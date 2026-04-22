@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Versión de Spring Boot -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>cl</groupId>
+    <artifactId>SP-RedNorte</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>SP-RedNorte</name>
+    <description>Proyecto padre multi-módulo</description>
+
+    <!-- Esta línea indica que este pom es el padre del proyecto -->
+    <packaging>pom</packaging>
+
+    <!-- Dentro de los módulos se agregan los microservicios -->
+    <modules>
+        <module>mcsv-auth</module>
+        <module></module>
+        <!-- agrega más módulos aquí -->
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <!-- Manejo centralizado de versiones -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Ejemplo: se pueden fijar versiones comunes aquí -->
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Plugins compartidos -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
