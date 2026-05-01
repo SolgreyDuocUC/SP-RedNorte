@@ -36,7 +36,7 @@ export function Header({
         scrolled ? 'shadow-lg border-transparent' : 'shadow-sm border-slate-100'
       }`}
     >
-      <div className="flex h-16 md:h-20 items-center justify-between px-4 md:px-8 max-w-[1600px] mx-auto">
+      <div className="flex h-16 md:h-20 items-center justify-between px-4 md:px-2 max-w-[2000px] mx-auto">
 
         {/* LEFT SECTION */}
         <div className="flex items-center gap-4">
