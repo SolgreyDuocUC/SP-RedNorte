@@ -1,9 +1,8 @@
-import React from 'react';
-import { 
-  Users, 
-  Stethoscope, 
-  Clock, 
-  AlertTriangle, 
+import {
+  Users,
+  Stethoscope,
+  Clock,
+  AlertTriangle,
   Search,
   Plus,
   Filter,
@@ -11,8 +10,8 @@ import {
   ChevronRight,
   Activity
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Badge } from '../../ui/badge';
 
 export function DashboardView() {
   return (
@@ -32,9 +31,9 @@ export function DashboardView() {
           {/* RF16: Búsqueda rápida de pacientes */}
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#00a7b1] transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Buscar paciente (RUT/Nombre)..." 
+            <input
+              type="text"
+              placeholder="Buscar paciente (RUT/Nombre)..."
               className="pl-10 pr-4 py-2.5 border border-slate-200 rounded-full text-sm w-full md:w-80 focus:ring-2 focus:ring-[#00a7b1]/20 focus:border-[#00a7b1] outline-none shadow-sm transition-all"
             />
           </div>

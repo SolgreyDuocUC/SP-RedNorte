@@ -1,0 +1,32 @@
+export const mockHistory = [
+    {
+        id: '1',
+        date: '15 Abril 2026',
+        specialty: 'Medicina Interna',
+        practitioner: 'Dra. Ana Torres',
+        facility: 'Hospital Regional Iquique',
+        type: 'Consulta',
+        diagnosis: 'Control de rutina - Presión arterial normal',
+        notes: 'Paciente en buen estado general. Se recomienda continuar con tratamiento actual.',
+    },
+    {
+        id: '2',
+        date: '3 Marzo 2026',
+        specialty: 'Cardiología',
+        practitioner: 'Dr. María Silva',
+        facility: 'Hospital Regional Iquique',
+        type: 'Consulta',
+        diagnosis: 'Evaluación cardiovascular preventiva',
+        notes: 'Electrocardiograma dentro de parámetros normales. Sin hallazgos significativos.',
+    },
+    {
+        id: '3',
+        date: '20 Febrero 2026',
+        specialty: 'Traumatología',
+        practitioner: 'Dr. Roberto Mendez',
+        facility: 'CESFAM Norte',
+        type: 'Procedimiento',
+        diagnosis: 'Evaluación de lesión en rodilla derecha',
+        notes: 'Se solicita resonancia magnética. Reposo relativo y terapia física.',
+    },
+];

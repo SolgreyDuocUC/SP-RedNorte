@@ -1,0 +1,43 @@
+export const mockNotifications = [
+    {
+        id: '1',
+        type: 'appointment-reminder',
+        title: 'Recordatorio de Cita',
+        message: 'Tu cita de Cardiología con Dr. María Silva es mañana a las 10:00 AM',
+        date: '29 Abril 2026',
+        time: '14:30',
+        isRead: false,
+        priority: 'high',
+    },
+    {
+        id: '2',
+        type: 'waiting-list-update',
+        title: 'Actualización Lista de Espera',
+        message: 'Tu solicitud de Traumatología ha sido priorizada. Tiempo estimado: 30 días',
+        date: '28 Abril 2026',
+        time: '11:15',
+        isRead: false,
+        priority: 'medium',
+    },
+    {
+        id: '3',
+        type: 'appointment-scheduled',
+        title: 'Cita Agendada',
+        message: 'Se ha agendado tu cita de Control General para el 22 de Mayo a las 15:30 PM',
+        date: '27 Abril 2026',
+        time: '09:20',
+        isRead: true,
+        priority: 'low',
+    },
+    {
+        id: '4',
+        type: 'reassignment-offer',
+        title: 'Hora Disponible',
+        message: 'Se ha liberado una hora para Oftalmología el 5 de Mayo. ¿Deseas tomarla?',
+        date: '26 Abril 2026',
+        time: '16:45',
+        isRead: true,
+        priority: 'high',
+    },
+];
+

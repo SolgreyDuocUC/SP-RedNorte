@@ -1,55 +1,18 @@
 import { Calendar, Clock, MapPin, User, MoreVertical, Plus } from 'lucide-react';
-import { Card, CardContent } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Card, CardContent } from '../../ui/card';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '../../ui/dropdown-menu';
 import { toast } from 'sonner';
+import {pastAppointments, statusConfig } from '../../../../imports/apoimentsIcon';
+import { mockAppointments} from '../../../../mocks/mockAppointments';
 
-const mockAppointments = [
-  {
-    id: '1',
-    specialty: 'Cardiología',
-    practitioner: 'Dr. María Silva',
-    date: '15 Mayo 2026',
-    time: '10:00 AM',
-    facility: 'Hospital Regional Iquique',
-    status: 'confirmed',
-  },
-  {
-    id: '2',
-    specialty: 'Control General',
-    practitioner: 'Dr. Carlos Rojas',
-    date: '22 Mayo 2026',
-    time: '15:30 PM',
-    facility: 'CESFAM Norte',
-    status: 'scheduled',
-  },
-];
-
-const pastAppointments = [
-  {
-    id: '3',
-    specialty: 'Medicina Interna',
-    practitioner: 'Dra. Ana Torres',
-    date: '15 Abril 2026',
-    time: '11:00 AM',
-    facility: 'Hospital Regional Iquique',
-    status: 'completed',
-  },
-];
-
-const statusConfig = {
-  confirmed:  { label: 'Confirmada',  classes: 'bg-green-50 text-green-700 border-green-200' },
-  scheduled:  { label: 'Agendada',    classes: 'bg-amber-50 text-amber-700 border-amber-200' },
-  completed:  { label: 'Completada',  classes: 'bg-slate-50 text-slate-600 border-slate-200' },
-  cancelled:  { label: 'Cancelada',   classes: 'bg-red-50 text-red-700 border-red-200' },
-};
 
 function AppointmentCard({ appointment, isPast = false }: { appointment: typeof mockAppointments[0]; isPast?: boolean }) {
   const status = statusConfig[appointment.status as keyof typeof statusConfig];

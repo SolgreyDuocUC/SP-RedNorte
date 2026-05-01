@@ -1,37 +1,9 @@
 import { Clock, AlertCircle, Hospital, Calendar, Info } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Progress } from '../ui/progress';
-
-const mockEntries = [
-  {
-    id: '1',
-    specialty: 'Traumatología',
-    diagnosis: 'Lesión de rodilla',
-    facility: 'Hospital Regional Iquique',
-    priority: 'medium',
-    entryDate: '1 Abril 2026',
-    estimatedDays: 45,
-    elapsedDays: 29,
-  },
-  {
-    id: '2',
-    specialty: 'Oftalmología',
-    diagnosis: 'Control de rutina',
-    facility: 'Clínica Especializada Norte',
-    priority: 'low',
-    entryDate: '15 Abril 2026',
-    estimatedDays: 60,
-    elapsedDays: 15,
-  },
-];
-
-const priorityConfig = {
-  urgent: { label: 'Urgente',       classes: 'bg-red-100 text-red-800' },
-  high:   { label: 'Alta',          classes: 'bg-orange-100 text-orange-800' },
-  medium: { label: 'Prioridad Media', classes: 'bg-amber-100 text-amber-800' },
-  low:    { label: 'Prioridad Baja',  classes: 'bg-green-100 text-green-800' },
-};
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Badge } from '../../ui/badge';
+import { Progress } from '../../ui/progress';
+import { mockEntries } from '../../../../mocks/mockEntries';
+import { priorityConfig } from '../../../../imports/priorityConfig';
 
 export function WaitingListView() {
   return (
