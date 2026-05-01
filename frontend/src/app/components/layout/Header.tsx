@@ -4,6 +4,7 @@ import {
   User,
   Settings,
   LogOut,
+  Menu,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import logoFull from '@/app/assets/logo-sf-1.svg';
@@ -14,6 +15,7 @@ interface HeaderProps {
   onProfile?: () => void;
   onSettings?: () => void;
   onLogout?: () => void; // Esta función debe setear el estado "isLoggedIn" a false
+  onToggleSidebar?: () => void;
 }
 
 export function Header({
@@ -22,6 +24,7 @@ export function Header({
   onProfile,
   onSettings,
   onLogout,
+  onToggleSidebar,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -40,11 +43,20 @@ export function Header({
       <div className="flex h-16 md:h-20 items-center justify-between px-4 md:px-2 max-w-[2000px] mx-auto">
 
         {/* LEFT SECTION */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Hamburguesa Mobile */}
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-[#00a7b1] transition-all"
+            title="Menú"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+
           {/* Botón Volver - Estilo CCdM */}
           <button
             onClick={onBack}
-            className="p-2 rounded-full text-slate-400 hover:bg-slate-50 hover:text-[#00a7b1] transition-all"
+            className="hidden md:block p-2 rounded-full text-slate-400 hover:bg-slate-50 hover:text-[#00a7b1] transition-all"
             title="Volver"
           >
             <ArrowLeft className="h-5 w-5" />

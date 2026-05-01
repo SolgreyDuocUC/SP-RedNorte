@@ -2,10 +2,47 @@ import { useState } from 'react';
 
 // Credenciales simuladas para el MVP (rol admin)
 const DEMO_CREDENTIALS = {
-  run: '12.345.678-9',
+  run: '12345678-5', // Formato limpio para backend (dígito verificador válido)
   password: 'admin123',
   role: 'admin' as const,
 };
+
+// Formatea RUN mientras el usuario escribe: "123456789" → "12.345.678-9"
+function formatRUN(raw: string): string {
+  // Solo dígitos y K
+  const clean = raw.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length === 0) return '';
+
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+
+  // Puntos al cuerpo (grupos de 3 desde la derecha)
+  const bodyFormatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  return `${bodyFormatted}-${dv}`;
+}
+
+// Valida RUN chileno con módulo 11
+function validateRUN(formatted: string): boolean {
+  const clean = formatted.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length < 2) return false;
+
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = 11 - (sum % 11);
+  const expected =
+    remainder === 11 ? '0' : remainder === 10 ? 'K' : String(remainder);
+
+  return dv === expected;
+}
 
 interface LoginViewProps {
   onLoginSuccess: (role: 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente') => void;
@@ -19,14 +56,30 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const handleRunChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Ignorar puntos y guiones que el usuario intente tipear
+    const clean = e.target.value.replace(/[^0-9kK]/g, '');
+
+    // Máximo 9 caracteres (8 dígitos + dígito verificador)
+    if (clean.length > 9) return;
+
+    const formatted = clean.length >= 2 ? formatRUN(clean) : clean;
+    setRun(formatted);
+
+    if (runError) setRunError('');
+  };
+
   const handleLogin = () => {
     setRunError('');
     setPassError('');
 
     let valid = true;
 
-    if (!run || run.length < 9) {
-      setRunError('Formato de RUN inválido');
+    if (!run || run.replace(/[^0-9kK]/gi, '').length < 7) {
+      setRunError('Ingresa un RUN válido (ej: 12.345.678-9)');
+      valid = false;
+    } else if (!validateRUN(run)) {
+      setRunError('El RUN ingresado no es válido');
       valid = false;
     }
 
@@ -37,14 +90,16 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
 
     if (!valid) return;
 
-    if (run !== DEMO_CREDENTIALS.run || password !== DEMO_CREDENTIALS.password) {
+    // Simula cómo se enviaría al backend (sin puntos, con guion y dígito en minúscula)
+    const cleanRun = run.replace(/\./g, '').toLowerCase();
+
+    if (cleanRun !== DEMO_CREDENTIALS.run || password !== DEMO_CREDENTIALS.password) {
       setPassError('RUN o contraseña incorrectos');
       return;
     }
 
     setLoading(true);
 
-    // Simula llamada a API
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
@@ -64,7 +119,6 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
 
         {/* PANEL IZQUIERDO – Identidad institucional */}
         <div className="relative bg-[#023e8a] md:w-[42%] flex flex-col justify-between p-10 overflow-hidden">
-          {/* Círculos decorativos */}
           <div className="absolute w-64 h-64 rounded-full border-[40px] border-white/5 -bottom-20 -right-20 pointer-events-none" />
           <div className="absolute w-40 h-40 rounded-full border-[28px] border-[#00a7b1]/20 -top-10 -left-10 pointer-events-none" />
 
@@ -79,7 +133,7 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
 
           <div className="relative z-10 mt-8 md:mt-0">
             <p className="text-white/60 text-sm leading-relaxed max-w-[220px]">
-                Acceso válido para personal autorizado. Si no puedes acceder, contacta al administrador del sistema en tu establecimiento.
+              Acceso válido para personal autorizado. Si no puedes acceder, contacta al administrador del sistema en tu establecimiento.
             </p>
           </div>
         </div>
@@ -94,7 +148,7 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             <span className="w-2 h-2 rounded-full bg-[#0096c7] shrink-0" />
             <span>
               Modo demo: RUN{' '}
-              <strong className="font-semibold">12.345.678-9</strong> · Contraseña{' '}
+              <strong className="font-semibold">12.345.678-5</strong> · Contraseña{' '}
               <strong className="font-semibold">admin123</strong>
             </span>
           </div>
@@ -119,18 +173,30 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
             <input
               type="text"
               value={run}
-              placeholder="12.345.678-9"
+              placeholder="Ej: 123456789"
               maxLength={12}
               autoComplete="username"
-              onChange={(e) => setRun(e.target.value)}
+              inputMode="numeric"
+              onChange={handleRunChange}
               onKeyDown={(e) => handleKeyDown(e, () => document.getElementById('rn-pass')?.focus())}
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm outline-none transition-all
+              className={`w-full px-4 py-2.5 border rounded-lg text-sm outline-none transition-all font-mono tracking-wide
                 ${runError
                   ? 'border-red-400 ring-2 ring-red-100'
                   : 'border-slate-200 focus:border-[#0096c7] focus:ring-2 focus:ring-[#0096c7]/15'
                 }`}
             />
-            {runError && <p className="text-xs text-red-500 mt-1.5">{runError}</p>}
+            {/* Ayuda contextual: siempre visible, reemplazada por error si hay */}
+            {!runError ? (
+              <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0 text-slate-400">
+                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2" />
+                  <path d="M6 5.5v3M6 3.5v.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                Solo ingresa los números — los puntos y guión se agregan solos.
+              </p>
+            ) : (
+              <p className="text-xs text-red-500 mt-1.5">{runError}</p>
+            )}
           </div>
 
           {/* Campo Contraseña */}

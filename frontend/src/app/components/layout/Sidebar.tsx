@@ -47,12 +47,12 @@ const navigationGroups = [
   },
 ];
 
-export function Sidebar({ activeView, onViewChange, isOpen = true }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, isOpen = false }: SidebarProps) {
   return (
     <aside
       className={cn(
-        // 👇 más aire abajo (bottom-2 + padding visual)
-        'fixed left-0.5 top-20 bottom-2 z-40 w-64 border-r border-border bg-white flex flex-col rounded-r-xl transition-transform duration-200',
+        // 👇 más aire abajo (bottom-2 + padding visual), top alineado a mobile/desktop
+        'fixed left-0.5 top-16 md:top-20 bottom-2 z-40 w-64 border-r border-border bg-white flex flex-col rounded-r-xl transition-transform duration-200',
         !isOpen && '-translate-x-full md:translate-x-0'
       )}
     >

@@ -16,7 +16,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
-  const [sidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!isLoggedIn) {
     if (showLogin) {
@@ -60,19 +60,33 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-full bg-background">
+    <div className="h-screen w-full flex flex-col bg-background overflow-hidden">
       <Toaster position="top-right" richColors closeButton />
-      <Header onLogout={() => setIsLoggedIn(false)} />
+      <Header 
+        onLogout={() => setIsLoggedIn(false)} 
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-      <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 pt-16 md:pt-20 relative">
+        {/* Backdrop Responsive para Sidebar */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/40 z-30 md:hidden backdrop-blur-sm transition-all"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         <Sidebar
           activeView={activeView}
-          onViewChange={setActiveView}
+          onViewChange={(view) => {
+            setActiveView(view);
+            setSidebarOpen(false); // Auto-cerrar sidebar en móvil al elegir vista
+          }}
           isOpen={sidebarOpen}
         />
 
-        <main className="flex-1 overflow-auto md:ml-64">
-          <div className="container mx-auto p-6 max-w-7xl">
+        <main className="flex-1 h-full overflow-y-auto overflow-x-hidden md:ml-64 relative">
+          <div className="container mx-auto p-4 md:p-6 max-w-7xl">
             {renderView()}
           </div>
         </main>
