@@ -60,14 +60,14 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-background overflow-hidden">
+    <div className="h-screen w-full flex flex-col pt-16 md:pt-20 bg-background overflow-hidden relative">
       <Toaster position="top-right" richColors closeButton />
       <Header 
         onLogout={() => setIsLoggedIn(false)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      <div className="flex flex-1 pt-16 md:pt-20 relative">
+      <div className="flex flex-1 relative overflow-hidden">
         {/* Backdrop Responsive para Sidebar */}
         {sidebarOpen && (
           <div 
