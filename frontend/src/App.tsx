@@ -7,11 +7,18 @@ import { WaitingListView } from './app/components/pages/WaitingListView';
 import { FacilitiesView } from './app/components/pages/FacilitiesView';
 import { NotificationsView } from './app/components/pages/NotificationsView';
 import { HistoryView } from './app/components/pages/HistoryView';
+import { HomePage } from './app/home/HomePage';
+import { Toaster } from './app/components/ui/sonner';
 
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  if (!isLoggedIn) {
+    return <HomePage onLogin={() => setIsLoggedIn(true)} />;
+  }
 
   const renderView = () => {
     switch (activeView) {
@@ -40,7 +47,8 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-full bg-gray-50">
+    <div className="h-screen w-full bg-background">
+      <Toaster position="top-right" richColors closeButton />
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex h-[calc(100vh-4rem)]">

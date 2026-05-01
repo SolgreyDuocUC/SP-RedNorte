@@ -54,9 +54,9 @@
   :root {
     --font-size: 16px;
 
-    /* BASE (blanco clínico limpio) */
-    --background: #f8fafc;
-    --foreground: #1e293b;
+    /* BASE */
+    --background: #f0f6fa;
+    --foreground: #0f172a;
 
     /* CARDS */
     --card: #ffffff;
@@ -66,20 +66,20 @@
     --popover: #ffffff;
     --popover-foreground: #1e293b;
 
-    /* PRIMARY (azul institucional) */
-    --primary: #0077b6;
+    /* PRIMARY (cian interactivo Red Norte) */
+    --primary: #0096c7;
     --primary-foreground: #ffffff;
 
-    /* SECONDARY (azul suave) */
-    --secondary: #e6f4f9;
+    /* SECONDARY (cian suave) */
+    --secondary: #e0f7fa;
     --secondary-foreground: #023e8a;
 
-    /* MUTED (gris clínico) */
-    --muted: #f1f5f9;
+    /* MUTED (fondo clínico) */
+    --muted: #f0f6fa;
     --muted-foreground: #64748b;
 
-    /* ACCENT (celeste médico) */
-    --accent: #48cae4;
+    /* ACCENT (cian muy claro, fondos sutiles) */
+    --accent: #caf0f8;
     --accent-foreground: #023e8a;
 
     /* DESTRUCTIVE */
@@ -105,9 +105,9 @@
     /* SIDEBAR */
     --sidebar: #ffffff;
     --sidebar-foreground: #1e293b;
-    --sidebar-primary: #0077b6;
+    --sidebar-primary: #0096c7;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f1f9fc;
+    --sidebar-accent: #e0f7fa;
     --sidebar-accent-foreground: #023e8a;
     --sidebar-border: #e2e8f0;
     --sidebar-ring: #0096c7;

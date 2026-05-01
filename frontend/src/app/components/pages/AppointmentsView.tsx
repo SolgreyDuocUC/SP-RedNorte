@@ -1,5 +1,5 @@
-import { Calendar, Clock, MapPin, User, MoreVertical } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Calendar, Clock, MapPin, User, MoreVertical, Plus } from 'lucide-react';
+import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { toast } from 'sonner';
 
 const mockAppointments = [
   {
@@ -19,7 +20,6 @@ const mockAppointments = [
     time: '10:00 AM',
     facility: 'Hospital Regional Iquique',
     status: 'confirmed',
-    type: 'consultation',
   },
   {
     id: '2',
@@ -29,7 +29,6 @@ const mockAppointments = [
     time: '15:30 PM',
     facility: 'CESFAM Norte',
     status: 'scheduled',
-    type: 'followup',
   },
 ];
 
@@ -42,172 +41,175 @@ const pastAppointments = [
     time: '11:00 AM',
     facility: 'Hospital Regional Iquique',
     status: 'completed',
-    type: 'consultation',
   },
 ];
 
-const statusStyles = {
-  confirmed: 'bg-green-50 text-green-700 border-green-200',
-  scheduled: 'bg-amber-50 text-amber-700 border-amber-200',
-  completed: 'bg-gray-50 text-gray-700 border-gray-200',
-  cancelled: 'bg-red-50 text-red-700 border-red-200',
+const statusConfig = {
+  confirmed:  { label: 'Confirmada',  classes: 'bg-green-50 text-green-700 border-green-200' },
+  scheduled:  { label: 'Agendada',    classes: 'bg-amber-50 text-amber-700 border-amber-200' },
+  completed:  { label: 'Completada',  classes: 'bg-slate-50 text-slate-600 border-slate-200' },
+  cancelled:  { label: 'Cancelada',   classes: 'bg-red-50 text-red-700 border-red-200' },
 };
 
-const statusLabels = {
-  confirmed: 'Confirmada',
-  scheduled: 'Agendada',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-};
+function AppointmentCard({ appointment, isPast = false }: { appointment: typeof mockAppointments[0]; isPast?: boolean }) {
+  const status = statusConfig[appointment.status as keyof typeof statusConfig];
+
+  const handleConfirm = () =>
+    toast.success('Asistencia confirmada', {
+      description: `Tu cita de ${appointment.specialty} ha sido confirmada.`,
+    });
+
+  const handleReschedule = () =>
+    toast.info('Reagendando cita', {
+      description: 'Pronto podrás seleccionar una nueva fecha disponible.',
+    });
+
+  const handleCancel = () =>
+    toast.error('Cita cancelada', {
+      description: `Tu cita de ${appointment.specialty} fue cancelada.`,
+    });
+
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex gap-4 flex-1 min-w-0">
+            {/* Icon */}
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+                isPast
+                  ? 'bg-slate-100'
+                  : 'bg-gradient-to-br from-[#0096c7] to-[#023e8a]'
+              }`}
+            >
+              <Calendar className={`h-6 w-6 ${isPast ? 'text-slate-400' : 'text-white'}`} />
+            </div>
+
+            {/* Details */}
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-[#023e8a]">{appointment.specialty}</h3>
+                <Badge variant="outline" className={status.classes}>
+                  {status.label}
+                </Badge>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <User className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span>{appointment.practitioner}</span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5 text-primary" />
+                  {appointment.date}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-primary" />
+                  {appointment.time}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 text-primary" />
+                  {appointment.facility}
+                </span>
+              </div>
+
+              {!isPast && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {appointment.status === 'scheduled' && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-green-700 border-green-300 hover:bg-green-50 text-xs"
+                      onClick={handleConfirm}
+                    >
+                      Confirmar Asistencia
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={handleReschedule}
+                  >
+                    Reagendar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive border-destructive/30 hover:bg-destructive/5 text-xs"
+                    onClick={handleCancel}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Options menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-slate-400 hover:text-primary">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => toast('Abriendo detalles...')}>
+                Ver detalles
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.success('Comprobante descargado')}>
+                Descargar comprobante
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => toast.success('Agregado al calendario')}>
+                Agregar a calendario
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function AppointmentsView() {
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Mis Citas Médicas</h2>
-          <p className="text-gray-600">Gestiona tus citas médicas programadas</p>
+          <h2 className="text-2xl font-semibold text-[#023e8a]">Mis Citas Médicas</h2>
+          <p className="text-sm text-muted-foreground">Gestiona tus citas médicas programadas</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Calendar className="mr-2 h-4 w-4" />
+        <Button
+          className="bg-primary hover:bg-[#0077b6] text-white gap-2"
+          onClick={() => toast.info('Nueva cita', { description: 'Redirigiendo al formulario de agendamiento...' })}
+        >
+          <Plus className="h-4 w-4" />
           Nueva Cita
         </Button>
       </div>
 
+      {/* Tabs */}
       <Tabs defaultValue="upcoming" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="upcoming">Próximas Citas</TabsTrigger>
-          <TabsTrigger value="past">Historial</TabsTrigger>
+        <TabsList className="bg-secondary">
+          <TabsTrigger value="upcoming" className="data-[state=active]:bg-white data-[state=active]:text-[#023e8a]">
+            Próximas Citas
+          </TabsTrigger>
+          <TabsTrigger value="past" className="data-[state=active]:bg-white data-[state=active]:text-[#023e8a]">
+            Historial
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upcoming" className="space-y-4">
-          {mockAppointments.map((appointment) => (
-            <Card key={appointment.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500">
-                      <Calendar className="h-7 w-7 text-white" />
-                    </div>
-
-                    <div className="space-y-3 flex-1">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg">{appointment.specialty}</h3>
-                          <Badge
-                            variant="outline"
-                            className={statusStyles[appointment.status as keyof typeof statusStyles]}
-                          >
-                            {statusLabels[appointment.status as keyof typeof statusLabels]}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <User className="h-4 w-4" />
-                            <span>{appointment.practitioner}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          <Calendar className="h-4 w-4 text-blue-600" />
-                          <span>{appointment.date}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          <Clock className="h-4 w-4 text-blue-600" />
-                          <span>{appointment.time}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-gray-700">
-                          <MapPin className="h-4 w-4 text-blue-600" />
-                          <span>{appointment.facility}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-2">
-                        {appointment.status === 'scheduled' && (
-                          <Button size="sm" variant="outline" className="text-green-700 border-green-300 hover:bg-green-50">
-                            Confirmar Asistencia
-                          </Button>
-                        )}
-                        <Button size="sm" variant="outline">
-                          Reagendar
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-red-700 border-red-300 hover:bg-red-50">
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Ver detalles</DropdownMenuItem>
-                      <DropdownMenuItem>Descargar comprobante</DropdownMenuItem>
-                      <DropdownMenuItem>Agregar a calendario</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="upcoming" className="space-y-3">
+          {mockAppointments.map((a) => (
+            <AppointmentCard key={a.id} appointment={a} />
           ))}
         </TabsContent>
 
-        <TabsContent value="past" className="space-y-4">
-          {pastAppointments.map((appointment) => (
-            <Card key={appointment.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-100">
-                      <Calendar className="h-7 w-7 text-gray-600" />
-                    </div>
-
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg">{appointment.specialty}</h3>
-                          <Badge
-                            variant="outline"
-                            className={statusStyles[appointment.status as keyof typeof statusStyles]}
-                          >
-                            {statusLabels[appointment.status as keyof typeof statusLabels]}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <User className="h-4 w-4" />
-                          <span>{appointment.practitioner}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 text-sm">
-                        <div className="flex items-center gap-1.5 text-gray-600">
-                          <Calendar className="h-4 w-4" />
-                          <span>{appointment.date}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-gray-600">
-                          <Clock className="h-4 w-4" />
-                          <span>{appointment.time}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-gray-600">
-                          <MapPin className="h-4 w-4" />
-                          <span>{appointment.facility}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button variant="outline" size="sm">
-                    Ver Resumen
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="past" className="space-y-3">
+          {pastAppointments.map((a) => (
+            <AppointmentCard key={a.id} appointment={a} isPast />
           ))}
         </TabsContent>
       </Tabs>
