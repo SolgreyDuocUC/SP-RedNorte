@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, User, Phone } from 'lucide-react';
 import { navItems } from '../../../types/HomeSlides';
+import logoFull from '@/app/assets/logo-sf-1.svg';
 
 interface PublicHeaderProps {
   onLogin: () => void;
@@ -37,27 +38,9 @@ export function PublicHeader({ onLogin }: PublicHeaderProps) {
       {/* MAIN HEADER */}
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
 
-        {/* LOGO (estilo del segundo header, más limpio) */}
-        <div className="flex items-center gap-3 select-none">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#0077b6] to-[#023e8a] shadow-sm">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
-              <path
-                d="M12 3v18M3 12h18"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-
-          <div className="leading-tight">
-            <span className="block font-bold text-[#023e8a] text-base">
-              Red Norte
-            </span>
-            <span className="block text-[10px] text-[#0096c7] uppercase tracking-widest">
-              Red de Salud
-            </span>
-          </div>
+        {/* LOGO */}
+        <div className="flex items-center select-none">
+          <img src={logoFull} alt="Red Norte" className="h-10 w-auto" />
         </div>
 
         {/* NAV DESKTOP */}

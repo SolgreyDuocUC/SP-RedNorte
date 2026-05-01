@@ -6,6 +6,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import logoFull from '@/app/assets/logo-sf-1.svg';
 
 interface HeaderProps {
   onBack?: () => void;
@@ -49,27 +50,9 @@ export function Header({
             <ArrowLeft className="h-5 w-5" />
           </button>
 
-          {/* Logo RedNorte con colores Ciudad del Mar */}
-          <div className="flex items-center gap-3 select-none group cursor-pointer">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#004a87] shadow-inner group-hover:bg-[#003561] transition-colors">
-              <svg viewBox="0 0 24 24" fill="none" className="h-6 w-6 text-white">
-                <path
-                  d="M12 3v18M3 12h18"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-
-            <div className="leading-tight hidden sm:block">
-              <span className="block font-black text-[#004a87] text-xl tracking-tight">
-                RedNorte
-              </span>
-              <span className="block text-[10px] text-[#00a7b1] font-bold uppercase tracking-[0.2em]">
-                Sistema de Salud
-              </span>
-            </div>
+          {/* Logo RedNorte */}
+          <div className="flex items-center select-none cursor-pointer">
+            <img src={logoFull} alt="RedNorte" className="h-10 w-auto" />
           </div>
         </div>
 
