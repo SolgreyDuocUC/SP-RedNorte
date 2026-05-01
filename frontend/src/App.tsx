@@ -1,23 +1,36 @@
 import { useState } from 'react';
+import { LoginView } from './app/components/pages/1. Login/Login';
 import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
-import { DashboardView } from './app/components/pages/DashboardView';
-import { AppointmentsView } from './app/components/pages/AppointmentsView';
-import { WaitingListView } from './app/components/pages/WaitingListView';
-import { FacilitiesView } from './app/components/pages/FacilitiesView';
-import { NotificationsView } from './app/components/pages/NotificationsView';
-import { HistoryView } from './app/components/pages/HistoryView';
+import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
+import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
+import { WaitingListView } from './app/components/pages/5. ListaEspera/WaitingListView';
+import { FacilitiesView } from './app/components/pages/6. CentrosAtencion/FacilitiesView';
+import { NotificationsView } from './app/components/pages/4. Notificaciones/NotificationsView';
+import { HistoryView } from './app/components/pages/7. VistaHistorial/HistoryView';
 import { HomePage } from './app/home/HomePage';
 import { Toaster } from './app/components/ui/sonner';
 
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen] = useState(true);
 
   if (!isLoggedIn) {
-    return <HomePage onLogin={() => setIsLoggedIn(true)} />;
+    if (showLogin) {
+      return (
+        <LoginView 
+          onLoginSuccess={(role) => {
+            console.log('User logged in with role:', role);
+            setIsLoggedIn(true);
+            setShowLogin(false);
+          }} 
+        />
+      );
+    }
+    return <HomePage onLogin={() => setShowLogin(true)} />;
   }
 
   const renderView = () => {
