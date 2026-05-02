@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, User, Phone } from 'lucide-react';
-import { navItems } from '../../../types/HomeSlides';
+import { navItems } from '../../types/home-slides';
 import logoFull from '@/app/assets/logo-sf-1.svg';
 
 interface PublicHeaderProps {

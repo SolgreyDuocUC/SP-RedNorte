@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, MessageCircle } from 'lucide-react';
-import { especialidades, examenes } from '../../types/HomeSlides';
+import { especialidades, examenes } from '../types/home-slides';
 
 export function BookingSection() {
   const [bookTab, setBookTab] = useState<'consultas' | 'examenes'>('consultas');

@@ -1,4 +1,4 @@
-import type { WaitingListEntry } from '../core/types/waiting-list.types';
+import type { WaitingListEntry } from '../app/types';
 
 class WaitingListService {
   private baseUrl = '/waiting-list';

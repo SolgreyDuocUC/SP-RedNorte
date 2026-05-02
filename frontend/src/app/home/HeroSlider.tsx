@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { slides } from '../../types/HomeSlides';
+import { slides } from '../types/home-slides';
 
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
