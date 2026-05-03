@@ -1,30 +1,15 @@
-package ms_paciente.model;
+package ms_paciente.domain;
 
-import ms_paciente.model.types.Gender;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-/*
- * MODELO DE DOMINIO DEL PACIENTE.
- *
- * REPRESENTA:
- * - Datos demográficos
- * - Información de contacto
- * - Estado del paciente
- * - Identificadores asociados
- *
- * REGLAS DE NEGOCIO:
- * - Debe existir al menos un IdentifierModel (validado en capa service)
- * - primaryPhone es obligatorio (validado en DTO)
- * - gender se maneja como ENUM (alineado con FHIR)
- *
- * DISEÑO:
- * - No contiene anotaciones JPA (separación de responsabilidades)
- * - No contiene validaciones directas (estas van en DTO)
- * - Se utiliza para lógica interna y mapeo a FHIR
- */
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PatientModel {
 
     private String id;

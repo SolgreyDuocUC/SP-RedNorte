@@ -1,4 +1,4 @@
-package ms_paciente.model.types;
+package ms_paciente.domain.types;
 
 public enum Gender {
     MALE,

@@ -1,4 +1,4 @@
-package ms_paciente.model;
+package ms_paciente.domain.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;

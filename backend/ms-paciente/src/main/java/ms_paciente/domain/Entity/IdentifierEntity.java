@@ -1,8 +1,8 @@
-package ms_paciente.model;
+package ms_paciente.domain.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ms_paciente.model.types.IdentifierType;
+import ms_paciente.domain.types.IdentifierType;
 
 /*
  * REPRESENTA UN IDENTIFICADOR OFICIAL DEL PACIENTE.

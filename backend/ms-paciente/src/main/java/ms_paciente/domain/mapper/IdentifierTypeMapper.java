@@ -1,6 +1,6 @@
-package ms_paciente.model.mapper;
+package ms_paciente.domain.mapper;
 
-import ms_paciente.model.types.IdentifierType;
+import ms_paciente.domain.types.IdentifierType;
 
 public class IdentifierTypeMapper {
 

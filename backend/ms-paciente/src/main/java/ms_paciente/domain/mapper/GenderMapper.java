@@ -1,6 +1,6 @@
-package ms_paciente.model.mapper;
+package ms_paciente.domain.mapper;
 
-import ms_paciente.model.types.Gender;
+import ms_paciente.domain.types.Gender;
 
 public class GenderMapper {
     public Gender mapGender(String gender) {

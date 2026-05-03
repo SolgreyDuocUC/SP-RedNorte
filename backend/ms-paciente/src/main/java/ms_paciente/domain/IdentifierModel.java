@@ -1,21 +1,13 @@
-package ms_paciente.model;
+package ms_paciente.domain;
 
-/*
- * MODELO DE DOMINIO PARA IDENTIFICADORES DEL PACIENTE.
- *
- * REPRESENTA DOCUMENTOS OFICIALES COMO:
- * - RUN (Chile)
- * - DNI (otros países)
- * - PASAPORTE
- *
- * REGLAS:
- * - type: obligatorio (define el tipo de documento)
- * - value: obligatorio (número del documento)
- * - country: opcional pero recomendado para interoperabilidad
- */
+import lombok.*;
+import ms_paciente.domain.types.IdentifierType;
 
-import ms_paciente.model.types.IdentifierType;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class IdentifierModel {
 
     private IdentifierType type; // ENUM → evita errores de string

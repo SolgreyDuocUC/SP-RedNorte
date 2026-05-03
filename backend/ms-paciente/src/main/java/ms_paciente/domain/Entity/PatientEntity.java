@@ -1,8 +1,8 @@
-package ms_paciente.model;
+package ms_paciente.domain.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ms_paciente.model.types.Gender;
+import ms_paciente.domain.types.Gender;
 
 import java.time.LocalDate;
 import java.util.List;
