@@ -1,6 +1,6 @@
 package ms_paciente.repository;
 
-import ms_paciente.entity.PatientEntity;
+import ms_paciente.domain.Entity.PatientEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.UUID;

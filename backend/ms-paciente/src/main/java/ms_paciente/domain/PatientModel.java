@@ -1,6 +1,7 @@
 package ms_paciente.domain;
 
 import lombok.*;
+import ms_paciente.domain.types.Gender;
 
 import java.time.LocalDate;
 import java.util.List;

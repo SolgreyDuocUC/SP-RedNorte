@@ -28,10 +28,13 @@ public class CoverageMapper {
 
         // Mapping plan (class)
         if (model.getPlan() != null) {
-            Coverage.CoverageClassComponent classComponent = coverage.addClass();
+            Coverage.ClassComponent classComponent = coverage.addClass_();
             classComponent.setName(model.getPlan());
-            // FHIR requires a type for class, we'll use a generic one or 'plan'
-            classComponent.getType().addCoding().setCode("plan").setSystem("http://terminology.hl7.org/CodeSystem/coverage-class");
+
+            classComponent.getType()
+                    .addCoding()
+                    .setCode("plan")
+                    .setSystem("http://terminology.hl7.org/CodeSystem/coverage-class");
         }
 
         // Mapping status

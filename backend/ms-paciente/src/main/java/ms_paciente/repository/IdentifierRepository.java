@@ -1,6 +1,6 @@
 package ms_paciente.repository;
 
-import ms_paciente.entity.IdentifierEntity;
+import ms_paciente.domain.Entity.IdentifierEntity;
 import ms_paciente.domain.types.IdentifierType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

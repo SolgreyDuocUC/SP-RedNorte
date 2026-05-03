@@ -28,16 +28,16 @@ public class CoverageServiceImpl implements CoverageService {
         PatientEntity patient = patientRepository.findById(UUID.fromString(patientId))
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        CoverageEntity entity = PatientEntityMapper.toEntity(coverageDTO, patient);
+        CoverageEntity entity = PatientEntityMapper.toCoverageEntity(coverageDTO, patient);
         CoverageEntity saved = coverageRepository.save(entity);
-        
-        return PatientEntityMapper.toDTO(saved);
+
+        return PatientEntityMapper.toCoverageDTO(saved);
     }
 
     @Override
     public List<CoverageDTO> getCoveragesByPatientId(String patientId) {
         return coverageRepository.findByPatientId(UUID.fromString(patientId)).stream()
-                .map(PatientEntityMapper::toDTO)
+                .map(PatientEntityMapper::toCoverageDTO)
                 .collect(Collectors.toList());
     }
 

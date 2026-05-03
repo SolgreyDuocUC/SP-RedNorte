@@ -45,7 +45,7 @@ public class PatientServiceImpl implements PatientService {
         validateBusinessRules(patientDTO);
         
         PatientEntity entity = PatientEntityMapper.toEntity(patientDTO);
-        entity.setId(uuid); // Ensure correct ID
+        entity.setId(String.valueOf(uuid)); // Ensure correct ID
         PatientEntity updated = patientRepository.save(entity);
         
         return PatientEntityMapper.toDTO(updated);

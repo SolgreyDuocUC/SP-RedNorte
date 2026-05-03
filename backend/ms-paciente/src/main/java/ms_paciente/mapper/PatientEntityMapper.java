@@ -7,6 +7,7 @@ import ms_paciente.domain.types.Gender;
 import ms_paciente.dto.CoverageDTO;
 import ms_paciente.dto.IdentifierDTO;
 import ms_paciente.dto.PatientDTO;
+
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,7 +17,7 @@ public class PatientEntityMapper {
         if (dto == null) return null;
 
         PatientEntity entity = PatientEntity.builder()
-                .id(dto.getId() != null ? UUID.fromString(dto.getId()) : null)
+                .id(dto.getId() != null ? dto.getId() : null)
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
                 .gender(dto.getGender() != null ? Gender.valueOf(dto.getGender().toUpperCase()) : Gender.UNKNOWN)
@@ -47,7 +48,7 @@ public class PatientEntityMapper {
         if (entity == null) return null;
 
         PatientDTO dto = PatientDTO.builder()
-                .id(entity.getId() != null ? entity.getId().toString() : null)
+                .id(entity.getId())
                 .firstName(entity.getFirstName())
                 .lastName(entity.getLastName())
                 .gender(entity.getGender() != null ? entity.getGender().name() : null)
@@ -91,9 +92,9 @@ public class PatientEntityMapper {
                 .build();
     }
 
-    public static CoverageEntity toEntity(CoverageDTO dto, PatientEntity patient) {
+    public static CoverageEntity toCoverageEntity(CoverageDTO dto, PatientEntity patient) {
         return CoverageEntity.builder()
-                .id(dto.getId() != null ? UUID.fromString(dto.getId()) : null)
+                .id(dto.getId())
                 .type(dto.getType())
                 .provider(dto.getProvider())
                 .plan(dto.getPlan())
@@ -102,10 +103,11 @@ public class PatientEntityMapper {
                 .build();
     }
 
-    public static CoverageDTO toDTO(CoverageEntity entity) {
+    public static CoverageDTO toCoverageDTO(CoverageEntity entity) {
         if (entity == null) return null;
+
         return CoverageDTO.builder()
-                .id(entity.getId() != null ? entity.getId().toString() : null)
+                .id(entity.getId())
                 .type(entity.getType())
                 .provider(entity.getProvider())
                 .plan(entity.getPlan())

@@ -26,7 +26,7 @@ public class CoverageMapper {
         }
 
         if (model.getPlan() != null) {
-            coverage.addClass().setName(model.getPlan());
+            coverage.addClass_().setName(model.getPlan());
         }
 
         if (model.getStatus() != null) {
