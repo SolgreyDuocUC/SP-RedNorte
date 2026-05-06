@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, ArrowRight, ArrowLeft } from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
 import { PREVISION_OPTIONS, validateRun, formatRun } from '../../../../core/constants/BookingConst';
+import { patientRemote } from '../../../../remotes/patient.remote';
+import { coverageLabel } from '../../../../remotes/dtos/patient.dto';
 
 interface Step1IdentificacionProps {
   data: Partial<BookingData>;
@@ -16,6 +18,24 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
   const [idType, setIdType] = useState<BookingData['idType']>(data.idType ?? 'RUN');
   const [error, setError] = useState('');
 
+  // Coverage dropdown options — loaded from ms-paciente, fallback to hardcoded
+  const [coverageOptions, setCoverageOptions] = useState<string[]>(PREVISION_OPTIONS);
+  const [loadingCoverages, setLoadingCoverages] = useState(true);
+
+  useEffect(() => {
+    patientRemote.getCoverages()
+      .then(dtos => {
+        if (dtos.length > 0) {
+          const labels = [...new Set(dtos.map(coverageLabel))].sort();
+          // Always keep "Particular" as an option
+          if (!labels.includes('Particular')) labels.push('Particular');
+          setCoverageOptions(labels);
+        }
+      })
+      .catch(() => { /* backend unavailable — keep hardcoded fallback */ })
+      .finally(() => setLoadingCoverages(false));
+  }, []);
+
   const handleIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value;
     if (idType === 'RUN') {
@@ -25,6 +45,23 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
     }
     setIdentifier(val);
     setError('');
+  };
+
+  // When user leaves the RUN field, try to look up the patient and preload their coverage
+  const handleIdentifierBlur = async () => {
+    if (idType !== 'RUN' || !validateRun(identifier)) return;
+    const rawRun = identifier.replace(/[^0-9kK]/g, '').toUpperCase();
+    try {
+      const patient = await patientRemote.getByIdentifier('RUN', rawRun);
+      if (patient?.coverage) {
+        const label = coverageLabel(patient.coverage);
+        // Only set if the label exists among the current options
+        const match = coverageOptions.find(o => o === label) ?? label;
+        setPrevision(match);
+      }
+    } catch {
+      // Patient not found or ms-paciente down — user selects coverage manually
+    }
   };
 
   const handleNext = () => {
@@ -74,6 +111,7 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
              type="text"
              value={identifier}
              onChange={handleIdentifierChange}
+             onBlur={handleIdentifierBlur}
              className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all font-mono tracking-wide
                ${error ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200 focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb]'}`}
              placeholder={idType === 'RUN' ? 'Ej: 123456789' : 'Ej: A1234567'}
@@ -98,10 +136,13 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
            <select
              value={prevision}
              onChange={(e) => setPrevision(e.target.value)}
-             className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb] outline-none transition-all bg-white"
+             disabled={loadingCoverages}
+             className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb] outline-none transition-all bg-white disabled:opacity-60"
            >
-             <option value="">Seleccione previsión</option>
-             {PREVISION_OPTIONS.map((opt) => (
+             <option value="">
+               {loadingCoverages ? 'Cargando coberturas…' : 'Seleccione previsión'}
+             </option>
+             {coverageOptions.map((opt) => (
                <option key={opt} value={opt}>{opt}</option>
              ))}
            </select>

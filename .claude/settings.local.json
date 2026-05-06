@@ -12,7 +12,8 @@
       "Bash(Format-Table -AutoSize)",
       "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\ms_paciente\" | Where-Object { !$_.PSIsContainer } | Select-Object FullName | Format-Table -AutoSize -Wrap)",
       "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\cl\\\\rednorte\\\\mspaciente\" | Where-Object { !$_.PSIsContainer } | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\cl\\\\rednorte\\\\mspaciente\\\\\", \"\"\\) })",
-      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\SP-RedNorte\" -Recurse -Directory)"
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\SP-RedNorte\" -Recurse -Directory)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\SP-RedNorte\\\\backend\\\\ms-paciente\" -Recurse -File)"
     ]
   }
 }
