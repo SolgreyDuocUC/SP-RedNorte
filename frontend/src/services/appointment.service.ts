@@ -3,18 +3,28 @@ import type { AppointmentDTO, CreateAppointmentDTO } from '../remotes/dtos/appoi
 import type { BookingData } from '../app/types/Booking';
 
 class AppointmentService {
-  // Converts wizard BookingData into the backend DTO and submits
+  // Converts wizard BookingData into the backend DTO and submits to ms-reservas
   bookAppointment(data: Partial<BookingData>): Promise<AppointmentDTO> {
     const startDate = new Date(`${data.date}T${data.slot}:00`);
-    const endDate = new Date(startDate.getTime() + 30 * 60 * 1000);
+    const endDate   = new Date(startDate.getTime() + 30 * 60 * 1000);
+
+    const patientLabel =
+      data.firstName && data.lastName
+        ? `${data.firstName} ${data.lastName}`
+        : (data.identifier ?? 'Desconocido');
 
     const dto: CreateAppointmentDTO = {
-      patientId: data.identifier ?? 'unknown',
-      practitionerId: data.doctorId ?? data.specialtyId ?? 'unknown',
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      status: 'booked',
-      description: `Cita de ${data.specialtyName ?? 'especialidad'}`,
+      patientId:        data.identifier?.replace(/[^0-9kK]/g, '').toUpperCase() ?? 'unknown',
+      practitionerId:   data.doctorId ?? data.specialtyId ?? 'unknown',
+      start:            startDate.toISOString(),
+      end:              endDate.toISOString(),
+      status:           'booked',
+      description: [
+        data.appointmentType === 'TELEMEDICINA' ? 'Telemedicina' : 'Presencial',
+        `Especialidad: ${data.specialtyName ?? 'sin especificar'}`,
+        `Paciente: ${patientLabel}`,
+        data.doctorName ? `Médico: ${data.doctorName}` : null,
+      ].filter(Boolean).join(' · '),
     };
 
     return appointmentsRemote.create(dto);

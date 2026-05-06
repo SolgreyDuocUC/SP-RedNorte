@@ -1,5 +1,10 @@
-import { ArrowLeft, Check, Bell, User, Stethoscope, Building2, Calendar, Clock, UserCheck } from 'lucide-react';
+import {
+  ArrowLeft, Check, Bell,
+  Stethoscope, Building2, Calendar, Clock,
+  Phone, Mail, Zap, Monitor,
+} from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
+import { doctorInitials } from '../../../../core/constants/BookingConst';
 
 interface Step4ConfirmarProps {
   data: Partial<BookingData>;
@@ -8,13 +13,7 @@ interface Step4ConfirmarProps {
   isLoading?: boolean;
 }
 
-interface SummaryRowProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}
-
-function SummaryRow({ icon, label, value }: SummaryRowProps) {
+function SummaryRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <>
       <div className="flex items-center justify-between py-2.5">
@@ -30,41 +29,13 @@ function SummaryRow({ icon, label, value }: SummaryRowProps) {
 }
 
 export function Step4Confirmar({ data, onConfirm, onBack, isLoading = false }: Step4ConfirmarProps) {
-  const rows: { icon: React.ReactNode; label: string; value: string }[] = [
-    {
-      icon:  <User size={15} />,
-      label: 'Paciente',
-      value: `${data.identifier ?? '—'} · ${data.prevision ?? '—'}`,
-    },
-    {
-      icon:  <Stethoscope size={15} />,
-      label: 'Especialidad',
-      value: data.specialtyName ?? '—',
-    },
-    {
-      icon:  <Building2 size={15} />,
-      label: 'Centro',
-      value: data.centerName ?? '—',
-    },
-    {
-      icon:  <Calendar size={15} />,
-      label: 'Fecha',
-      value: data.dateLabel ?? '—',
-    },
-    {
-      icon:  <Clock size={15} />,
-      label: 'Hora',
-      value: data.slot ? `${data.slot} hrs` : '—',
-    },
-    {
-      icon:  <UserCheck size={15} />,
-      label: 'Médico',
-      value: data.doctorName ?? '—',
-    },
-  ];
+  const patientIni = `${data.firstName?.[0] ?? ''}${data.lastName?.[0] ?? ''}`.toUpperCase();
+  const doctorIni  = doctorInitials(data.doctorName ?? '');
+
+  const isTelemedicina = data.appointmentType === 'TELEMEDICINA';
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {/* Header */}
       <div>
         <p className="text-xs font-semibold tracking-widest text-[#5bc0eb] uppercase mb-1 flex items-center gap-1">
@@ -72,17 +43,88 @@ export function Step4Confirmar({ data, onConfirm, onBack, isLoading = false }: S
         </p>
         <h2 className="text-xl font-semibold text-[#0b3c5d]">Confirma tu reserva</h2>
         <p className="text-sm text-slate-500 mt-1">
-          Revisa los datos antes de confirmar. Recibirás una notificación de confirmación.
+          Revisa todos los datos antes de confirmar.
         </p>
       </div>
 
       <hr className="border-slate-100" />
 
-      {/* Resumen */}
+      {/* ── Tarjeta paciente ── */}
+      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Paciente</p>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-[#0b3c5d] text-white flex items-center justify-center text-sm font-bold shrink-0">
+            {patientIni || '?'}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[#0b3c5d]">
+              {data.firstName} {data.lastName}
+            </p>
+            <p className="text-xs text-slate-500">
+              {data.identifier} · {data.prevision}
+            </p>
+          </div>
+        </div>
+
+        {(data.phone || data.email) && (
+          <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-3">
+            {data.phone && (
+              <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                <Phone size={11} className="text-slate-400" /> {data.phone}
+              </p>
+            )}
+            {data.email && (
+              <p className="text-xs text-slate-500 flex items-center gap-1.5">
+                <Mail size={11} className="text-slate-400" /> {data.email}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Detalles de la cita ── */}
       <div className="bg-slate-50 rounded-2xl px-5 py-1 border border-slate-100">
-        {rows.map((row, i) => (
-          <SummaryRow key={i} {...row} />
-        ))}
+        <SummaryRow
+          icon={isTelemedicina ? <Monitor size={15} /> : <Zap size={15} />}
+          label="Modalidad"
+          value={isTelemedicina ? 'Telemedicina' : 'Presencial'}
+        />
+        <SummaryRow
+          icon={<Stethoscope size={15} />}
+          label="Especialidad"
+          value={data.specialtyName ?? '—'}
+        />
+        <SummaryRow
+          icon={<Building2 size={15} />}
+          label="Centro"
+          value={data.centerName ?? '—'}
+        />
+        <SummaryRow
+          icon={<Calendar size={15} />}
+          label="Fecha"
+          value={data.dateLabel ?? '—'}
+        />
+        <SummaryRow
+          icon={<Clock size={15} />}
+          label="Hora"
+          value={data.slot ? `${data.slot} hrs` : '—'}
+        />
+      </div>
+
+      {/* ── Tarjeta profesional ── */}
+      <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Profesional asignado</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#1d7874] text-white flex items-center justify-center text-sm font-bold shrink-0">
+            {doctorIni || '?'}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[#0b3c5d]">{data.doctorName ?? '—'}</p>
+            {data.doctorTitle && (
+              <p className="text-xs text-slate-500">{data.doctorTitle}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Aviso notificación */}
@@ -94,7 +136,7 @@ export function Step4Confirmar({ data, onConfirm, onBack, isLoading = false }: S
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-200">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-200">
         <button
           onClick={onBack}
           disabled={isLoading}
