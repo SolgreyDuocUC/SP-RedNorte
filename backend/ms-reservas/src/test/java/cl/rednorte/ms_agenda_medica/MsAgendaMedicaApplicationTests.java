@@ -1,4 +1,4 @@
-package cl.rednorte.ms_reservas;
+package cl.rednorte.ms_agenda_medica;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
