@@ -18,17 +18,28 @@ public class CoverageController {
 
     private final CoverageService coverageService;
 
-    @PostMapping("/patients/{patientId}/coverages")
-    public ResponseEntity<CoverageDTO> createCoverage(@PathVariable String patientId, @Valid @RequestBody CoverageDTO coverageDTO) {
+    // RF55 — Asociación paciente-previsión
+    @PostMapping("/patient/{patientId}")
+    public ResponseEntity<CoverageDTO> createCoverage(@PathVariable String patientId,
+            @Valid @RequestBody CoverageDTO coverageDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(coverageService.createCoverage(patientId, coverageDTO));
     }
 
-    @GetMapping("/patients/{patientId}/coverages")
+    // RF54 — Actualización de previsión
+    @PutMapping("/{id}")
+    public ResponseEntity<CoverageDTO> updateCoverage(@PathVariable String id,
+            @Valid @RequestBody CoverageDTO coverageDTO) {
+        return ResponseEntity.ok(coverageService.updateCoverage(id, coverageDTO));
+    }
+
+    // RF54 — Consulta de previsión por paciente
+    @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<CoverageDTO>> getCoveragesByPatientId(@PathVariable String patientId) {
         return ResponseEntity.ok(coverageService.getCoveragesByPatientId(patientId));
     }
 
-    @DeleteMapping("/coverages/{id}")
+    // RF54 — Eliminación de previsión
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCoverage(@PathVariable String id) {
         coverageService.deleteCoverage(id);
         return ResponseEntity.noContent().build();

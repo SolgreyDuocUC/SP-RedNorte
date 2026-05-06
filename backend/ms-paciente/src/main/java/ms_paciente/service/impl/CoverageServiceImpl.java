@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ms_paciente.domain.Entity.CoverageEntity;
 import ms_paciente.domain.Entity.PatientEntity;
 import ms_paciente.dto.CoverageDTO;
+import ms_paciente.exception.ResourceNotFoundException;
 import ms_paciente.mapper.PatientEntityMapper;
 import ms_paciente.repository.CoverageRepository;
 import ms_paciente.repository.PatientRepository;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,8 +25,8 @@ public class CoverageServiceImpl implements CoverageService {
     @Override
     @Transactional
     public CoverageDTO createCoverage(String patientId, CoverageDTO coverageDTO) {
-        PatientEntity patient = patientRepository.findById(UUID.fromString(patientId))
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        PatientEntity patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
 
         CoverageEntity entity = PatientEntityMapper.toCoverageEntity(coverageDTO, patient);
         CoverageEntity saved = coverageRepository.save(entity);
@@ -34,9 +34,28 @@ public class CoverageServiceImpl implements CoverageService {
         return PatientEntityMapper.toCoverageDTO(saved);
     }
 
+    // RF54 — Actualización de previsión
+    @Override
+    @Transactional
+    public CoverageDTO updateCoverage(String id, CoverageDTO coverageDTO) {
+        CoverageEntity existing = coverageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Coverage not found with id: " + id));
+
+        existing.setType(coverageDTO.getType());
+        existing.setProvider(coverageDTO.getProvider());
+        existing.setPlan(coverageDTO.getPlan());
+        existing.setStatus(coverageDTO.getStatus());
+
+        CoverageEntity updated = coverageRepository.save(existing);
+        return PatientEntityMapper.toCoverageDTO(updated);
+    }
+
     @Override
     public List<CoverageDTO> getCoveragesByPatientId(String patientId) {
-        return coverageRepository.findByPatientId(UUID.fromString(patientId)).stream()
+        if (!patientRepository.existsById(patientId)) {
+            throw new ResourceNotFoundException("Patient not found with id: " + patientId);
+        }
+        return coverageRepository.findByPatientId(patientId).stream()
                 .map(PatientEntityMapper::toCoverageDTO)
                 .collect(Collectors.toList());
     }
@@ -44,6 +63,9 @@ public class CoverageServiceImpl implements CoverageService {
     @Override
     @Transactional
     public void deleteCoverage(String id) {
-        coverageRepository.deleteById(UUID.fromString(id));
+        if (!coverageRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Coverage not found with id: " + id);
+        }
+        coverageRepository.deleteById(id);
     }
 }

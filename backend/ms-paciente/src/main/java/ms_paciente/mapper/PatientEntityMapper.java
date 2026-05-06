@@ -8,7 +8,6 @@ import ms_paciente.dto.CoverageDTO;
 import ms_paciente.dto.IdentifierDTO;
 import ms_paciente.dto.PatientDTO;
 
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PatientEntityMapper {
@@ -17,10 +16,10 @@ public class PatientEntityMapper {
         if (dto == null) return null;
 
         PatientEntity entity = PatientEntity.builder()
-                .id(dto.getId() != null ? dto.getId() : null)
+                .id(dto.getId())
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
-                .gender(dto.getGender() != null ? Gender.valueOf(dto.getGender().toUpperCase()) : Gender.UNKNOWN)
+                .gender(parseGender(dto.getGender()))
                 .birthDate(dto.getBirthDate())
                 .primaryPhone(dto.getPrimaryPhone())
                 .secondaryPhone(dto.getSecondaryPhone())
@@ -58,6 +57,8 @@ public class PatientEntityMapper {
                 .email(entity.getEmail())
                 .address(entity.getAddress())
                 .active(entity.isActive())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
 
         if (entity.getIdentifiers() != null) {
@@ -105,7 +106,6 @@ public class PatientEntityMapper {
 
     public static CoverageDTO toCoverageDTO(CoverageEntity entity) {
         if (entity == null) return null;
-
         return CoverageDTO.builder()
                 .id(entity.getId())
                 .type(entity.getType())
@@ -113,5 +113,14 @@ public class PatientEntityMapper {
                 .plan(entity.getPlan())
                 .status(entity.getStatus())
                 .build();
+    }
+
+    private static Gender parseGender(String gender) {
+        if (gender == null || gender.isBlank()) return Gender.UNKNOWN;
+        try {
+            return Gender.valueOf(gender.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Gender.UNKNOWN;
+        }
     }
 }

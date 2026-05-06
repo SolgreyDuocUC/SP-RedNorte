@@ -3,8 +3,12 @@ package ms_paciente.domain.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 import ms_paciente.domain.types.Gender;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /*
@@ -24,6 +28,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "patients")
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -64,14 +69,19 @@ public class PatientEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     // RELACIÓN UNO A MUCHOS CON IDENTIFIERS
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IdentifierEntity> identifiers;
 
     // RELACIÓN UNO A MUCHOS CON COVERAGES
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoverageEntity> coverages;
-
-    @Column(name = "is_foreign", nullable = false)
-    private boolean isForeign;
 }
