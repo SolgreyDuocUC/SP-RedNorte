@@ -46,7 +46,7 @@ export function Reservahoraview({ onBack }: { onBack: () => void }) {
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-y-auto">
         {!completed ? (
           <>
-            {currentStep === 1 && <Step1Identificacion data={data} onChange={handleChange} onNext={handleNext} />}
+            {currentStep === 1 && <Step1Identificacion data={data} onChange={handleChange} onNext={handleNext} onBack={onBack} />}
             {currentStep === 2 && <Step2Especialidad data={data} onChange={handleChange} onNext={handleNext} onBack={handleBackStep} />}
             {currentStep === 3 && <Step3FechaHora data={data} onChange={handleChange} onNext={handleNext} onBack={handleBackStep} />}
             {currentStep === 4 && <Step4Confirmar data={data} onConfirm={handleConfirm} onBack={handleBackStep} isLoading={isLoading} />}

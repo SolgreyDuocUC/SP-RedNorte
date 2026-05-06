@@ -128,9 +128,9 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
             {onBack && (
               <button 
                 onClick={onBack} 
-                className="flex items-center gap-1.5 text-white/70 hover:text-white mb-6 text-sm font-medium transition-all"
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full mb-8 text-sm font-medium transition-all w-fit"
               >
-                <ArrowLeft size={16} /> Volver
+                <ArrowLeft size={16} /> Volver al Inicio
               </button>
             )}
             <h1 className="text-white font-bold text-2xl tracking-tight leading-tight">

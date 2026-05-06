@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, ArrowRight } from 'lucide-react';
+import { User, ArrowRight, ArrowLeft } from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
 import { PREVISION_OPTIONS, validateRun, formatRun } from '../../../../core/constants/BookingConst';
 
@@ -7,9 +7,10 @@ interface Step1IdentificacionProps {
   data: Partial<BookingData>;
   onChange: (fields: Partial<BookingData>) => void;
   onNext: () => void;
+  onBack: () => void;
 }
 
-export function Step1Identificacion({ data, onChange, onNext }: Step1IdentificacionProps) {
+export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1IdentificacionProps) {
   const [identifier, setIdentifier] = useState(data.identifier ?? '');
   const [prevision, setPrevision] = useState(data.prevision ?? '');
   const [idType, setIdType] = useState<BookingData['idType']>(data.idType ?? 'RUN');
@@ -107,7 +108,13 @@ export function Step1Identificacion({ data, onChange, onNext }: Step1Identificac
         </div>
       </div>
 
-      <div className="flex items-center justify-end pt-4 border-t border-slate-100">
+      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 transition-all font-medium bg-white"
+        >
+          <ArrowLeft size={15} /> Cancelar reserva
+        </button>
         <button
           onClick={handleNext}
           disabled={!isValid}
