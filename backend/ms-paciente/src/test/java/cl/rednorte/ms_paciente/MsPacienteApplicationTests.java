@@ -1,4 +1,4 @@
-﻿package cl.rednorte.mspaciente;
+package cl.rednorte.ms_paciente;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
