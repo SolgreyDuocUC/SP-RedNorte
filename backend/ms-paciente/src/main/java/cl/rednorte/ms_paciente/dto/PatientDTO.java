@@ -21,5 +21,10 @@ public class PatientDTO {
 
     private Gender gender;
 
-    private String insurance;
+    private String phone;
+    private String email;
+    private String address;
+    private Boolean active;
+
+    private CoverageDTO coverage;
 }

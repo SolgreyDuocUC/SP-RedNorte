@@ -1,9 +1,6 @@
 package cl.rednorte.ms_paciente.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -18,8 +15,9 @@ public class CoverageEntity {
     @Id
     private String id;
 
-    @Column(name = "patient_id", nullable = false)
-    private String patientId;
+    @OneToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private PatientEntity patient;
 
     // Tipo de cobertura
     @Column(name = "type", nullable = false)
