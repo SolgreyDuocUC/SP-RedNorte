@@ -10,7 +10,7 @@ import { NotificationsView } from './app/components/pages/4. Notificaciones/Noti
 import { HistoryView } from './app/components/pages/7. VistaHistorial/HistoryView';
 import { HomePage } from './app/home/HomePage';
 import { Toaster } from './app/components/ui/sonner';
-
+import { Reservahoraview } from './app/components/pages/8. Reservas/Reservahoraview';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -47,6 +47,8 @@ export default function App() {
         return <NotificationsView />;
       case 'history':
         return <HistoryView />;
+      case 'reserva':
+        return <Reservahoraview onBack={() => setActiveView('dashboard')} />;
       default:
         return (
           <div className="flex h-full items-center justify-center">

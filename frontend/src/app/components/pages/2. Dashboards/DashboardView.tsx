@@ -21,7 +21,7 @@ import { DashboardNurse } from './DashboardNurse';
 
 type UserRole = 'ADMIN' | 'ADMINISTRATIVO' | 'ENFERMERO' | 'MEDICO';
 
-export function DashboardView() {
+export function DashboardView({ onNewBooking }: { onNewBooking?: () => void }) {
   const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
 
   const renderDashboardByRole = () => {
@@ -88,7 +88,7 @@ export function DashboardView() {
               className="pl-10 pr-4 py-2.5 border border-slate-200 rounded-full text-sm w-full md:w-64 focus:ring-2 focus:ring-[#00a7b1]/20 focus:border-[#00a7b1] outline-none shadow-sm transition-all"
             />
           </div>
-          <button className="flex items-center gap-2 bg-[#004a87] hover:bg-[#003561] text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md transition-all">
+          <button onClick={onNewBooking} className="flex items-center gap-2 bg-[#004a87] hover:bg-[#003561] text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md transition-all">
             <Plus className="h-4 w-4" /> Nueva Atención
           </button>
         </div>
