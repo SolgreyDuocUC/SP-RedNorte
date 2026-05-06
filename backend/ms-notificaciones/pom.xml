@@ -16,10 +16,10 @@
     </parent>
 
     <groupId>cl.rednorte</groupId>
-    <artifactId>ms-paciente</artifactId>
+    <artifactId>ms-notificaciones</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ms-paciente</name>
-    <description>Microservicio de gestión de pacientes</description>
+    <name>ms-notificaciones</name>
+    <description>Microservicio de notificaciones</description>
 
     <properties>
         <java.version>21</java.version>
