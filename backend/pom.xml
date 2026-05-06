@@ -24,7 +24,6 @@
 
     <!-- Dentro de los módulos se agregan los microservicios -->
     <modules>
-        <module>mcsv-auth</module>
         <module>ms-ficha-clinica</module>
         <module>ms-paciente</module>
         <!-- agrega más módulos aquí -->
