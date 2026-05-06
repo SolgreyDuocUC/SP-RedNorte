@@ -15,6 +15,7 @@ import { Reservahoraview } from './app/components/pages/8. Reservas/Reservahorav
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showReserva, setShowReserva] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -27,10 +28,20 @@ export default function App() {
             setIsLoggedIn(true);
             setShowLogin(false);
           }} 
+          onBack={() => setShowLogin(false)}
         />
       );
     }
-    return <HomePage onLogin={() => setShowLogin(true)} />;
+    if (showReserva) {
+      return (
+        <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+           <div className="max-w-5xl mx-auto h-[85vh] bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
+             <Reservahoraview onBack={() => setShowReserva(false)} />
+           </div>
+        </div>
+      );
+    }
+    return <HomePage onLogin={() => setShowLogin(true)} onReserva={() => setShowReserva(true)} />;
   }
 
   const renderView = () => {

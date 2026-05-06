@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 // Credenciales simuladas para el MVP (rol admin)
 const DEMO_CREDENTIALS = {
@@ -46,9 +47,10 @@ function validateRUN(formatted: string): boolean {
 
 interface LoginViewProps {
   onLoginSuccess: (role: 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente') => void;
+  onBack?: () => void;
 }
 
-export function LoginView({ onLoginSuccess }: LoginViewProps) {
+export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
   const [run, setRun] = useState('');
   const [password, setPassword] = useState('');
   const [runError, setRunError] = useState('');
@@ -122,7 +124,15 @@ export function LoginView({ onLoginSuccess }: LoginViewProps) {
           <div className="absolute w-64 h-64 rounded-full border-[40px] border-white/5 -bottom-20 -right-20 pointer-events-none" />
           <div className="absolute w-40 h-40 rounded-full border-[28px] border-[#00a7b1]/20 -top-10 -left-10 pointer-events-none" />
 
-          <div className="relative z-10">
+          <div className="relative z-10 flex flex-col items-start">
+            {onBack && (
+              <button 
+                onClick={onBack} 
+                className="flex items-center gap-1.5 text-white/70 hover:text-white mb-6 text-sm font-medium transition-all"
+              >
+                <ArrowLeft size={16} /> Volver
+              </button>
+            )}
             <h1 className="text-white font-bold text-2xl tracking-tight leading-tight">
               Red Norte
             </h1>

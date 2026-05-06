@@ -5,9 +5,10 @@ import logoFull from '@/app/assets/logo-sf-1.svg';
 
 interface PublicHeaderProps {
   onLogin: () => void;
+  onReserva?: () => void;
 }
 
-export function PublicHeader({ onLogin }: PublicHeaderProps) {
+export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -66,6 +67,7 @@ export function PublicHeader({ onLogin }: PublicHeaderProps) {
           </button>
 
           <button
+            onClick={onReserva}
             className="px-4 py-2 rounded-full text-sm font-medium bg-[#0096c7] text-white hover:bg-[#0077b6] transition"
           >
             Reservar hora
@@ -101,7 +103,9 @@ export function PublicHeader({ onLogin }: PublicHeaderProps) {
             </button>
           ))}
 
-          <button className="mt-2 w-full py-2 rounded-full bg-[#0096c7] text-white text-sm">
+          <button 
+            onClick={onReserva}
+            className="mt-2 w-full py-2 rounded-full bg-[#0096c7] text-white text-sm">
             Reservar hora
           </button>
 

@@ -8,16 +8,17 @@ import { FloatingElements } from '../home/FloatingElements';
 
 interface HomePageProps {
   onLogin: () => void;
+  onReserva?: () => void;
 }
 
-export function HomePage({ onLogin }: HomePageProps) {
+export function HomePage({ onLogin, onReserva }: HomePageProps) {
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <PublicHeader onLogin={onLogin} />
+      <PublicHeader onLogin={onLogin} onReserva={onReserva} />
       
       <main className="flex-1">
         <HeroSlider />
-        <BookingSection />
+        <BookingSection onReserva={onReserva} />
         <ServiciosSection />
         <CentrosSection />
       </main>

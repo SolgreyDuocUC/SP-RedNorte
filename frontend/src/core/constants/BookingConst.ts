@@ -56,9 +56,39 @@ export const MONTHS = [
 
 export const WEEKDAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
-/** Valida formato RUN chileno: 12.345.678-9 o 12.345.678-K */
-export function validateRun(value: string): boolean {
-  return /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/.test(value);
+/** Formatea RUN: "123456789" → "12.345.678-9" */
+export function formatRun(raw: string): string {
+  const clean = raw.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length === 0) return '';
+
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+
+  const bodyFormatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  return `${bodyFormatted}-${dv}`;
+}
+
+/** Valida RUN chileno con módulo 11 */
+export function validateRun(formatted: string): boolean {
+  const clean = formatted.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length < 2) return false;
+
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = 11 - (sum % 11);
+  const expected =
+    remainder === 11 ? '0' : remainder === 10 ? 'K' : String(remainder);
+
+  return dv === expected;
 }
 
 /** Formatea una fecha Date a etiqueta legible en español */

@@ -14,7 +14,7 @@ interface BookingSidebarProps {
 
 export function BookingSidebar({ steps, currentStep, completed }: BookingSidebarProps) {
   return (
-    <aside className="bg-[#0b3c5d] rounded-2xl p-7 flex flex-col gap-1 min-w-[200px]">
+    <aside className="bg-[#0b3c5d] rounded-2xl p-7 flex flex-col gap-1 min-w-[200px] h-full">
       {/* Logo / título */}
       <div className="flex items-center gap-2.5 mb-8">
         <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white font-bold text-lg">

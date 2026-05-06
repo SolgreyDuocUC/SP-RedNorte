@@ -40,7 +40,7 @@ export function Reservahoraview({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="flex gap-6 h-full w-full">
-      <div className="hidden md:block">
+      <div className="hidden md:block h-full">
         <BookingSidebar steps={steps} currentStep={currentStep} completed={completed} />
       </div>
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 overflow-y-auto">

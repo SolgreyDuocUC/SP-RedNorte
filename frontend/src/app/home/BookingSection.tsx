@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Search, MessageCircle } from 'lucide-react';
 import { especialidades, examenes } from '../types/home-slides';
 
-export function BookingSection() {
+export function BookingSection({ onReserva }: { onReserva?: () => void }) {
   const [bookTab, setBookTab] = useState<'consultas' | 'examenes'>('consultas');
   const [typeTab, setTypeTab] = useState<'especialidad' | 'profesional'>('especialidad');
   const [search, setSearch] = useState('');
@@ -115,7 +115,9 @@ export function BookingSection() {
             {/* ACTIONS (más separadas y claras) */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
 
-              <button className="flex-1 px-6 py-3 rounded-full bg-[#0096c7] text-white text-sm font-bold
+              <button 
+                onClick={onReserva}
+                className="flex-1 px-6 py-3 rounded-full bg-[#0096c7] text-white text-sm font-bold
               hover:bg-[#0077b6] transition shadow-sm">
                 Buscar disponibilidad
               </button>

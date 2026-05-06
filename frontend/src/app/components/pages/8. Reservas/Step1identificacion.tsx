@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { User, ArrowRight } from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
-import { PREVISION_OPTIONS, validateRun } from '../../../../core/constants/BookingConst';
+import { PREVISION_OPTIONS, validateRun, formatRun } from '../../../../core/constants/BookingConst';
 
 interface Step1IdentificacionProps {
   data: Partial<BookingData>;
@@ -15,9 +15,20 @@ export function Step1Identificacion({ data, onChange, onNext }: Step1Identificac
   const [idType, setIdType] = useState<BookingData['idType']>(data.idType ?? 'RUN');
   const [error, setError] = useState('');
 
+  const handleIdentifierChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (idType === 'RUN') {
+      const clean = val.replace(/[^0-9kK]/g, '');
+      if (clean.length > 9) return;
+      val = clean.length >= 2 ? formatRun(clean) : clean;
+    }
+    setIdentifier(val);
+    setError('');
+  };
+
   const handleNext = () => {
     if (idType === 'RUN' && !validateRun(identifier)) {
-      setError('RUN inválido. Formato esperado: 12.345.678-9');
+      setError('RUN inválido. El formato o dígito verificador es incorrecto.');
       return;
     }
     setError('');
@@ -44,11 +55,11 @@ export function Step1Identificacion({ data, onChange, onNext }: Step1Identificac
           <label className="block text-sm font-medium text-[#0b3c5d] mb-2 uppercase tracking-wide text-xs">Tipo de Identificación</label>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-              <input type="radio" checked={idType === 'RUN'} onChange={() => setIdType('RUN')} className="accent-[#0b3c5d]" />
+              <input type="radio" checked={idType === 'RUN'} onChange={() => { setIdType('RUN'); setIdentifier(''); setError(''); }} className="accent-[#0b3c5d]" />
               RUN
             </label>
             <label className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-              <input type="radio" checked={idType === 'PASAPORTE'} onChange={() => setIdType('PASAPORTE')} className="accent-[#0b3c5d]" />
+              <input type="radio" checked={idType === 'PASAPORTE'} onChange={() => { setIdType('PASAPORTE'); setIdentifier(''); setError(''); }} className="accent-[#0b3c5d]" />
               Pasaporte
             </label>
           </div>
@@ -61,14 +72,24 @@ export function Step1Identificacion({ data, onChange, onNext }: Step1Identificac
            <input
              type="text"
              value={identifier}
-             onChange={(e) => {
-               setIdentifier(e.target.value);
-               setError('');
-             }}
-             className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb] outline-none transition-all"
-             placeholder={idType === 'RUN' ? '12.345.678-9' : 'Ej: A1234567'}
+             onChange={handleIdentifierChange}
+             className={`w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all font-mono tracking-wide
+               ${error ? 'border-red-400 ring-2 ring-red-100' : 'border-slate-200 focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb]'}`}
+             placeholder={idType === 'RUN' ? 'Ej: 123456789' : 'Ej: A1234567'}
+             maxLength={idType === 'RUN' ? 12 : 20}
+             inputMode={idType === 'RUN' ? 'numeric' : 'text'}
            />
-           {error && <p className="text-xs text-red-500 mt-1.5 font-medium">{error}</p>}
+           {idType === 'RUN' && !error ? (
+              <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0 text-slate-400">
+                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2" />
+                  <path d="M6 5.5v3M6 3.5v.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                Solo ingresa números — puntos y guión se agregan solos.
+              </p>
+           ) : (
+             error && <p className="text-xs text-red-500 mt-1.5 font-medium">{error}</p>
+           )}
         </div>
 
         <div>
