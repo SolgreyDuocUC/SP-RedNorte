@@ -1,6 +1,6 @@
 import React from 'react';
 import { Phone, MapPin, Clock, ArrowUpRight } from 'lucide-react';
-import { centros } from '../../types/HomeSlides';
+import { centros } from '../types/home-slides';
 
 export function CentrosSection() {
   return (

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\" -Recurse -Force | Select-Object FullName, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Sort-Object FullName | Format-Table -AutoSize)",
+      "Bash(mvn compile *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\" -Recurse -Filter \"*.java\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\" -Recurse -Filter \"*.java\")",
+      "Bash(Get-ChildItem -Recurse \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\ms_paciente\")",
+      "Bash(Select-Object FullName)",
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\ms_paciente\" | Where-Object { !$_.PSIsContainer } | Select-Object FullName | Format-Table -AutoSize -Wrap)",
+      "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\cl\\\\rednorte\\\\mspaciente\" | Where-Object { !$_.PSIsContainer } | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\RedNorte\\\\SP-RedNorte\\\\backend\\\\ms-paciente\\\\src\\\\main\\\\java\\\\cl\\\\rednorte\\\\mspaciente\\\\\", \"\"\\) })"
+    ]
+  }
+}

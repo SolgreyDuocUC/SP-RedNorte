@@ -1,4 +1,4 @@
-import type { Appointment } from '../core/types/appointment.types';
+import type { Appointment } from '../app/types';
 
 class AppointmentService {
   private baseUrl = '/appointments';

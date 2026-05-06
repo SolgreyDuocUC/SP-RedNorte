@@ -1,4 +1,4 @@
-import type { Patient, PatientSearch } from '../core/types/patient.types';
+import type { Patient, PatientSearch } from '../app/types';
 
 class PatientService {
   private baseUrl = '/patients';
