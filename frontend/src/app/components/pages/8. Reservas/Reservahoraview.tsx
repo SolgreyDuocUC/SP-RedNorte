@@ -6,6 +6,7 @@ import { Step3FechaHora } from './Step3fechahora';
 import { Step4Confirmar } from './Step4confirmar';
 import { BookingSuccess } from './Bookingsuccess';
 import { BookingData } from '../../../types/Booking';
+import { appointmentService } from '../../../../services/appointment.service';
 
 export function Reservahoraview({ onBack }: { onBack: () => void }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -21,14 +22,44 @@ export function Reservahoraview({ onBack }: { onBack: () => void }) {
   const handleNext = () => setCurrentStep((p) => Math.min(p + 1, 4));
   const handleBackStep = () => setCurrentStep((p) => Math.max(p - 1, 1));
   
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setIsLoading(true);
-    // API Call simulation
-    setTimeout(() => {
-      setBookingCode(`RN-${Math.floor(1000 + Math.random() * 9000)}`);
+    try {
+      // Calcular fechas
+      const startDateTime = `${data.date}T${data.slot}:00`;
+      const startDate = new Date(startDateTime);
+      const endDate = new Date(startDate);
+      endDate.setMinutes(endDate.getMinutes() + 30); // duración asumida de 30 min
+      
+      const newAppointment = {
+        patientId: data.identifier || "unknown",
+        practitionerId: data.doctorId || data.specialtyId || "unknown",
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        status: "booked" as const,
+        description: `Cita para especialidad ${data.specialtyName}`,
+        
+        // Frontend-only/Mocks
+        patientName: "Paciente (Mock)", 
+        practitionerName: data.doctorName || "Médico",
+        specialtyId: data.specialtyId || "",
+        specialtyName: data.specialtyName || "",
+        facilityId: data.centerId || "",
+        facilityName: data.centerName || "",
+        dateTime: startDate.toISOString(),
+        duration: 30,
+        type: "consultation" as const
+      };
+
+      const response = await appointmentService.createAppointment(newAppointment);
+      setBookingCode(response.id || `RN-${Math.floor(1000 + Math.random() * 9000)}`);
       setCompleted(true);
+    } catch (error) {
+      console.error("Error creando reserva:", error);
+      alert("Hubo un error al procesar tu reserva. Intenta de nuevo.");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const steps = [
