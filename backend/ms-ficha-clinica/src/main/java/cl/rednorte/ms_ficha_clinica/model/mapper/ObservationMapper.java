@@ -26,6 +26,8 @@ public class ObservationMapper {
             );
         }
 
+
+
         if (obs.hasEncounter()) {
             entity.setEncounterId(
                     obs.getEncounter().getReference().replace("Encounter/", "")
