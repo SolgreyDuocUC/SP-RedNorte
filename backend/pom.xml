@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <!-- ===================================================== -->
+    <!-- DEFINICIÓN BASE DEL PROYECTO MAVEN -->
+    <!-- ===================================================== -->
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Versión de Spring Boot -->
+    <!--
+        Se define Spring Boot como proyecto padre base.
+        Este proporciona:
+        - Gestión automática de versiones de dependencias
+        - Configuración por defecto para plugins comunes
+        - Compatibilidad con el ecosistema Spring
+    -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,16 +22,35 @@
         <relativePath />
     </parent>
 
+    <!--
+        Identificación del proyecto en el repositorio Maven.
+        groupId: organización o dominio
+        artifactId: nombre del proyecto
+        version: versión actual del sistema
+    -->
     <groupId>cl</groupId>
     <artifactId>SP-RedNorte</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>SP-RedNorte</name>
-    <description>Proyecto padre multi-módulo</description>
+    <description>Proyecto padre multi-módulo para la arquitectura de microservicios Red Norte</description>
 
-    <!-- Esta línea indica que este pom es el padre del proyecto -->
+    <!--
+        Se define el tipo de empaquetado como "pom".
+        Esto indica que el proyecto:
+        - No genera un artefacto ejecutable
+        - Actúa como agregador de módulos
+        - Centraliza configuración y dependencias
+    -->
     <packaging>pom</packaging>
 
-    <!-- Dentro de los módulos se agregan los microservicios -->
+    <!-- ===================================================== -->
+    <!-- DEFINICIÓN DE MÓDULOS -->
+    <!-- ===================================================== -->
+    <!--
+        Se listan todos los microservicios que forman parte del sistema.
+        Cada módulo corresponde a un proyecto independiente,
+        pero hereda la configuración definida en este POM padre.
+    -->
     <modules>
         <module>ms-ficha-clinica</module>
         <module>ms-paciente</module>
@@ -32,30 +60,73 @@
         <module>ms-reservas</module>
         <module>ms-notificaciones</module>
         <module>ms-flujo-urgencias</module>
-        <!-- agrega más módulos aquí -->
+        <!-- Se pueden agregar nuevos microservicios en esta sección -->
     </modules>
 
+    <!-- ===================================================== -->
+    <!-- PROPIEDADES GLOBALES -->
+    <!-- ===================================================== -->
+    <!--
+        Se centralizan propiedades reutilizables.
+        Java.version define la versión de Java utilizada por todos los módulos.
+    -->
     <properties>
         <java.version>21</java.version>
     </properties>
 
-    <!-- Manejo centralizado de versiones -->
+    <!-- ===================================================== -->
+    <!-- GESTIÓN CENTRALIZADA DE DEPENDENCIAS -->
+    <!-- ===================================================== -->
+    <!--
+        dependencyManagement permite definir versiones de dependencias
+        en un solo lugar sin necesidad de repetirlas en cada microservicio.
+
+        Los módulos hijos podrán declarar dependencias sin versión,
+        heredando automáticamente la definida aquí.
+    -->
     <dependencyManagement>
         <dependencies>
-            <!-- Ejemplo: se pueden fijar versiones comunes aquí -->
+            <!--
+                Ejemplo de uso futuro:
+
+                <dependency>
+                    <groupId>ca.uhn.hapi.fhir</groupId>
+                    <artifactId>hapi-fhir-client</artifactId>
+                    <version>8.4.0</version>
+                </dependency>
+            -->
         </dependencies>
     </dependencyManagement>
 
+    <!-- ===================================================== -->
+    <!-- CONFIGURACIÓN DE BUILD -->
+    <!-- ===================================================== -->
     <build>
+
+        <!--
+            pluginManagement permite definir plugins comunes
+            para todos los módulos sin necesidad de duplicarlos.
+
+            Cada microservicio puede usar estos plugins
+            heredando su configuración desde este nivel.
+        -->
         <pluginManagement>
             <plugins>
-                <!-- Plugins compartidos -->
+
+                <!--
+                    Plugin de Spring Boot para:
+                    - Empaquetado de aplicaciones
+                    - Ejecución de servicios
+                    - Generación de artefactos ejecutables
+                -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                 </plugin>
+
             </plugins>
         </pluginManagement>
+
     </build>
 
 </project>
