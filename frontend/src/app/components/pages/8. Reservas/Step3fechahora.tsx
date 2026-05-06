@@ -189,23 +189,23 @@ export function Step3FechaHora({ data, onChange, onNext, onBack }: Step3FechaHor
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-200">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 transition-all"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-300 text-base font-bold text-slate-600 hover:bg-slate-100 transition-all"
         >
-          <ArrowLeft size={15} /> Volver
+          <ArrowLeft size={20} /> Volver al Paso 2
         </button>
         <button
           onClick={onNext}
           disabled={!canProceed}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all
+          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-base font-bold transition-all shadow-md
             ${canProceed
-              ? 'bg-[#0b3c5d] text-white hover:bg-[#0e4d76] shadow-sm'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              ? 'bg-[#0b3c5d] text-white hover:bg-[#0e4d76]'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}
         >
-          Siguiente <ArrowRight size={15} />
+          Revisar Reserva <ArrowRight size={20} />
         </button>
       </div>
     </div>

@@ -94,22 +94,22 @@ export function Step4Confirmar({ data, onConfirm, onBack, isLoading = false }: S
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-200">
         <button
           onClick={onBack}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 disabled:opacity-40 transition-all"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-300 text-base font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 transition-all"
         >
-          <ArrowLeft size={15} /> Volver
+          <ArrowLeft size={20} /> Ajustar Fecha/Hora
         </button>
         <button
           onClick={onConfirm}
           disabled={isLoading}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold bg-[#1d7874] text-white hover:bg-[#0f6e56] disabled:opacity-60 disabled:cursor-not-allowed shadow-sm transition-all"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-base font-bold bg-[#1d7874] text-white hover:bg-[#0f6e56] disabled:opacity-60 disabled:cursor-not-allowed shadow-md transition-all"
         >
           {isLoading ? (
             <>
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
@@ -117,7 +117,7 @@ export function Step4Confirmar({ data, onConfirm, onBack, isLoading = false }: S
             </>
           ) : (
             <>
-              <Check size={15} /> Confirmar reserva
+              <Check size={20} /> Confirmar mi reserva
             </>
           )}
         </button>

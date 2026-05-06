@@ -128,9 +128,9 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
             {onBack && (
               <button 
                 onClick={onBack} 
-                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-full mb-8 text-sm font-medium transition-all w-fit"
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl mb-8 text-base font-bold shadow-sm transition-all border border-white/20 w-fit"
               >
-                <ArrowLeft size={16} /> Volver al Inicio
+                <ArrowLeft size={20} /> Volver a la página principal
               </button>
             )}
             <h1 className="text-white font-bold text-2xl tracking-tight leading-tight">
@@ -236,19 +236,19 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="w-full py-3 bg-[#023e8a] hover:bg-[#0077b6] disabled:opacity-60 disabled:cursor-not-allowed
-                text-white text-sm font-semibold rounded-lg transition-all active:scale-[0.98]"
+              className="w-full py-4 mt-2 bg-[#023e8a] hover:bg-[#0077b6] disabled:opacity-60 disabled:cursor-not-allowed
+                text-white text-lg font-bold rounded-xl shadow-md transition-all active:scale-[0.98]"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                   </svg>
-                  Verificando...
+                  Iniciando sesión...
                 </span>
               ) : (
-                'Iniciar sesión'
+                'Iniciar sesión en mi Portal'
               )}
             </button>
           )}

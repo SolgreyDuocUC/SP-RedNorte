@@ -108,23 +108,23 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-200">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 transition-all font-medium bg-white"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-300 text-base font-bold text-slate-600 hover:bg-slate-100 transition-all"
         >
-          <ArrowLeft size={15} /> Cancelar reserva
+          <ArrowLeft size={20} /> Cancelar y volver al inicio
         </button>
         <button
           onClick={handleNext}
           disabled={!isValid}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all
+          className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-base font-bold transition-all shadow-md
             ${isValid
-              ? 'bg-[#0b3c5d] text-white hover:bg-[#0e4d76] shadow-sm'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              ? 'bg-[#0b3c5d] text-white hover:bg-[#0e4d76]'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}
         >
-          Siguiente <ArrowRight size={15} />
+          Continuar al Paso 2 <ArrowRight size={20} />
         </button>
       </div>
     </div>

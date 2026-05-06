@@ -50,18 +50,18 @@ export function BookingSuccess({
       </div>
 
       {/* Acciones */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 w-full mt-2">
         <button
           onClick={onViewAppointments}
-          className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#0b3c5d] text-white text-sm font-semibold hover:bg-[#0e4d76] transition-all shadow-sm"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0b3c5d] text-white text-base font-bold hover:bg-[#0e4d76] transition-all shadow-md"
         >
-          Ver mis citas <ArrowRight size={15} />
+          Ver mis horas agendadas <ArrowRight size={20} />
         </button>
         <button
           onClick={onNewBooking}
-          className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50 transition-all"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-300 text-base font-bold text-slate-600 hover:bg-slate-50 transition-all"
         >
-          Nueva reserva
+          Agendar otra hora
         </button>
       </div>
     </div>
