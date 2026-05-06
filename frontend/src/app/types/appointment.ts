@@ -1,8 +1,14 @@
 export interface Appointment {
   id: string;
   patientId: string;
-  patientName: string;
   practitionerId: string;
+  start: string; // from backend Date
+  end: string;   // from backend Date
+  status: AppointmentStatus; 
+  description?: string; // from backend
+
+  // Frontend-only / Mock fields
+  patientName: string;
   practitionerName: string;
   specialtyId: string;
   specialtyName: string;
@@ -10,20 +16,18 @@ export interface Appointment {
   facilityName: string;
   dateTime: string;
   duration: number;
-  status: AppointmentStatus;
   type: AppointmentType;
-  notes?: string;
   cancelReason?: string;
 }
 
+// Matched with backend ms-reservas (booked, cancelled, fulfilled, noshow)
 export type AppointmentStatus =
-  | 'scheduled'
-  | 'confirmed'
-  | 'in-progress'
-  | 'completed'
+  | 'booked'
   | 'cancelled'
-  | 'no-show';
+  | 'fulfilled'
+  | 'noshow';
 
+// Mock values for frontend
 export type AppointmentType =
   | 'consultation'
   | 'procedure'
