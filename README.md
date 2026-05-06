@@ -1,51 +1,91 @@
-# 1. Estructura de ramas:
+# SP-RedNorte — Sistema de Salud
 
-main            → Producción (estable)
-preprod         → Pre-producción (validación final)
-qa              → Pruebas (testing técnico)
-dev-Solgrey     → Desarrollo Solgrey
-dev-Martin      → Desarrollo Martin
+Plataforma de gestión clínica desarrollada para la Red Norte de salud. El sistema está construido bajo una arquitectura de microservicios con un frontend React y un backend Spring Boot.
 
-# 2. Estrategia de desarrollo:  
+---
 
-1. Desarrollo individual en ramas dev-Solgrey y dev-Martin
-2. Merge a qa cuando esté listo
-3. Testing en qa
-4. Merge a preprod cuando esté listo
-5. Testing en preprod
-6. Merge a main cuando esté listo
-7. Despliegue en producción
+## Arquitectura General
 
-# 3. Git Flow simplificado basado en entornos:
+```text
+SP-RedNorte/
+├── backend/          # Microservicios Spring Boot (Java 21)
+│   ├── ms-ficha-clinica   → Puerto 8001
+│   ├── ms-paciente        → Puerto 8002
+│   ├── ms-reservas        → Puerto 8003
+│   └── ms-usuarios        → Puerto 8004
+└── frontend/         # Aplicación React + Vite
+```
 
-    No es Git Flow puro
-    No es GitHub Flow
-    Es una adaptación práctica enfocada en control y validación progresiva
+---
 
-# 4. Reglas de Pull Requests (PR):
+## Microservicios
 
-    Siempre PR desde dev-Solgrey o dev-Martin → qa
-    Siempre PR desde qa → preprod
-    Siempre PR desde preprod → main
-    Nunca PR directo a main
-    Nunca PR directo a preprod
-    Nunca PR directo a qa
-    Nunca PR directo a dev-Solgrey
-    Nunca PR directo a dev-Martin
+| Servicio          | Puerto | Responsabilidad                                        |
+|-------------------|--------|--------------------------------------------------------|
+| ms-ficha-clinica  | 8001   | Historial clínico, notas, diagnósticos, procedimientos |
+| ms-paciente       | 8002   | Registro de pacientes y coberturas de salud            |
+| ms-reservas       | 8003   | Gestión de citas y agenda médica                       |
+| ms-usuarios       | 8004   | Usuarios del sistema y roles                           |
 
-# 5. Reglas de Merge:
+---
 
-    Nunca hacer merge directo
-    Siempre hacer merge con PR
-    Siempre hacer merge con revisión
-    Siempre hacer merge con testing
-    Siempre hacer merge con validación
-    Siempre hacer merge con aprobación
-    Siempre hacer merge con documentación
-    Siempre hacer merge con pruebas
-    Siempre hacer merge con despliegue
-    Siempre hacer merge con monitoreo
-    Siempre hacer merge con rollback
-    Siempre hacer merge con recuperación
-    Siempre hacer merge con recuperación
-    
+## Stack Tecnológico
+
+### Backend
+
+- Java 21
+- Spring Boot 4.x (Web MVC, Data JPA, Validation)
+- MySQL 8 (puerto 3307)
+- HAPI FHIR R4 (estándar de interoperabilidad clínica)
+- Lombok
+
+### Frontend
+
+- React
+- Vite
+
+---
+
+## Base de Datos
+
+Todos los microservicios comparten la misma base de datos MySQL:
+
+```text
+Host:     localhost:3307
+Base:     bd_rednorte
+Usuario:  root
+```
+
+---
+
+## Estrategia de Ramas (Git Flow Adaptado)
+
+```text
+main        → Producción (rama estable)
+preprod     → Pre-producción (validación final)
+qa          → Pruebas técnicas
+dev-Solgrey → Desarrollo individual
+dev-Martin  → Desarrollo individual
+```
+
+**Flujo obligatorio:** `dev-* → qa → preprod → main`
+
+Toda integración se realiza mediante Pull Request. No se permiten merges directos a ninguna rama protegida.
+
+---
+
+## Ejecución del Proyecto
+
+Cada microservicio se ejecuta de forma independiente. Consulte el `README.md` dentro de cada módulo para instrucciones específicas.
+
+Para el frontend, consulte el `README.md` en el directorio `frontend/`.
+
+---
+
+## Swagger / OpenAPI
+
+Cada microservicio expone su documentación de API en:
+
+```text
+http://localhost:{puerto}/swagger-ui/index.html
+```
