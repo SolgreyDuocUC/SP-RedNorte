@@ -26,6 +26,12 @@
     <modules>
         <module>ms-ficha-clinica</module>
         <module>ms-paciente</module>
+        <module>ms-establecimientos</module>
+        <module>ms-agenda-medica</module>
+        <module>ms-usuarios</module>
+        <module>ms-reservas</module>
+        <module>ms-notificaciones</module>
+        <module>ms-flujo-urgencias</module>
         <!-- agrega más módulos aquí -->
     </modules>
 
