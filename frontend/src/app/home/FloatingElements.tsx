@@ -49,7 +49,7 @@ export function FloatingElements() {
 
       {/* ── WhatsApp FAB ────────────────────────────────────────────────── */}
       <a
-        href="https://wa.me/56900000000"
+        href="https://wa.me/56962361884"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Contactar por WhatsApp"

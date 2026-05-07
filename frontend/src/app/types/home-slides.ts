@@ -1,3 +1,7 @@
+import img1 from '../assets/CARRUCEL-1.avif';
+import img2 from '../assets/CARRUCEL-2.avif';
+import img3 from '../assets/CARRUCEL-3.avif';
+
 export const slides = [
   {
     id: 1,
@@ -6,6 +10,7 @@ export const slides = [
     body: 'Unidad de Imágenes y Consultas Médicas disponibles,\nSábado 08:00 a 18:00 horas.\nDomingo 08:00 a 14:00 horas.',
     cta: 'Agenda aquí',
     accent: '#0096c7',
+    image: img1,
   },
   {
     id: 2,
@@ -14,6 +19,7 @@ export const slides = [
     body: 'Controles periódicos, vacunación y atención integral.\nLunes a Viernes 07:30 a 19:00 horas.',
     cta: 'Ver programa',
     accent: '#0077b6',
+    image: img2,
   },
   {
     id: 3,
@@ -22,6 +28,7 @@ export const slides = [
     body: 'Atiéndete con nuestros especialistas sin salir de casa.\nDisponible todos los días del año.',
     cta: 'Reservar ahora',
     accent: '#023e8a',
+    image: img3,
   },
 ];
 

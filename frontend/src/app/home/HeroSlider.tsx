@@ -229,54 +229,45 @@ export function HeroSlider() {
             style={{ maxWidth: '560px' }}
           >
             <div
-              className="w-full rounded-3xl flex items-center justify-center relative overflow-hidden"
+              className="w-full rounded-3xl relative overflow-hidden"
               style={{
                 height: 'clamp(260px, 38vw, 440px)',
-                background: `linear-gradient(135deg, ${slide.accent}cc 0%, ${slide.accent} 100%)`,
-                boxShadow: `0 32px 80px ${slide.accent}40`,
+                background: `linear-gradient(135deg, ${slide.accent}44 0%, ${slide.accent}22 100%)`,
+                boxShadow: `0 32px 80px ${slide.accent}30`,
               }}
             >
-              {/* Decorative rings */}
+              {/* Actual Image */}
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+                style={{
+                  animation: 'heroScaleIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both',
+                }}
+              />
+
+              {/* Subtle Overlay gradient for text readability if needed (though text is outside) */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.1), transparent)',
+                  pointerEvents: 'none',
+                }}
+              />
+
+              {/* Decorative rings (optional, kept for style) */}
               <div style={{
                 position: 'absolute', top: '-40px', right: '-40px',
                 width: '220px', height: '220px', borderRadius: '50%',
-                border: '40px solid rgba(255,255,255,0.10)',
+                border: '40px solid rgba(255,255,255,0.08)',
+                pointerEvents: 'none',
               }} />
               <div style={{
                 position: 'absolute', bottom: '-60px', left: '-60px',
                 width: '280px', height: '280px', borderRadius: '50%',
-                border: '50px solid rgba(255,255,255,0.07)',
+                border: '50px solid rgba(255,255,255,0.05)',
+                pointerEvents: 'none',
               }} />
-
-              {/* Centered icon / placeholder area */}
-              <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
-                position: 'relative', zIndex: 1,
-              }}>
-                <div style={{
-                  width: 'clamp(64px, 8vw, 96px)', height: 'clamp(64px, 8vw, 96px)',
-                  borderRadius: '24px',
-                  background: 'rgba(255,255,255,0.2)',
-                  backdropFilter: 'blur(8px)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                }}>
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <rect x="4" y="12" width="32" height="22" rx="4" fill="white" fillOpacity=".9"/>
-                    <rect x="12" y="6" width="16" height="8" rx="3" fill="white" fillOpacity=".5"/>
-                    <circle cx="20" cy="23" r="5" fill={slide.accent}/>
-                  </svg>
-                </div>
-                <p style={{
-                  color: 'rgba(255,255,255,0.75)',
-                  fontSize: 'clamp(12px, 1.2vw, 14px)',
-                  fontWeight: 500,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}>
-                  {slide.tag}
-                </p>
-              </div>
             </div>
           </div>
         </div>
