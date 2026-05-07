@@ -2,30 +2,79 @@
 INSTRUCCIONES PARA LEVANTAR LA BASE DE DATOS CON DOCKER
 =========================================================
 
-Para levantar manualmente la base de datos de SP-RedNorte, sigue estos pasos:
+Requisitos previos:
+- Tener Docker Desktop instalado y en ejecución.
+- Tener Docker Compose habilitado.
+- Tener configurado el archivo `.env` dentro de esta carpeta.
 
-1. Abre una terminal (CMD, PowerShell o Bash).
-2. Navega hasta la carpeta 'db':
-   cd "C:\Users\GAMER\Desktop\PROYECTOS WEB\SP-RedNorte\db"
+---------------------------------------------------------
+1. Abrir una terminal
+---------------------------------------------------------
 
-3. Ejecuta el comando para levantar el contenedor en segundo plano:
-   docker-compose up -d
+Puede ser CMD, PowerShell, Git Bash o la terminal de VS Code.
 
-4. Para verificar que el contenedor esté corriendo:
-   docker ps
+---------------------------------------------------------
+2. Navegar a la carpeta de la base de datos
+---------------------------------------------------------
 
-5. Para ver los logs en tiempo real (útil para debug):
-   docker-compose logs -f
+cd db
 
-6. Para detener los contenedores:
-   docker-compose stop
+---------------------------------------------------------
+3. Levantar el contenedor de MySQL
+---------------------------------------------------------
 
-7. Para detener y eliminar los contenedores (manteniendo los datos):
-   docker-compose down
+docker compose up -d
 
-Notas:
-- El puerto expuesto es el 3307 (mapeado al 3306 interno de MySQL).
-- La base de datos inicial se llama 'bd_rednorte'.
-- Las credenciales están en el archivo .env en esta misma carpeta.
-- Los datos se persisten en un volumen de Docker llamado 'mysql_data'.
+Esto iniciará el contenedor en segundo plano.
+
+---------------------------------------------------------
+4. Verificar que el contenedor esté funcionando
+---------------------------------------------------------
+
+docker ps
+
+Debería aparecer el contenedor:
+rednorte-mysql-dev
+
+---------------------------------------------------------
+5. Ver logs en tiempo real (opcional)
+---------------------------------------------------------
+
+docker compose logs -f
+
+Útil para verificar errores o el estado de inicialización
+de la base de datos.
+
+---------------------------------------------------------
+6. Detener los contenedores
+---------------------------------------------------------
+
+docker compose stop
+
+---------------------------------------------------------
+7. Detener y eliminar los contenedores
+---------------------------------------------------------
+
+docker compose down
+
+IMPORTANTE:
+Este comando NO elimina los datos almacenados en el volumen
+de Docker.
+
+---------------------------------------------------------
+INFORMACIÓN ADICIONAL
+---------------------------------------------------------
+
+- Puerto expuesto:
+  3307 -> 3306 (MySQL interno)
+
+- Base de datos inicial:
+  bd_rednorte
+
+- Variables de entorno:
+  configuradas en el archivo `.env`
+
+- Persistencia de datos:
+  volumen Docker `mysql_data`
+
 =========================================================

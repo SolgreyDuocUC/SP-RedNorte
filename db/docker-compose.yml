@@ -1,20 +1,31 @@
 version: "3.8"
 
 services:
-  db:
+  mysql-rednorte-dev:
     image: mysql:8.0
-    container_name: sp-rednorte-db
-    restart: always
+    container_name: rednorte-mysql-dev
+    restart: unless-stopped
+
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      TZ: America/Santiago
+
     ports:
       - "${DB_PORT}:3306"
+
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
     networks:
       - rednorte-network
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   rednorte-network:
