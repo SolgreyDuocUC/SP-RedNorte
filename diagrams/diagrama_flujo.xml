@@ -1,0 +1,125 @@
+<mxGraphModel dx="1488" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1"
+    arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- PRESENTATION -->
+        <mxCell id="flow-fe" value="Frontend Web&lt;br&gt;(React + TypeScript)"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1"
+            vertex="1" parent="1">
+            <mxGeometry x="300" y="50" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- GATEWAY -->
+        <mxCell id="flow-gateway" value="API Gateway&lt;br&gt;(Central Routing &amp; Auth)"
+            style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1"
+            vertex="1" parent="1">
+            <mxGeometry x="310" y="150" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- MICROSERVICES CLUSTER -->
+        <mxCell id="services-cluster" value="Capa de Microservicios (Backend)"
+            style="swimlane;whiteSpace=wrap;html=1;startSize=30;fillColor=#f5f5f5;" vertex="1"
+            parent="1">
+            <mxGeometry x="50" y="300" width="720" height="350" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ms-usuarios" value="ms-usuarios"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="20" y="50" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-paciente" value="ms-paciente"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="190" y="50" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-establecimientos" value="ms-establecimientos"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="360" y="50" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-agenda" value="ms-agenda"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="530" y="50" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ms-reservas" value="ms-reservas"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="20" y="150" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-ficha-clinica" value="ms-ficha-clinica"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="190" y="150" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-notificaciones" value="ms-notificaciones"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="360" y="150" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ms-flujo-urgencias" value="ms-flujo-urgencias"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0cee2;strokeColor=#56517e;"
+            vertex="1" parent="services-cluster">
+            <mxGeometry x="530" y="150" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- DATA LAYER -->
+        <mxCell id="flow-db" value="Base de Datos MySQL&lt;br&gt;(Centralizada / Red Norte)"
+            style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1"
+            vertex="1" parent="1">
+            <mxGeometry x="300" y="700" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- FHIR SERVICE -->
+        <mxCell id="flow-fhir" value="Interoperabilidad FHIR&lt;br&gt;(HAPI FHIR Server)"
+            style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1"
+            parent="1">
+            <mxGeometry x="580" y="700" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- NOTIFICATIONS FLOW -->
+        <mxCell id="flow-events"
+            value="Eventos / Comunicación HTTP&lt;br&gt;(Notificaciones, Sincronización)"
+            style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;"
+            vertex="1" parent="1">
+            <mxGeometry x="50" y="700" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- CONNECTIONS -->
+        <mxCell id="link-fe-gw" edge="1" source="flow-fe" target="flow-gateway"
+            style="endArrow=block;html=1;rounded=0;endFill=1;" parent="1">
+            <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="link-gw-cluster" edge="1" source="flow-gateway" target="services-cluster"
+            style="endArrow=block;html=1;rounded=0;endFill=1;" parent="1">
+            <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="link-cluster-db" edge="1" source="services-cluster" target="flow-db"
+            style="endArrow=classic;html=1;rounded=0;startArrow=classic;startFill=1;" parent="1">
+            <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="link-cluster-fhir" edge="1" source="services-cluster" target="flow-fhir"
+            style="endArrow=classic;html=1;rounded=0;" parent="1">
+            <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="link-cluster-events" edge="1" source="services-cluster" target="flow-events"
+            style="endArrow=classic;html=1;rounded=0;" parent="1">
+            <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="link-events-users" edge="1" source="flow-events" target="ms-usuarios"
+            style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=classic;endFill=1;"
+            parent="1">
+            <mxGeometry relative="1" as="geometry">
+                <Array as="points">
+                    <mxPoint x="150" y="680" />
+                    <mxPoint x="145" y="680" />
+                </Array>
+            </mxGeometry>
+        </mxCell>
+
+    </root>
+</mxGraphModel>

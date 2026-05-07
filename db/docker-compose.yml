@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: sp-rednorte-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - rednorte-network
+
+networks:
+  rednorte-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
