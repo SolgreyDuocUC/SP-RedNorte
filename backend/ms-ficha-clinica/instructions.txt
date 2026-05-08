@@ -1,0 +1,91 @@
+=========================================================
+MS-FICHA-CLINICA — INSTRUCCIONES DOCKER
+=========================================================
+
+Microservicio encargado de gestionar las fichas clínicas
+de los pacientes dentro del sistema RedNorte.
+
+  Puerto : 8001
+  Imagen : rednorte/ms-ficha-clinica:dev
+  Swagger: http://localhost:8001/swagger-ui/index.html
+
+Requisitos previos:
+  - Docker Desktop instalado y en ejecución.
+  - Docker Compose habilitado.
+
+---------------------------------------------------------
+ARRANQUE RECOMENDADO: DESDE LA RAÍZ DEL PROYECTO
+---------------------------------------------------------
+
+La forma correcta de levantar este microservicio es
+usando el orquestador raíz, que levanta TODO de una vez:
+
+  cd SP-RedNorte
+  docker compose up -d --build
+
+Esto levanta en orden automático:
+  1. MySQL
+  2. ms-ficha-clinica (este servicio)
+  3. ms-paciente
+  4. ms-reservas
+  5. ms-usuarios
+  6. Frontend
+
+---------------------------------------------------------
+VARIABLES DE ENTORNO (inyectadas por docker-compose)
+---------------------------------------------------------
+
+  SPRING_PROFILES_ACTIVE    → dev
+  SPRING_DATASOURCE_URL     → jdbc:mysql://mysql:3306/bd_rednorte
+  SPRING_DATASOURCE_USERNAME→ root
+  SPRING_DATASOURCE_PASSWORD→ rootpassword (desde .env raíz)
+  TZ                        → America/Santiago
+
+Los valores por defecto para entorno local (sin Docker)
+están definidos en application.properties.
+
+---------------------------------------------------------
+COMANDOS ÚTILES (ejecutar desde la raíz SP-RedNorte/)
+---------------------------------------------------------
+
+Ver logs de este microservicio:
+  docker compose logs -f ms-ficha-clinica
+
+Reconstruir solo este microservicio:
+  docker compose up -d --build ms-ficha-clinica
+
+Ver estado de todos los contenedores:
+  docker compose ps
+
+Detener todos los servicios:
+  docker compose stop
+
+Detener y eliminar contenedores (conserva datos MySQL):
+  docker compose down
+
+Eliminar todo incluyendo volúmenes (BORRA LA BD):
+  docker compose down -v
+
+---------------------------------------------------------
+ACCESOS
+---------------------------------------------------------
+
+  API REST   : http://localhost:8001
+  Swagger UI : http://localhost:8001/swagger-ui/index.html
+  MySQL      : localhost:3307  (usuario: root)
+
+---------------------------------------------------------
+ESTRUCTURA DEL DOCKERFILE
+---------------------------------------------------------
+
+Etapa 1 - BUILD:
+  Imagen  : maven:3.9.9-eclipse-temurin-21
+  Compila : mvn clean package -DskipTests
+  Output  : target/ms-ficha-clinica-0.0.1-SNAPSHOT.jar
+
+Etapa 2 - RUNTIME:
+  Imagen  : eclipse-temurin:21-jre-alpine
+  Expone  : puerto 8001
+  Comando : java -jar app.jar
+
+=========================================================

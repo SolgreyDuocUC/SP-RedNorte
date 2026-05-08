@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rednorte/frontend:dev
+    container_name: rednorte-frontend-dev
+    restart: unless-stopped
+
+    environment:
+      TZ: America/Santiago
+
+    ports:
+      - "${APP_PORT}:80"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  rednorte-network:
+    external: true
+    name: db_rednorte-network

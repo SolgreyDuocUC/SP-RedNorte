@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(ConvertTo-Json -Depth 100)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\GAMER\\\\Desktop\\\\PROYECTOS WEB\\\\SP-RedNorte\\\\backend\\\\ms-reservas\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(xargs grep -l \"CorsConfigurationSource\\\\|WebMvcConfigurer\")",
+      "Bash(docker exec *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(docker compose *)"
+    ]
+  }
+}

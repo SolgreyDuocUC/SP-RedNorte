@@ -1,0 +1,104 @@
+=========================================================
+INSTRUCCIONES PARA LEVANTAR MS-RESERVAS CON DOCKER
+=========================================================
+
+Requisitos previos:
+- Tener Docker Desktop instalado y en ejecución.
+- Tener Docker Compose habilitado.
+- El contenedor de la base de datos (carpeta db/) debe estar
+  levantado ANTES de iniciar este microservicio.
+- Tener configurado el archivo `.env` dentro de esta carpeta.
+
+---------------------------------------------------------
+ORDEN DE ARRANQUE OBLIGATORIO
+---------------------------------------------------------
+
+1. Primero levanta la base de datos:
+   cd db
+   docker compose up -d
+
+2. Luego levanta el microservicio:
+   cd backend/ms-reservas
+   docker compose up -d --build
+
+---------------------------------------------------------
+1. Abrir una terminal
+---------------------------------------------------------
+
+Puede ser CMD, PowerShell, Git Bash o la terminal de VS Code.
+
+---------------------------------------------------------
+2. Navegar a la carpeta del microservicio
+---------------------------------------------------------
+
+cd backend/ms-reservas
+
+---------------------------------------------------------
+3. Construir y levantar el contenedor
+---------------------------------------------------------
+
+docker compose up -d --build
+
+La flag --build fuerza la recompilación de la imagen si
+hubo cambios en el código fuente. Solo la primera vez
+puede tardar varios minutos (descarga de dependencias Maven).
+
+Para levantarlo sin recompilar (más rápido):
+
+docker compose up -d
+
+---------------------------------------------------------
+4. Verificar que el contenedor esté funcionando
+---------------------------------------------------------
+
+docker ps
+
+Debería aparecer el contenedor:
+rednorte-ms-reservas-dev
+
+---------------------------------------------------------
+5. Ver logs en tiempo real (opcional)
+---------------------------------------------------------
+
+docker compose logs -f
+
+Útil para verificar que Spring Boot arrancó correctamente.
+Busca la línea:
+  Started MsReservasApplication in X seconds
+
+---------------------------------------------------------
+6. Verificar health del servicio (opcional)
+---------------------------------------------------------
+
+Swagger UI:
+  http://localhost:8003/swagger-ui/index.html
+
+---------------------------------------------------------
+7. Detener el contenedor
+---------------------------------------------------------
+
+docker compose stop
+
+---------------------------------------------------------
+8. Detener y eliminar el contenedor
+---------------------------------------------------------
+
+docker compose down
+
+---------------------------------------------------------
+INFORMACIÓN ADICIONAL
+---------------------------------------------------------
+
+- Puerto expuesto:
+  8003 -> 8003 (Spring Boot interno)
+
+- Red compartida:
+  db_rednorte-network (creada por el contenedor de la DB)
+
+- Variables de entorno:
+  configuradas en el archivo `.env`
+
+- La imagen generada se llama:
+  rednorte/ms-reservas:dev
+
+=========================================================

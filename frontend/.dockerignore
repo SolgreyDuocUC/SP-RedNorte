@@ -1,0 +1,14 @@
+# Ignorar node_modules local (incompatible con Linux/Alpine)
+node_modules
+
+# Ignorar build anterior
+dist
+
+# Ignorar archivos de entorno y configuración local
+.env
+.env.*
+
+# Ignorar archivos de editor/IDE
+.vscode
+.idea
+*.log

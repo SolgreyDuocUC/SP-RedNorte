@@ -29,4 +29,20 @@ export default defineConfig({
   },
 
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  // Proxy para desarrollo local: replica el comportamiento del reverse proxy de Nginx
+  server: {
+    proxy: {
+      '/proxy/reservas': {
+        target: 'http://localhost:8003',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/reservas/, ''),
+      },
+      '/proxy/pacientes': {
+        target: 'http://localhost:8002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/pacientes/, ''),
+      },
+    },
+  },
 });

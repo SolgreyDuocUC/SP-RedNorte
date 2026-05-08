@@ -1,0 +1,118 @@
+=========================================================
+INSTRUCCIONES PARA LEVANTAR EL FRONTEND CON DOCKER
+=========================================================
+
+Stack tecnológico:
+- React 18 + Vite 6 + Tailwind CSS 4
+- Servidor: Nginx 1.27 (Alpine)
+- Java: Node 22 (solo para el build)
+
+Requisitos previos:
+- Tener Docker Desktop instalado y en ejecución.
+- Tener Docker Compose habilitado.
+- El contenedor de la base de datos (carpeta db/) debe estar
+  levantado para que los microservicios funcionen.
+- Tener configurado el archivo `.env` dentro de esta carpeta.
+
+---------------------------------------------------------
+ORDEN DE ARRANQUE RECOMENDADO
+---------------------------------------------------------
+
+1. Base de datos:
+   cd db
+   docker compose up -d
+
+2. Microservicios (ej. ms-reservas):
+   cd backend/ms-reservas
+   docker compose up -d --build
+
+3. Frontend:
+   cd frontend
+   docker compose up -d --build
+
+---------------------------------------------------------
+1. Abrir una terminal
+---------------------------------------------------------
+
+Puede ser CMD, PowerShell, Git Bash o la terminal de VS Code.
+
+---------------------------------------------------------
+2. Navegar a la carpeta del frontend
+---------------------------------------------------------
+
+cd frontend
+
+---------------------------------------------------------
+3. Construir y levantar el contenedor
+---------------------------------------------------------
+
+docker compose up -d --build
+
+La flag --build fuerza la recompilación de la imagen si
+hubo cambios en el código fuente.
+
+Para levantarlo sin recompilar (más rápido):
+
+docker compose up -d
+
+NOTA: La primera vez puede tardar varios minutos mientras
+npm instala todas las dependencias y Vite compila el build.
+
+---------------------------------------------------------
+4. Verificar que el contenedor esté funcionando
+---------------------------------------------------------
+
+docker ps
+
+Debería aparecer el contenedor:
+rednorte-frontend-dev
+
+---------------------------------------------------------
+5. Acceder a la aplicación
+---------------------------------------------------------
+
+Abrir en el navegador:
+  http://localhost:3000
+
+---------------------------------------------------------
+6. Ver logs en tiempo real (opcional)
+---------------------------------------------------------
+
+docker compose logs -f
+
+---------------------------------------------------------
+7. Detener el contenedor
+---------------------------------------------------------
+
+docker compose stop
+
+---------------------------------------------------------
+8. Detener y eliminar el contenedor
+---------------------------------------------------------
+
+docker compose down
+
+---------------------------------------------------------
+INFORMACIÓN ADICIONAL
+---------------------------------------------------------
+
+- Puerto expuesto:
+  3000 -> 80 (Nginx interno)
+
+- Tecnología de servidor:
+  Nginx 1.27 (sirve los estáticos generados por Vite)
+
+- La imagen generada se llama:
+  rednorte/frontend:dev
+
+- Red compartida:
+  db_rednorte-network
+
+- Archivos IMPORTANTES:
+  nginx.conf  -> configuración de rutas SPA y caché
+  .env        -> puerto del host
+
+- React Router está habilitado en Nginx (todas las rutas
+  redirigen a index.html correctamente).
+
+=========================================================

@@ -1,0 +1,118 @@
+=========================================================
+SP-REDNORTE — ARRANQUE COMPLETO CON DOCKER
+=========================================================
+
+Este archivo permite levantar TODA la infraestructura
+del proyecto desde la raíz, con un solo comando.
+
+Servicios incluidos:
+  - MySQL 8.0
+  - ms-ficha-clinica
+  - ms-paciente
+  - ms-reservas
+  - ms-usuarios
+  - Frontend React/Nginx
+
+---------------------------------------------------------
+REQUISITOS
+---------------------------------------------------------
+
+- Docker Desktop instalado
+- Docker Compose habilitado
+- Archivo .env configurado
+- Estar en la raíz del proyecto
+
+---------------------------------------------------------
+PRIMER ARRANQUE
+---------------------------------------------------------
+
+docker compose up -d --build
+
+---------------------------------------------------------
+ARRANQUE NORMAL
+---------------------------------------------------------
+
+docker compose up -d
+
+---------------------------------------------------------
+DETENER SERVICIOS
+---------------------------------------------------------
+
+docker compose stop
+
+---------------------------------------------------------
+ELIMINAR CONTENEDORES
+---------------------------------------------------------
+
+docker compose down
+
+Eliminar también los volúmenes:
+
+docker compose down -v
+
+---------------------------------------------------------
+VER CONTENEDORES
+---------------------------------------------------------
+
+docker compose ps
+
+---------------------------------------------------------
+VER LOGS
+---------------------------------------------------------
+
+Todos:
+
+docker compose logs -f
+
+Servicio específico:
+
+docker compose logs -f ms-reservas
+
+docker compose logs -f ms-paciente
+
+docker compose logs -f mysql
+
+---------------------------------------------------------
+REBUILD DE UN SERVICIO
+---------------------------------------------------------
+
+docker compose up -d --build ms-reservas
+
+docker compose up -d --build frontend
+
+---------------------------------------------------------
+ACCESOS
+---------------------------------------------------------
+
+Frontend:
+http://localhost:3000
+
+Swagger ms-ficha-clinica:
+http://localhost:8001/swagger-ui/index.html
+
+Swagger ms-paciente:
+http://localhost:8002/swagger-ui/index.html
+
+Swagger ms-reservas:
+http://localhost:8003/swagger-ui/index.html
+
+Swagger ms-usuarios:
+http://localhost:8004/swagger-ui/index.html
+
+MySQL:
+localhost:3307
+
+---------------------------------------------------------
+IMPORTANTE
+---------------------------------------------------------
+
+Los microservicios exponen internamente el puerto 8080.
+
+Docker mapea:
+
+8001 -> 8080
+8002 -> 8080
+8003 -> 8080
+8004 -> 8080
+
+=========================================================

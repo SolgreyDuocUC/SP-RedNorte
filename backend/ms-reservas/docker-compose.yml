@@ -1,0 +1,39 @@
+services:
+  ms-reservas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-reservas:dev
+    container_name: rednorte-ms-reservas-dev
+
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+
+      SPRING_DATASOURCE_URL: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true
+
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      TZ: America/Santiago
+
+    ports:
+      - "${APP_PORT}:8080"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  rednorte-network:
+    external: true
+    name: db_rednorte-network

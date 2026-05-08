@@ -1,0 +1,222 @@
+version: "3.8"
+
+services:
+
+  # -----------------------------------------------------------
+  # BASE DE DATOS
+  # -----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: rednorte-mysql-dev
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      TZ: America/Santiago
+
+    ports:
+      - "${DB_PORT}:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------------------------------------------
+  # MICROSERVICIO: ms-ficha-clinica
+  # -----------------------------------------------------------
+  ms-ficha-clinica:
+    build:
+      context: ./backend/ms-ficha-clinica
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-ficha-clinica:dev
+    container_name: rednorte-ms-ficha-clinica-dev
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: America/Santiago
+
+    ports:
+      - "8001:8001"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8001/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # -----------------------------------------------------------
+  # MICROSERVICIO: ms-paciente
+  # -----------------------------------------------------------
+  ms-paciente:
+    build:
+      context: ./backend/ms-paciente
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-paciente:dev
+    container_name: rednorte-ms-paciente-dev
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: America/Santiago
+
+    ports:
+      - "8002:8002"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8002/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # -----------------------------------------------------------
+  # MICROSERVICIO: ms-reservas
+  # -----------------------------------------------------------
+  ms-reservas:
+    build:
+      context: ./backend/ms-reservas
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-reservas:dev
+    container_name: rednorte-ms-reservas-dev
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: America/Santiago
+
+    ports:
+      - "8003:8003"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8003/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # -----------------------------------------------------------
+  # MICROSERVICIO: ms-usuarios
+  # -----------------------------------------------------------
+  ms-usuarios:
+    build:
+      context: ./backend/ms-usuarios
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-usuarios:dev
+    container_name: rednorte-ms-usuarios-dev
+    restart: unless-stopped
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&serverTimezone=America/Santiago&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: America/Santiago
+
+    ports:
+      - "8004:8004"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8004/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # -----------------------------------------------------------
+  # FRONTEND
+  # -----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    image: rednorte/frontend:dev
+    container_name: rednorte-frontend-dev
+    restart: unless-stopped
+
+    depends_on:
+      - ms-reservas
+      - ms-paciente
+
+    environment:
+      TZ: America/Santiago
+
+    ports:
+      - "${FRONTEND_PORT}:80"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+# =============================================================
+# REDES
+# =============================================================
+networks:
+  rednorte-network:
+    name: db_rednorte-network
+    driver: bridge
+
+# =============================================================
+# VOLÚMENES
+# =============================================================
+volumes:
+  mysql_data:
