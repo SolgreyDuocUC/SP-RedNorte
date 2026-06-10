@@ -3,30 +3,31 @@ version: "3.8"
 services:
 
   # -----------------------------------------------------------
-  # BASE DE DATOS
+  # BASE DE DATOS (PostgreSQL - Compatible con Neon)
   # -----------------------------------------------------------
-  mysql:
-    image: mysql:8.0
-    container_name: rednorte-mysql-dev
+  postgres:
+    image: postgres:16-alpine
+    container_name: rednorte-postgres-dev
     restart: unless-stopped
 
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      POSTGRES_USER: ${MYSQL_USER}
+      POSTGRES_PASSWORD: ${MYSQL_PASSWORD}
+      POSTGRES_DB: ${MYSQL_DATABASE}
       TZ: America/Santiago
 
     ports:
-      - "${DB_PORT}:3306"
+      - "${DB_PORT}:5432" # Expone el puerto 3307 de tu máquina hacia el 5432 interno
 
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
       - ./db/docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     networks:
       - rednorte-network
 
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${MYSQL_USER} -d ${MYSQL_DATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -44,7 +45,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
     environment:
@@ -81,7 +82,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
     environment:
@@ -118,7 +119,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
     environment:
@@ -155,7 +156,7 @@ services:
     restart: unless-stopped
 
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
     environment:
@@ -223,4 +224,4 @@ networks:
 # VOLÚMENES
 # =============================================================
 volumes:
-  mysql_data:
+  postgres_data:
