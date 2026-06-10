@@ -54,12 +54,8 @@
     <modules>
         <module>ms-ficha-clinica</module>
         <module>ms-paciente</module>
-        <module>ms-establecimientos</module>
-        <module>ms-agenda</module>
         <module>ms-usuarios</module>
         <module>ms-reservas</module>
-        <module>ms-notificaciones</module>
-        <module>ms-flujo-urgencias</module>
         <!-- Se pueden agregar nuevos microservicios en esta sección -->
     </modules>
 
