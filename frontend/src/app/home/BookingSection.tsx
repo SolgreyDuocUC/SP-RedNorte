@@ -2,8 +2,18 @@ import { useState } from 'react';
 import { Search, MessageCircle } from 'lucide-react';
 import { especialidades, examenes } from '../types/home-slides';
 
-export function BookingSection({ onReserva }: { onReserva?: () => void }) {
-  const [bookTab, setBookTab] = useState<'consultas' | 'examenes'>('consultas');
+interface BookingSectionProps {
+  onReserva?: () => void;
+  activeTab?: 'consultas' | 'examenes';
+  setActiveTab?: (tab: 'consultas' | 'examenes') => void;
+}
+
+export function BookingSection({ onReserva, activeTab, setActiveTab }: BookingSectionProps) {
+  const [localTab, setLocalTab] = useState<'consultas' | 'examenes'>('consultas');
+  
+  const bookTab = activeTab !== undefined ? activeTab : localTab;
+  const setBookTab = setActiveTab !== undefined ? setActiveTab : setLocalTab;
+  
   const [typeTab, setTypeTab] = useState<'especialidad' | 'profesional'>('especialidad');
   const [search, setSearch] = useState('');
 
@@ -11,7 +21,7 @@ export function BookingSection({ onReserva }: { onReserva?: () => void }) {
   const filtered = items.filter(i => i.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <section className="bg-white py-14 md:py-20 border-b">
+    <section id="booking-section" className="bg-white py-14 md:py-20 border-b">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-10 md:gap-20 items-start">
 
         {/* TITULO */}

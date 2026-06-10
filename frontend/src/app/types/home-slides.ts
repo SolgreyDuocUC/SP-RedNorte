@@ -34,9 +34,9 @@ export const slides = [
 
 export const navItems = [
   { label: 'Especialidades', dropdown: false },
-  { label: 'Servicios y Unidades', dropdown: true },
-  { label: 'Seguros y Convenios', dropdown: false },
-  { label: 'Información al Paciente', dropdown: true },
+  { label: 'Servicios y Unidades', dropdown: false },
+  { label: 'Consulta tus exámenes', dropdown: false },
+  { label: 'Seguros y convenios', dropdown: false },
 ];
 
 // ─── Especialidades rápidas ────────────────────────────────────────────────────

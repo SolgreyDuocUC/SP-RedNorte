@@ -20,36 +20,24 @@ export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
 
   return (
     <header
-      className={`fixed top-2 left-2 right-2 z-50 bg-white transition-all duration-300 rounded-xl ${
-        scrolled ? 'shadow-md' : 'shadow-sm'
+      className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300 border-b border-gray-100/80 ${
+        scrolled ? 'shadow-sm py-1' : 'py-3'
       }`}
     >
-      {/* TOP BAR */}
-      <div className="hidden md:flex items-center justify-end gap-5 px-6 py-1.5 bg-[#023e8a] text-white text-xs rounded-t-xl">
-        <a href="#centros" className="flex items-center gap-1 hover:text-cyan-300 transition">
-          <Phone className="h-3 w-3" />
-          Centros
-        </a>
-        <span className="opacity-40">|</span>
-        <a href="#" className="hover:text-cyan-300 transition">Urgencias 24/7</a>
-        <span className="opacity-40">|</span>
-        <a href="#" className="hover:text-cyan-300 transition">Portal Médico</a>
-      </div>
-
       {/* MAIN HEADER */}
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
+      <div className="flex h-16 items-center justify-between px-6 md:px-12 max-w-7xl mx-auto w-full">
 
         {/* LOGO */}
-        <div className="flex items-center select-none">
+        <div className="flex items-center select-none flex-shrink-0">
           <img src={logoFull} alt="Red Norte" className="h-10 w-auto" />
         </div>
 
         {/* NAV DESKTOP */}
-        <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-gray-700">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500 justify-center flex-1 mx-8">
           {navItems.map((item) => (
             <button
               key={item.label}
-              className="flex items-center gap-1 px-2 py-1 rounded-full hover:bg-gray-100 hover:text-[#0077b6] transition"
+              className="flex items-center gap-1 py-1 text-gray-500 hover:text-black transition cursor-pointer"
             >
               {item.label}
               {item.dropdown && <ChevronDown className="h-3.5 w-3.5 opacity-60" />}
@@ -58,27 +46,19 @@ export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
         </nav>
 
         {/* ACTIONS */}
-        <div className="hidden md:flex items-center gap-2">
-
+        <div className="hidden md:flex items-center gap-3 flex-shrink-0">
           <button
-            className="px-4 py-2 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+            onClick={onLogin}
+            className="px-5 py-2.5 rounded-full text-sm font-semibold bg-black text-white hover:bg-neutral-800 transition cursor-pointer"
           >
-            Mi Portal
+            Ingresar
           </button>
 
           <button
             onClick={onReserva}
-            className="px-4 py-2 rounded-full text-sm font-medium bg-[#0096c7] text-white hover:bg-[#0077b6] transition"
+            className="px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-black border border-black hover:bg-neutral-50 transition cursor-pointer"
           >
-            Reservar hora
-          </button>
-
-          <button
-            onClick={onLogin}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600 hover:text-[#0077b6] transition"
-          >
-            <User className="h-4 w-4" />
-            Iniciar sesión
+            Reservar una hora
           </button>
         </div>
 
