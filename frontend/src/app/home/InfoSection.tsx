@@ -8,11 +8,11 @@ export function InfoSection() {
   };
 
   return (
-    <section className="bg-[#f8f9fb] py-16 md:py-24 border-b border-gray-100">
+    <section className="bg-background py-16 md:py-24 border-b border-gray-100">
       <div className="max-w-4xl mx-auto px-6 md:px-12 flex flex-col items-start text-left">
-        
+
         {/* Section Heading */}
-        <h2 className="text-3xl md:text-[38px] font-extrabold text-[#2d4b68] tracking-tight leading-tight mb-8">
+        <h2 className="text-3xl md:text-[38px] font-extrabold text-[#023e8a] tracking-tight leading-tight mb-8">
           Conoce los Servicios a nivel nacional
         </h2>
 
@@ -34,7 +34,7 @@ export function InfoSection() {
         {/* Action Button */}
         <button
           onClick={handleContactClick}
-          className="mt-10 px-6 py-3 rounded-lg text-sm font-semibold bg-[#4a6b82] hover:bg-[#3d596d] text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer text-center"
+          className="mt-10 px-6 py-3 rounded-lg text-sm font-semibold bg-[#0096c7] hover:bg-[#0077b6] text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 cursor-pointer text-center"
         >
           Contactanos
         </button>

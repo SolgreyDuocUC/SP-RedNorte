@@ -10,7 +10,7 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
     <section 
       className="relative flex items-center justify-center overflow-hidden min-h-[580px] md:min-h-[640px] pt-24 pb-16"
       style={{
-        background: 'linear-gradient(145deg, #e8f1f8 0%, #d6e6f2 35%, #ffffff 70%, #cfe2f3 100%)',
+        background: 'linear-gradient(145deg, #e0f7fa 0%, #caf0f8 35%, #ffffff 70%, #e0f7fa 100%)',
       }}
     >
       {/* Background blobs */}
@@ -22,10 +22,10 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
             animationDuration: '9s',
           }}
         />
-        <div 
+        <div
           className="absolute -bottom-[20%] right-[10%] w-[60%] h-[60%] rounded-full blur-[120px]"
           style={{
-            background: 'rgba(120, 170, 210, 0.35)',
+            background: 'rgba(0, 150, 199, 0.18)',
             animationDuration: '12s',
           }}
         />
@@ -41,8 +41,8 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
       <div className="relative max-w-4xl mx-auto px-6 text-center z-10 flex flex-col items-center">
 
         {/* Badge */}
-        <div 
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 border border-[#c7d9ea] text-xs font-semibold text-[#0b2f4f] tracking-wide uppercase mb-8 backdrop-blur-sm shadow-sm"
+        <div
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 border border-gray-200 text-xs font-semibold text-[#023e8a] tracking-wide uppercase mb-8 backdrop-blur-sm shadow-sm"
           style={{
             letterSpacing: '0.12em',
           }}
@@ -51,11 +51,8 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
         </div>
 
         {/* Title */}
-        <h1 
-          className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.15] mb-10 select-none font-sans"
-          style={{
-            color: '#0b2f4f',
-          }}
+        <h1
+          className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.15] mb-10 select-none font-sans text-[#023e8a]"
         >
           Bienvenido a la mejor <br />
           red de salud
@@ -66,14 +63,14 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
 
           <button
             onClick={onEspecialidadesClick}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-[#0b2f4f] text-white hover:bg-[#0f3f66] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-[#023e8a] text-white hover:bg-[#0077b6] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
           >
             Especialidades
           </button>
 
           <button
             onClick={onExamenesClick}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-white border border-[#c7d9ea] text-[#0b2f4f] hover:bg-[#f4f9fc] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-xl text-base font-semibold bg-white border border-gray-200 text-[#023e8a] hover:bg-[#e0f7fa] transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
           >
             Consulta tus exámenes
             <ArrowRight className="w-4 h-4 opacity-70" />

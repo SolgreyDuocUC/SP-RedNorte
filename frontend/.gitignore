@@ -1,0 +1,17 @@
+# Dependencias
+node_modules
+
+# Build de producción (se genera con `npm run build`)
+dist
+
+# Variables de entorno locales
+.env.local
+.env.*.local
+
+# Editor / IDE
+.vscode
+.idea
+
+# Logs
+*.log
+npm-debug.log*
