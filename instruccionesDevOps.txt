@@ -1,0 +1,174 @@
+========================================================================
+             INSTRUCCIONES DE DEVOPS (CI/CD) - RED NORTE
+========================================================================
+
+Este documento detalla el pipeline de Integración y Despliegue Continuo (CI/CD)
+utilizando GitHub Actions y DockerHub para compilar, empaquetar y distribuir 
+los microservicios y el frontend del proyecto, conectándolos a la base de datos Neon.
+
+------------------------------------------------------------------------
+1. CONFIGURACIÓN PREVIA EN GITHUB (Secrets)
+------------------------------------------------------------------------
+Para que el pipeline de GitHub Actions pueda compilar y subir las imágenes 
+a DockerHub, debes configurar las siguientes variables secretas en tu 
+repositorio de GitHub en la ruta:
+Settings -> Secrets and variables -> Actions -> New repository secret
+
+* DOCKERHUB_USERNAME : Tu nombre de usuario de DockerHub.
+* DOCKERHUB_TOKEN    : Un Access Token generado desde tu cuenta de DockerHub 
+                       (Account Settings -> Security -> New Access Token).
+                       Se recomienda usar tokens en lugar de contraseñas.
+* NEON_DATABASE_URL  : jdbc:postgresql://ep-sweet-paper-ap7u0t4b-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+* NEON_USER          : neondb_owner
+* NEON_PASSWORD      : npg_ZFQao74MzXDC
+
+------------------------------------------------------------------------
+2. PIPELINE DE GITHUB ACTIONS (.github/workflows/ci-cd.yml)
+------------------------------------------------------------------------
+Crea un archivo en tu repositorio en la ruta: `.github/workflows/ci-cd.yml`
+con la siguiente configuración:
+
+```yaml
+name: CI/CD Pipeline - Red Norte
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 1. Configurar JDK para compilar Microservicios (Java/Spring Boot)
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    # 2. Compilar microservicios de backend con Maven
+    - name: Build Backend Microservices
+      run: |
+        mvn -f backend/pom.xml clean package -DskipTests
+
+    # 3. Autenticación en DockerHub
+    - name: Log in to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # 4. Compilar y Subir imágenes de Microservicios
+    - name: Build & Push ms-ficha-clinica
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/ms-ficha-clinica
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/ms-ficha-clinica:latest
+
+    - name: Build & Push ms-paciente
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/ms-paciente
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/ms-paciente:latest
+
+    - name: Build & Push ms-reservas
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/ms-reservas
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/ms-reservas:latest
+
+    - name: Build & Push ms-usuarios
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend/ms-usuarios
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/ms-usuarios:latest
+
+    # 5. Compilar y Subir Imagen de Frontend
+    - name: Build & Push Frontend
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/frontend-rednorte:latest
+```
+
+------------------------------------------------------------------------
+3. CONEXIÓN A NEON EN DOCKER-COMPOSE DE PRODUCCIÓN
+------------------------------------------------------------------------
+Cuando despliegues la aplicación usando Docker Compose, ya no se requiere
+levantar un contenedor local de base de datos MySQL/PostgreSQL. En su lugar,
+los servicios consumirán la base de datos oficial en la nube de Neon mediante
+las variables de entorno.
+
+Ejemplo de `docker-compose.prod.yml` para desplegar en tu servidor:
+
+```yaml
+version: "3.8"
+
+services:
+  ms-ficha-clinica:
+    image: USERNAME_DOCKERHUB/ms-ficha-clinica:latest
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    ports:
+      - "8001:8001"
+
+  ms-paciente:
+    image: USERNAME_DOCKERHUB/ms-paciente:latest
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    ports:
+      - "8002:8002"
+
+  ms-reservas:
+    image: USERNAME_DOCKERHUB/ms-reservas:latest
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    ports:
+      - "8003:8003"
+
+  ms-usuarios:
+    image: USERNAME_DOCKERHUB/ms-usuarios:latest
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    ports:
+      - "8004:8004"
+
+  frontend:
+    image: USERNAME_DOCKERHUB/frontend-rednorte:latest
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+```
+
+Para levantar el despliegue con las variables de Neon cargadas:
+1. Crea un archivo `.env` en tu servidor de despliegue con las credenciales de Neon.
+2. Ejecuta:
+   `docker compose -f docker-compose.prod.yml up -d`

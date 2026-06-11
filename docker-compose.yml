@@ -3,34 +3,31 @@ version: "3.8"
 services:
 
   # -----------------------------------------------------------
-  # BASE DE DATOS (PostgreSQL - Compatible con Neon)
+  # BASE DE DATOS (PostgreSQL)
   # -----------------------------------------------------------
   postgres:
     image: postgres:16-alpine
     container_name: rednorte-postgres-dev
     restart: unless-stopped
-
     environment:
-      POSTGRES_USER: ${MYSQL_USER}
-      POSTGRES_PASSWORD: ${MYSQL_PASSWORD}
-      POSTGRES_DB: ${MYSQL_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
+      POSTGRES_DB: ${POSTGRES_DB:-bd_rednorte}
       TZ: America/Santiago
-
     ports:
-      - "${DB_PORT}:5432" # Expone el puerto 3307 de tu máquina hacia el 5432 interno
-
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-
+      - ./db/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - rednorte-network
-
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${MYSQL_USER} -d ${MYSQL_DATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-bd_rednorte}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-ficha-clinica
@@ -47,6 +44,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
 
     environment:
       SPRING_PROFILES_ACTIVE: dev
@@ -85,6 +83,7 @@ services:
       postgres:
         condition: service_healthy
 
+
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
@@ -121,6 +120,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
 
     environment:
       SPRING_PROFILES_ACTIVE: dev
@@ -225,3 +225,5 @@ networks:
 # =============================================================
 volumes:
   postgres_data:
+
+
