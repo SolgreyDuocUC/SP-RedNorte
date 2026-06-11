@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <!-- ===================================================== -->
     <!-- DEFINICIÓN BASE DEL PROYECTO MAVEN -->
@@ -52,11 +52,15 @@
         pero hereda la configuración definida en este POM padre.
     -->
     <modules>
+        <module>ms-agenda</module>
+        <module>ms-centros</module>
         <module>ms-ficha-clinica</module>
+        <module>api-gateway</module>
+        <module>ms-notificaciones</module>
         <module>ms-paciente</module>
-        <module>ms-usuarios</module>
         <module>ms-reservas</module>
-        <!-- Se pueden agregar nuevos microservicios en esta sección -->
+        <module>ms-urgencias</module>
+        <module>ms-usuarios</module>
     </modules>
 
     <!-- ===================================================== -->
