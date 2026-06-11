@@ -44,7 +44,7 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
           <p
             className="text-lg sm:text-xl font-semibold tracking-wide leading-relaxed mb-3 select-none font-sans text-[#0096c7]"
           >
-            Red Norte
+            RedNorte
           </p>
 
           {/* Title */}
@@ -68,7 +68,7 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
               onClick={onEspecialidadesClick}
               className="w-full sm:w-auto px-9 py-3.5 rounded-full text-base font-semibold bg-[#0077b6] text-white hover:bg-[#023e8a] transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer text-center"
             >
-              Nuestras Especialidades
+              Reservar una hora
             </button>
 
             <button
