@@ -55,7 +55,7 @@
         <module>ms-agenda</module>
         <module>ms-centros</module>
         <module>ms-ficha-clinica</module>
-        <module>api-gateway</module>
+        <module>ms-gateway</module>
         <module>ms-notificaciones</module>
         <module>ms-paciente</module>
         <module>ms-reservas</module>
