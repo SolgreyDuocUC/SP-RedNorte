@@ -11,6 +11,8 @@ import { patientRemote } from '../../../../remotes/patient.remote';
 import type { CoverageDTO } from '../../../../remotes/dtos/patient.dto';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
+import { toast } from 'sonner';
+
 /** Maps a prevision display label back to a CoverageDTO for ms-paciente */
 function toCoverageDTO(prevision: string): CoverageDTO | undefined {
   if (!prevision || prevision === 'Particular') return undefined;
@@ -68,12 +70,34 @@ export function Reservahoraview({ onBack }: { onBack: () => void }) {
 
       setBookingCode(created.id ?? `RN-${Math.floor(1000 + Math.random() * 9000)}`);
       setCompleted(true);
+      toast.success('¡Reserva confirmada con éxito!', {
+        description: `Código de reserva: ${created.id ?? 'Confirmada'}`,
+      });
     } catch (error) {
       console.error('Error creando reserva:', error);
-      setUiError('No pudimos procesar tu reserva en este momento. Por favor, verifica tu conexión o intenta nuevamente.');
+      const errMsg = 'No pudimos procesar tu reserva en este momento. Por favor, verifica tu conexión o intenta nuevamente.';
+      setUiError(errMsg);
+      toast.error('Error al procesar la reserva', {
+        description: errMsg,
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleConfirmPrompt = () => {
+    toast('¿Estás seguro de confirmar la reserva?', {
+      description: `Se agendará una hora de ${data.specialtyName} para ${data.firstName} ${data.lastName}.`,
+      duration: 10000,
+      action: {
+        label: 'Confirmar',
+        onClick: () => handleConfirm(),
+      },
+      cancel: {
+        label: 'Cancelar',
+        onClick: () => {},
+      },
+    });
   };
 
   const steps = [
@@ -144,7 +168,7 @@ export function Reservahoraview({ onBack }: { onBack: () => void }) {
                 <Step3FechaHora data={data} onChange={handleChange} onNext={handleNext} onBack={handleBackStep} />
               )}
               {currentStep === 4 && (
-                <Step4Confirmar data={data} onConfirm={handleConfirm} onBack={handleBackStep} isLoading={isLoading} />
+                <Step4Confirmar data={data} onConfirm={handleConfirmPrompt} onBack={handleBackStep} isLoading={isLoading} />
               )}
             </>
           ) : (

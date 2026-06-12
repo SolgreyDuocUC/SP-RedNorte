@@ -224,7 +224,7 @@ export function Step1Identificacion({ data, onChange, onNext, onBack }: Step1Ide
             inputMode={idType === 'RUN' ? 'numeric' : 'text'}
           />
           {errors.identifier ? (
-            <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">⚠️ {errors.identifier}</p>
+            <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1"> {errors.identifier}</p>
           ) : idType === 'RUN' ? (
             <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
               Solo ingresa números — los puntos y el guión aparecerán automáticos.
