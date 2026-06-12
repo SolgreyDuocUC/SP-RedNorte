@@ -3,83 +3,109 @@ package cl.rednorte.ms_notificaciones.controller;
 import cl.rednorte.ms_notificaciones.dto.NotificationRequest;
 import cl.rednorte.ms_notificaciones.service.EmailService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(NotificationController.class)
-@TestPropertySource(properties = {
-        "app.security.notification-secret=test-secret-ci",
-        "spring.mail.username=test@example.com",
-        "spring.mail.password=test-password"
-})
+@ExtendWith(MockitoExtension.class)
 class NotificationControllerTest {
 
-    private static final String TEST_SECRET = "test-secret-ci";
-
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private EmailService emailService;
 
-    @Autowired
+    @InjectMocks
+    private NotificationController notificationController;
+
     private ObjectMapper objectMapper;
 
-    @Test
-    void whenSecretMissing_shouldReturnUnauthorized() throws Exception {
-        NotificationRequest request = NotificationRequest.builder()
-                .recipient("test@test.com")
-                .subject("Asunto")
-                .body("Cuerpo")
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(notificationController)
+                .addPlaceholderValue("app.cors.allowed-origins", "*")
                 .build();
-
-        mockMvc.perform(post("/api/v1/notifications/send")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+        objectMapper = new ObjectMapper();
+        ReflectionTestUtils.setField(notificationController, "expectedSecret", "my-secret");
     }
 
     @Test
-    void whenSecretMatchesAndValidRequest_shouldReturnSuccess() throws Exception {
-        NotificationRequest request = NotificationRequest.builder()
-                .recipient("test@test.com")
-                .subject("Asunto")
-                .body("Cuerpo")
-                .build();
+    void sendNotification_WithValidSecretAndRequest_ShouldReturnOk() throws Exception {
+        NotificationRequest request = new NotificationRequest();
+        request.setRecipient("test@test.com");
+        request.setSubject("Test Subject");
+        request.setBody("Test Body");
 
         doNothing().when(emailService).sendEmail(any(NotificationRequest.class));
 
         mockMvc.perform(post("/api/v1/notifications/send")
-                .header("X-Notification-Secret", TEST_SECRET)
+                .header("X-Notification-Secret", "my-secret")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Notificación enviada con éxito."));
+
+        verify(emailService, times(1)).sendEmail(any(NotificationRequest.class));
     }
 
     @Test
-    void whenMissingRecipient_shouldReturnBadRequest() throws Exception {
-        NotificationRequest request = NotificationRequest.builder()
-                .subject("Asunto")
-                .body("Cuerpo")
-                .build();
+    void sendNotification_WithInvalidSecret_ShouldReturnUnauthorized() throws Exception {
+        NotificationRequest request = new NotificationRequest();
 
         mockMvc.perform(post("/api/v1/notifications/send")
-                .header("X-Notification-Secret", TEST_SECRET)
+                .header("X-Notification-Secret", "wrong-secret")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("No autorizado."));
+
+        verify(emailService, never()).sendEmail(any(NotificationRequest.class));
+    }
+
+    @Test
+    void sendNotification_WithMissingRecipient_ShouldReturnBadRequest() throws Exception {
+        NotificationRequest request = new NotificationRequest();
+        request.setSubject("Test Subject");
+        request.setBody("Test Body");
+
+        mockMvc.perform(post("/api/v1/notifications/send")
+                .header("X-Notification-Secret", "my-secret")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("El destinatario es obligatorio."));
+
+        verify(emailService, never()).sendEmail(any(NotificationRequest.class));
+    }
+
+    @Test
+    void sendNotification_WhenEmailServiceFails_ShouldReturnInternalServerError() throws Exception {
+        NotificationRequest request = new NotificationRequest();
+        request.setRecipient("test@test.com");
+        request.setSubject("Test Subject");
+        request.setBody("Test Body");
+
+        doThrow(new RuntimeException("SMTP error")).when(emailService).sendEmail(any(NotificationRequest.class));
+
+        mockMvc.perform(post("/api/v1/notifications/send")
+                .header("X-Notification-Secret", "my-secret")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Error al enviar la notificación. Por favor intente más tarde."));
+
+        verify(emailService, times(1)).sendEmail(any(NotificationRequest.class));
     }
 }

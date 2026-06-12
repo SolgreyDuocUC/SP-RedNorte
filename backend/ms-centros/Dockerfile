@@ -21,10 +21,10 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Copiar el JAR generado en la etapa anterior
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/ms-centros-0.0.1-SNAPSHOT.jar app.jar
 
 # Puerto del microservicio
-EXPOSE 8004
+EXPOSE 8006
 
 # Variables de entorno por defecto (sobrescribibles con docker-compose)
 ENV SPRING_PROFILES_ACTIVE=dev
