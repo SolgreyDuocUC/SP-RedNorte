@@ -6,6 +6,8 @@ import { DashboardView } from './app/components/pages/2. Dashboards/DashboardVie
 import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
 import { AdminView } from './app/components/pages/9. AdminView/AdminView';
 import { AdminFacilitiesView } from './app/components/pages/10. AdminFacilities/AdminFacilitiesView';
+import { NewAppointment } from './app/components/pages/10. AdminFacilities/NewAppointment';
+import { RegisterPatient } from './app/components/pages/10. AdminFacilities/RegisterPatient';
 import { WaitingListView } from './app/components/pages/5. ListaEspera/WaitingListView';
 import { FacilitiesView } from './app/components/pages/6. CentrosAtencion/FacilitiesView';
 import { NotificationsView } from './app/components/pages/4. Notificaciones/NotificationsView';
@@ -81,7 +83,27 @@ export default function App() {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView userRole={userRole} />;
+        return (
+          <DashboardView 
+            userRole={userRole} 
+            onNewBooking={() => setActiveView('new-appointment')}
+            onRegisterPatient={() => setActiveView('register-patient')}
+          />
+        );
+      case 'new-appointment':
+        return (
+          <NewAppointment 
+            onBack={() => setActiveView('dashboard')}
+            onSuccess={() => setActiveView('dashboard')}
+          />
+        );
+      case 'register-patient':
+        return (
+          <RegisterPatient 
+            onBack={() => setActiveView('dashboard')}
+            onSuccess={() => setActiveView('dashboard')}
+          />
+        );
       case 'appointments':
         return <AppointmentsView userRole={userRole} />;
       case 'waiting-list':
@@ -116,6 +138,9 @@ export default function App() {
       <Header 
         onLogout={() => setIsLoggedIn(false)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onAgenda={() => setActiveView('appointments')}
+        onProfile={() => setActiveView('dashboard')} // Fallback or dashboard
+        onSettings={() => setActiveView('dashboard')} // Fallback or dashboard
       />
 
       <div className="flex flex-1 relative overflow-hidden">

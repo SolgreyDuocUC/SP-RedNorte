@@ -44,13 +44,21 @@ public class CentroController {
     // ==========================================
 
     @PostMapping("/locations")
-    public ResponseEntity<String> crearUbicacion(@RequestBody Map<String, String> payload) {
-        String id = payload.get("id");
-        String organizationId = payload.get("organization_id");
-        String name = payload.get("name");
-        String status = payload.get("status");
+    public ResponseEntity<String> crearUbicacion(@RequestBody Map<String, Object> payload) {
+        String id = (String) payload.get("id");
+        String organizationId = (String) payload.get("organization_id");
+        String name = (String) payload.get("name");
+        String status = (String) payload.get("status");
+        List<String> specialties = (List<String>) payload.get("specialties");
+        String type = (String) payload.get("type");
+        String address = (String) payload.get("address");
+        String commune = (String) payload.get("commune");
+        String region = (String) payload.get("region");
+        String phone = (String) payload.get("phone");
+        String email = (String) payload.get("email");
         
-        String locId = centroService.crearUbicacion(id, organizationId, name, status);
+        String locId = centroService.crearUbicacion(id, organizationId, name, status, specialties,
+                type, address, commune, region, phone, email);
         return ResponseEntity.ok("Ubicación creada exitosamente con ID: " + locId);
     }
 
@@ -62,5 +70,11 @@ public class CentroController {
     @GetMapping("/locations")
     public ResponseEntity<List<Map<String, Object>>> listarUbicaciones() {
         return ResponseEntity.ok(centroService.listarUbicaciones());
+    }
+
+    @DeleteMapping("/locations/{id}")
+    public ResponseEntity<Void> eliminarUbicacion(@PathVariable String id) {
+        centroService.eliminarUbicacion(id);
+        return ResponseEntity.noContent().build();
     }
 }

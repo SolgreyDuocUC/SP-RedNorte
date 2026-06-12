@@ -21,14 +21,22 @@ import { DashboardNurse } from './DashboardNurse';
 
 type UserRole = 'ADMIN' | 'ADMINISTRATIVO' | 'ENFERMERO' | 'MEDICO';
 
-export function DashboardView({ userRole, onNewBooking }: { userRole: string; onNewBooking?: () => void }) {
+export function DashboardView({ 
+  userRole, 
+  onNewBooking, 
+  onRegisterPatient 
+}: { 
+  userRole: string; 
+  onNewBooking?: () => void;
+  onRegisterPatient?: () => void;
+}) {
   
   const renderDashboardByRole = () => {
     switch (userRole) {
       case 'admin':
         return <DashboardAdmin />;
       case 'administrativo':
-        return <DashboardAdministrative />;
+        return <DashboardAdministrative onRegisterPatient={onRegisterPatient} onNewBooking={onNewBooking} />;
       case 'enfermeria':
         return <DashboardNurse />;
       case 'medico':

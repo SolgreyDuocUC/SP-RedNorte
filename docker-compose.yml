@@ -260,8 +260,16 @@ services:
     container_name: rednorte-ms-centros-dev
     restart: unless-stopped
 
+    depends_on:
+      postgres:
+        condition: service_healthy
+
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
       TZ: America/Santiago
 
     ports:

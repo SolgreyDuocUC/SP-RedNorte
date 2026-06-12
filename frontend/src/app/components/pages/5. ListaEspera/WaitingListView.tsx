@@ -1,18 +1,54 @@
-import { Clock, AlertCircle, Hospital, Calendar, Search, Filter, MoreHorizontal } from 'lucide-react';
+import { Clock, AlertCircle, Hospital, Calendar, Search, Filter, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { mockEntries } from '../../../../mocks/mockEntries';
 import { priorityConfig } from '../../../../imports/priorityConfig';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export function WaitingListView() {
+  // Estados para la búsqueda y filtros
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedFacility, setSelectedFacility] = useState('');
+  const [selectedPriority, setSelectedPriority] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
-  const filteredEntries = mockEntries.filter(entry => 
-    entry.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.facility.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Obtener listas únicas para los selectores de filtros dinámicos
+  const specialties = useMemo(() => [...new Set(mockEntries.map(e => e.specialty))], []);
+  const facilities = useMemo(() => [...new Set(mockEntries.map(e => e.facility))], []);
+  const priorities = useMemo(() => [...new Set(mockEntries.map(e => e.priority))], []);
+
+  // Lógica de filtrado combinada
+  const filteredEntries = useMemo(() => {
+    return mockEntries.filter(entry => {
+      const matchesSearch = 
+        entry.diagnosis.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.facility.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesSpecialty = selectedSpecialty === '' || entry.specialty === selectedSpecialty;
+      const matchesFacility = selectedFacility === '' || entry.facility === selectedFacility;
+      const matchesPriority = selectedPriority === '' || entry.priority === selectedPriority;
+      
+      // Filtro por día: Compara la fecha de ingreso (se asume formato YYYY-MM-DD o similar)
+      const matchesDate = selectedDate === '' || entry.entryDate.includes(selectedDate);
+
+      return matchesSearch && matchesSpecialty && matchesFacility && matchesPriority && matchesDate;
+    });
+  }, [searchTerm, selectedSpecialty, selectedFacility, selectedPriority, selectedDate]);
+
+  // Función para resetear todos los filtros
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedSpecialty('');
+    setSelectedFacility('');
+    setSelectedPriority('');
+    setSelectedDate('');
+  };
+
+  const isFiltered = searchTerm || selectedSpecialty || selectedFacility || selectedPriority || selectedDate;
 
   return (
     <div className="space-y-6">
@@ -82,29 +118,116 @@ export function WaitingListView() {
       {/* Table Section */}
       <Card>
         <CardHeader className="border-b bg-slate-50/50 pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-lg">Pacientes en Espera</CardTitle>
-              <CardDescription>Lista detallada de requerimientos médicos</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Buscar especialidad o diagnóstico..."
-                  className="h-9 w-[250px] rounded-md border border-input bg-transparent pl-8 pr-3 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg">Pacientes en Espera</CardTitle>
+                <CardDescription>
+                  {isFiltered 
+                    ? `Mostrando ${filteredEntries.length} de ${mockEntries.length} registros filtrados`
+                    : "Lista detallada de requerimientos médicos"
+                  }
+                </CardDescription>
               </div>
-              <button className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-white px-3 shadow-sm hover:bg-slate-50">
-                <Filter className="h-4 w-4 mr-2" />
-                Filtros
-              </button>
+              
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Buscar ID, diagnóstico..."
+                    className="h-9 w-[230px] rounded-md border border-input bg-white pl-8 pr-3 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                
+                <button 
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors hover:bg-slate-50 ${showFilters ? 'bg-slate-100 border-slate-400 text-[#023e8a]' : 'bg-white border-input'}`}
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filtros Avanzados
+                </button>
+
+                {isFiltered && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-red-50 px-3 text-sm font-medium text-red-600 shadow-sm hover:bg-red-100 transition-colors"
+                    title="Limpiar todos los filtros"
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Limpiar
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Desplegable de Filtros Avanzados */}
+            {showFilters && (
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 p-4 rounded-lg bg-slate-100/70 border border-slate-200 transition-all animate-in fade-in-50 duration-200">
+                {/* Filtro por Día */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Fecha de Ingreso</label>
+                  <input
+                    type="date"
+                    className="h-9 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                  />
+                </div>
+
+                {/* Filtro por Especialidad */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Especialidad</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+                    value={selectedSpecialty}
+                    onChange={(e) => setSelectedSpecialty(e.target.value)}
+                  >
+                    <option value="">Todas las especialidades</option>
+                    {specialties.map(spec => (
+                      <option key={spec} value={spec}>{spec}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filtro por Establecimiento */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Establecimiento</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+                    value={selectedFacility}
+                    onChange={(e) => setSelectedFacility(e.target.value)}
+                  >
+                    <option value="">Todos los centros</option>
+                    {facilities.map(fac => (
+                      <option key={fac} value={fac}>{fac}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filtro por Prioridad */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Prioridad</label>
+                  <select
+                    className="h-9 w-full rounded-md border border-input bg-white px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1"
+                    value={selectedPriority}
+                    onChange={(e) => setSelectedPriority(e.target.value)}
+                  >
+                    <option value="">Todas</option>
+                    {priorities.map(prio => (
+                      <option key={prio} value={prio}>
+                        {priorityConfig[prio as keyof typeof priorityConfig]?.label || prio}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
         </CardHeader>
+
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -136,8 +259,8 @@ export function WaitingListView() {
                       </td>
                       <td className="px-4 py-3 text-slate-600">{entry.facility}</td>
                       <td className="px-4 py-3">
-                        <Badge className={`${pCfg.classes} border-0 shadow-sm font-semibold`}>
-                          {pCfg.label}
+                        <Badge className={`${pCfg?.classes || 'bg-slate-100'} border-0 shadow-sm font-semibold`}>
+                          {pCfg?.label || entry.priority}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -147,8 +270,9 @@ export function WaitingListView() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <button className="p-1.5 text-slate-400 hover:text-[#023e8a] hover:bg-blue-50 rounded-md transition-colors">
-                          <MoreHorizontal className="w-5 h-5" />
+                        {/* Aquí puedes mantener tu botón MoreHorizontal original */}
+                        <button className="px-2 py-1 text-xs font-medium text-[#023e8a] bg-blue-50 hover:bg-blue-100 rounded transition-colors">
+                          Gestionar
                         </button>
                       </td>
                     </tr>
@@ -157,7 +281,7 @@ export function WaitingListView() {
                 {filteredEntries.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-                      No se encontraron registros que coincidan con la búsqueda.
+                      No se encontraron registros que coincidan con los filtros aplicados.
                     </td>
                   </tr>
                 )}

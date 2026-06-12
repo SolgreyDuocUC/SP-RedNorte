@@ -56,8 +56,6 @@ export function Step3FechaHora({ data, onChange, onNext, onBack }: Step3FechaHor
       date:       dateStr,
       dateLabel:  formatDateLabel(date),
       slot:       '',              // reset slot on date change
-      centerId:   CENTER_ID,
-      centerName: CENTER_NAME,
     });
   }
 

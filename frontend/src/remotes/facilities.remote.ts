@@ -5,7 +5,15 @@ export interface FacilityDTO {
   organization_id?: string;
   name: string;
   status: string;
+  specialties?: string[];
+  type?: string;
+  address?: string;
+  commune?: string;
+  region?: string;
+  phone?: string;
+  email?: string;
 }
+
 
 export const facilitiesRemote = {
   create: async (facility: Partial<FacilityDTO>): Promise<string> => {
@@ -16,12 +24,23 @@ export const facilitiesRemote = {
   },
 
   getAll: async (): Promise<FacilityDTO[]> => {
-    const response = await facilitiesApi.get('/locations');
-    return response.data;
+    try {
+      const response = await facilitiesApi.get('/locations');
+      if (Array.isArray(response.data)) return response.data;
+      if (response.data && Array.isArray(response.data.content)) return response.data.content;
+      return [];
+    } catch (error) {
+      console.error("Error fetching facilities:", error);
+      return [];
+    }
   },
 
   getById: async (id: string): Promise<FacilityDTO> => {
     const response = await facilitiesApi.get(`/locations/${id}`);
     return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await facilitiesApi.delete(`/locations/${id}`);
   }
 };

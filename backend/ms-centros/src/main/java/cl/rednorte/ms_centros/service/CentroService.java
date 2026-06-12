@@ -1,8 +1,7 @@
 package cl.rednorte.ms_centros.service;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.r4.model.*;
+import cl.rednorte.ms_centros.model.CentroEntity;
+import cl.rednorte.ms_centros.repository.CentroRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,128 +12,107 @@ import java.util.Map;
 @Service
 public class CentroService {
 
-    private final IGenericClient fhirClient;
+    private final CentroRepository centroRepository;
 
-    public CentroService(IGenericClient fhirClient) {
-        this.fhirClient = fhirClient;
+    public CentroService(CentroRepository centroRepository) {
+        this.centroRepository = centroRepository;
     }
 
-    // ==========================================
-    // ORGANIZACIONES
-    // ==========================================
-
-    public String crearOrganizacion(String id, String name) {
-        Organization org = new Organization();
-        if (id != null && !id.trim().isEmpty()) {
-            org.setId(id);
-        }
-        org.setName(name);
-
-        MethodOutcome outcome;
-        if (org.getId() != null) {
-            // Si el cliente envía ID, hacemos un PUT para conservar ese ID
-            outcome = fhirClient.update().resource(org).execute();
-        } else {
-            // Si no, dejamos que el servidor FHIR cree el ID autogenerado
-            outcome = fhirClient.create().resource(org).execute();
-        }
-        return outcome.getId().getIdPart();
+    public String crearUbicacion(String id, String organizationId, String name, String status, List<String> specialties) {
+        return crearUbicacion(id, organizationId, name, status, specialties, null, null, null, null, null, null);
     }
-
-    public Map<String, Object> obtenerOrganizacion(String id) {
-        Organization org = fhirClient.read().resource(Organization.class).withId(id).execute();
-        Map<String, Object> resultado = new HashMap<>();
-        resultado.put("id", org.getIdElement().getIdPart());
-        resultado.put("name", org.getName());
-        return resultado;
-    }
-
-    public List<Map<String, Object>> listarOrganizaciones() {
-        Bundle bundle = fhirClient.search().forResource(Organization.class).returnBundle(Bundle.class).execute();
-        List<Map<String, Object>> lista = new ArrayList<>();
-        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-            if (entry.getResource() instanceof Organization) {
-                Organization org = (Organization) entry.getResource();
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", org.getIdElement().getIdPart());
-                map.put("name", org.getName());
-                lista.add(map);
-            }
-        }
-        return lista;
-    }
-
-    // ==========================================
-    // UBICACIONES / CENTROS (LOCATIONS)
-    // ==========================================
 
     public String crearUbicacion(String id, String organizationId, String name, String status) {
-        Location loc = new Location();
-        if (id != null && !id.trim().isEmpty()) {
-            loc.setId(id);
-        }
-        loc.setName(name);
-        
-        // Status mapping (FHIR admite: active, suspended, inactive)
-        if (status != null) {
-            try {
-                loc.setStatus(Location.LocationStatus.fromCode(status.toLowerCase().trim()));
-            } catch (Exception e) {
-                loc.setStatus(Location.LocationStatus.ACTIVE);
+        return crearUbicacion(id, organizationId, name, status, null, null, null, null, null, null, null);
+    }
+
+    public String crearUbicacion(String id, String organizationId, String name, String status, List<String> specialties,
+                                 String type, String address, String commune, String region, String phone, String email) {
+        CentroEntity centro;
+        if (id != null && !id.trim().isEmpty() && centroRepository.existsById(id)) {
+            centro = centroRepository.findById(id).orElseThrow();
+        } else {
+            centro = new CentroEntity();
+            if (id != null && !id.trim().isEmpty()) {
+                centro.setId(id);
             }
-        } else {
-            loc.setStatus(Location.LocationStatus.ACTIVE);
         }
 
-        // Relación con Organización (organization_id)
-        if (organizationId != null && !organizationId.trim().isEmpty()) {
-            loc.setManagingOrganization(new Reference("Organization/" + organizationId));
+        centro.setName(name);
+        centro.setStatus(status != null ? status : "active");
+        if (specialties != null) {
+            centro.setSpecialties(specialties);
+        }
+        if (type != null) {
+            centro.setType(type);
+        }
+        if (address != null) {
+            centro.setAddress(address);
+        }
+        if (commune != null) {
+            centro.setCommune(commune);
+        }
+        if (region != null) {
+            centro.setRegion(region);
+        }
+        if (phone != null) {
+            centro.setPhone(phone);
+        }
+        if (email != null) {
+            centro.setEmail(email);
         }
 
-        MethodOutcome outcome;
-        if (loc.getId() != null) {
-            outcome = fhirClient.update().resource(loc).execute();
-        } else {
-            outcome = fhirClient.create().resource(loc).execute();
-        }
-        return outcome.getId().getIdPart();
+        CentroEntity saved = centroRepository.save(centro);
+        return saved.getId();
     }
 
     public Map<String, Object> obtenerUbicacion(String id) {
-        Location loc = fhirClient.read().resource(Location.class).withId(id).execute();
-        Map<String, Object> resultado = new HashMap<>();
-        resultado.put("id", loc.getIdElement().getIdPart());
-        resultado.put("name", loc.getName());
-        resultado.put("status", loc.getStatus() != null ? loc.getStatus().toCode() : "active");
-        
-        if (loc.hasManagingOrganization()) {
-            resultado.put("organization_id", loc.getManagingOrganization().getReferenceElement().getIdPart());
-        } else {
-            resultado.put("organization_id", null);
-        }
-        
-        return resultado;
+        CentroEntity c = centroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Centro no encontrado: " + id));
+        return mapToMap(c);
     }
 
     public List<Map<String, Object>> listarUbicaciones() {
-        Bundle bundle = fhirClient.search().forResource(Location.class).returnBundle(Bundle.class).execute();
-        List<Map<String, Object>> lista = new ArrayList<>();
-        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-            if (entry.getResource() instanceof Location) {
-                Location loc = (Location) entry.getResource();
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", loc.getIdElement().getIdPart());
-                map.put("name", loc.getName());
-                map.put("status", loc.getStatus() != null ? loc.getStatus().toCode() : "active");
-                
-                if (loc.hasManagingOrganization()) {
-                    map.put("organization_id", loc.getManagingOrganization().getReferenceElement().getIdPart());
-                } else {
-                    map.put("organization_id", null);
-                }
-                lista.add(map);
-            }
+        List<CentroEntity> list = centroRepository.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (CentroEntity c : list) {
+            result.add(mapToMap(c));
         }
-        return lista;
+        return result;
+    }
+
+    public void eliminarUbicacion(String id) {
+        centroRepository.deleteById(id);
+    }
+
+    // Métodos dummy para Organizaciones
+    public String crearOrganizacion(String id, String name) {
+        return id != null ? id : "org-1";
+    }
+
+    public Map<String, Object> obtenerOrganizacion(String id) {
+        Map<String, Object> org = new HashMap<>();
+        org.put("id", id);
+        org.put("name", "Organización Default");
+        return org;
+    }
+
+    public List<Map<String, Object>> listarOrganizaciones() {
+        return new ArrayList<>();
+    }
+
+    private Map<String, Object> mapToMap(CentroEntity c) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", c.getId());
+        map.put("name", c.getName());
+        map.put("status", c.getStatus() != null ? c.getStatus() : "active");
+        map.put("specialties", c.getSpecialties() != null ? c.getSpecialties() : new ArrayList<String>());
+        map.put("type", c.getType() != null ? c.getType() : "hospital");
+        map.put("address", c.getAddress() != null ? c.getAddress() : "");
+        map.put("commune", c.getCommune() != null ? c.getCommune() : "");
+        map.put("region", c.getRegion() != null ? c.getRegion() : "");
+        map.put("phone", c.getPhone() != null ? c.getPhone() : "");
+        map.put("email", c.getEmail() != null ? c.getEmail() : "");
+        return map;
     }
 }

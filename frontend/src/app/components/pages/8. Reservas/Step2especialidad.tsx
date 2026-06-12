@@ -6,6 +6,7 @@ import {
 import { BookingData, AppointmentType, Doctor } from '../../../types/Booking';
 import { SPECIALTIES, MOCK_DOCTORS, doctorInitials } from '../../../../core/constants/BookingConst';
 import { slotsRemote } from '../../../../remotes/slots.remote';
+import { facilitiesRemote, FacilityDTO } from '../../../../remotes/facilities.remote';
 
 const ICON_MAP: Record<string, React.FC<{ size?: number; className?: string }>> = {
   Heart, Brain, Bone, Eye, Wind, Stethoscope, Baby, Activity,
@@ -22,8 +23,24 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
   const appointmentType = data.appointmentType ?? 'PRESENCIAL';
   const specialtyId     = data.specialtyId     ?? '';
 
+  const [facilities, setFacilities] = useState<FacilityDTO[]>([]);
+  const [loadingFacilities, setLoadingFacilities] = useState(true);
   const [realSlotsCount, setRealSlotsCount] = useState<Record<string, number> | null>(null);
 
+  // Load facilities from backend
+  useEffect(() => {
+    facilitiesRemote.getAll()
+      .then(data => {
+        setFacilities(data);
+        setLoadingFacilities(false);
+      })
+      .catch(err => {
+        console.error("Error cargando establecimientos:", err);
+        setLoadingFacilities(false);
+      });
+  }, []);
+
+  // Load slots for the selected specialty
   useEffect(() => {
     if (!specialtyId) {
       setRealSlotsCount(null);
@@ -57,8 +74,16 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
     onChange({ doctorId: doctor.id, doctorName: doctor.name, doctorTitle: doctor.title });
   }
 
+  // Filter specialties based on the selected center
+  const selectedCenter = facilities.find(f => f.id === data.centerId);
+  const availableSpecialties = selectedCenter 
+    ? SPECIALTIES.filter(spec => 
+        (selectedCenter.specialties || []).some(s => s.toLowerCase() === spec.name.toLowerCase())
+      )
+    : [];
+
   const doctorsForSpecialty = MOCK_DOCTORS.filter(d => d.specialty === specialtyId);
-  const canProceed = specialtyId !== '' && (data.doctorId ?? '') !== '';
+  const canProceed = data.centerId !== '' && specialtyId !== '' && (data.doctorId ?? '') !== '';
 
   return (
     <div className="flex flex-col gap-6">
@@ -68,10 +93,53 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
           <Stethoscope size={13} /> Paso 2 de 4
         </p>
         <h2 className="text-xl font-semibold text-[#0b3c5d]">Especialidad y profesional</h2>
-        <p className="text-sm text-slate-500 mt-1">Selecciona el tipo de consulta, la especialidad y el médico.</p>
+        <p className="text-sm text-slate-500 mt-1">Selecciona el establecimiento de salud, tipo de consulta, especialidad y el médico.</p>
       </div>
 
       <hr className="border-slate-100" />
+
+      {/* Establecimiento de Salud */}
+      <div>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Establecimiento de Salud</p>
+        {loadingFacilities ? (
+          <p className="text-sm text-slate-400">Cargando establecimientos de salud...</p>
+        ) : (
+          <select
+            value={data.centerId || ''}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              const facility = facilities.find(f => f.id === selectedId);
+              if (facility) {
+                onChange({
+                  centerId: facility.id,
+                  centerName: facility.name,
+                  specialtyId: '',
+                  specialtyName: '',
+                  doctorId: '',
+                  doctorName: '',
+                  doctorTitle: undefined
+                });
+              } else {
+                onChange({
+                  centerId: '',
+                  centerName: '',
+                  specialtyId: '',
+                  specialtyName: '',
+                  doctorId: '',
+                  doctorName: '',
+                  doctorTitle: undefined
+                });
+              }
+            }}
+            className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-[#5bc0eb]/20 focus:border-[#5bc0eb] outline-none bg-white cursor-pointer"
+          >
+            <option value="">Seleccione un establecimiento de salud...</option>
+            {facilities.map(facility => (
+              <option key={facility.id} value={facility.id}>{facility.name}</option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {/* Modalidad */}
       <div>
@@ -102,39 +170,51 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
       </div>
 
       {/* Especialidades */}
-      <div>
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Especialidad</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {SPECIALTIES.map(spec => {
-            const Icon       = ICON_MAP[spec.icon] ?? Activity;
-            const isSelected = specialtyId === spec.id;
-            return (
-              <button
-                key={spec.id}
-                onClick={() => handleSpecialtySelect(spec.id, spec.name)}
-                className={`flex flex-col items-center gap-2 px-3 py-4 rounded-xl border-[1.5px] transition-all text-center
-                  ${isSelected
-                    ? 'border-[#5bc0eb] bg-[#eaf8ff] shadow-sm'
-                    : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white'
-                  }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
-                    ${isSelected ? 'bg-[#0b3c5d]' : 'bg-white border border-slate-200'}`}
-                >
-                  <Icon size={20} className={isSelected ? 'text-white' : 'text-[#0b3c5d]'} />
-                </div>
-                <span
-                  className={`text-xs font-semibold leading-tight transition-colors
-                    ${isSelected ? 'text-[#0b3c5d]' : 'text-slate-600'}`}
-                >
-                  {spec.name}
-                </span>
-              </button>
-            );
-          })}
+      {data.centerId ? (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Especialidad</p>
+          {availableSpecialties.length === 0 ? (
+            <p className="text-sm text-amber-600 bg-amber-50 border border-amber-100 p-4 rounded-xl">
+              Este establecimiento no cuenta con especialidades activas actualmente en el sistema.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {availableSpecialties.map(spec => {
+                const Icon       = ICON_MAP[spec.icon] ?? Activity;
+                const isSelected = specialtyId === spec.id;
+                return (
+                  <button
+                    key={spec.id}
+                    onClick={() => handleSpecialtySelect(spec.id, spec.name)}
+                    className={`flex flex-col items-center gap-2 px-3 py-4 rounded-xl border-[1.5px] transition-all text-center
+                      ${isSelected
+                        ? 'border-[#5bc0eb] bg-[#eaf8ff] shadow-sm'
+                        : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white'
+                      }`}
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors
+                        ${isSelected ? 'bg-[#0b3c5d]' : 'bg-white border border-slate-200'}`}
+                    >
+                      <Icon size={20} className={isSelected ? 'text-white' : 'text-[#0b3c5d]'} />
+                    </div>
+                    <span
+                      className={`text-xs font-semibold leading-tight transition-colors
+                        ${isSelected ? 'text-[#0b3c5d]' : 'text-slate-600'}`}
+                    >
+                      {spec.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="bg-slate-50 border border-dashed border-slate-200 rounded-xl p-6 text-center">
+          <p className="text-sm text-slate-500">Seleccione un establecimiento de salud para ver las especialidades disponibles.</p>
+        </div>
+      )}
 
       {/* Profesionales disponibles */}
       {specialtyId && (
@@ -235,3 +315,4 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
     </div>
   );
 }
+

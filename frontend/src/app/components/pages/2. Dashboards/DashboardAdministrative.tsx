@@ -16,7 +16,12 @@ import { PatientDTO } from '../../../../remotes/dtos/patient.dto';
 import { patientRemote } from '../../../../remotes/patient.remote';
 import { appointmentsRemote } from '../../../../remotes/appointments.remote';
 
-export function DashboardAdministrative() {
+interface DashboardAdministrativeProps {
+  onRegisterPatient?: () => void;
+  onNewBooking?: () => void;
+}
+
+export function DashboardAdministrative({ onRegisterPatient, onNewBooking }: DashboardAdministrativeProps) {
   const [patients, setPatients] = useState<PatientDTO[]>([]);
   const [appointments, setAppointments] = useState<AppointmentDTO[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,10 +55,14 @@ export function DashboardAdministrative() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-[#004a87]">Dashboard Administrativo</h2>
-        <button className="flex items-center gap-2 bg-[#00a7b1] hover:bg-[#008d96] text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-md transition-all">
+        <button 
+          onClick={onRegisterPatient}
+          className="flex items-center gap-2 bg-[#00a7b1] hover:bg-[#008d96] text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-md transition-all"
+        >
           <UserPlus className="h-4 w-4" /> Registrar Nuevo Paciente
         </button>
       </div>
+
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Agenda del Día */}
@@ -168,7 +177,13 @@ export function DashboardAdministrative() {
                   <p className="text-[10px] text-blue-200">0 Pacientes pendientes</p>
                 </div>
               </div>
-              <button className="w-full bg-[#00a7b1] hover:bg-[#00c2ce] py-2.5 rounded-lg text-xs font-bold transition-all shadow-md">
+              <button 
+                onClick={() => {
+                  const event = new CustomEvent('navigate', { detail: 'waiting-list' });
+                  window.dispatchEvent(event);
+                }}
+                className="w-full bg-[#00a7b1] hover:bg-[#00c2ce] py-2.5 rounded-lg text-xs font-bold transition-all shadow-md"
+              >
                 Ver Lista de Espera Completa
               </button>
             </CardContent>
