@@ -34,12 +34,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/proxy/reservas': {
-        target: 'http://localhost:8003',
+        target: 'http://localhost:8011',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/reservas/, ''),
       },
       '/proxy/pacientes': {
-        target: 'http://localhost:8002',
+        target: 'http://localhost:8011',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/pacientes/, ''),
       },
