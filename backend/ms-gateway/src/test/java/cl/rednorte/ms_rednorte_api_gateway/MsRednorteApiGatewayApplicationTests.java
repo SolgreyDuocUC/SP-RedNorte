@@ -1,10 +1,10 @@
-package cl.rednorte.ms_gateway;
+package cl.rednorte.ms_rednorte_api_gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MsGatewayApplicationTests {
+class MsRednorteApiGatewayApplicationTests {
 
 	@Test
 	void contextLoads() {
