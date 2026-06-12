@@ -14,6 +14,7 @@ import { Reservahoraview } from './app/components/pages/8. Reservas/Reservahorav
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente'>('paciente');
   const [showLogin, setShowLogin] = useState(false);
   const [showReserva, setShowReserva] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
@@ -25,6 +26,7 @@ export default function App() {
         <LoginView 
           onLoginSuccess={(role) => {
             console.log('User logged in with role:', role);
+            setUserRole(role);
             setIsLoggedIn(true);
             setShowLogin(false);
           }} 
@@ -47,7 +49,7 @@ export default function App() {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView userRole={userRole} />;
       case 'appointments':
         return <AppointmentsView />;
       case 'waiting-list':

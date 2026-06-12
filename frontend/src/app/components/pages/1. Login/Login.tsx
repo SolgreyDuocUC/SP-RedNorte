@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
-// Credenciales simuladas para el MVP (rol admin)
-const DEMO_CREDENTIALS = {
-  run: '12345678-5', // Formato limpio para backend (dígito verificador válido)
-  password: 'admin123',
-  role: 'admin' as const,
-};
+const DEMO_ACCOUNTS = [
+  { run: '12345678-5', password: 'admin123', role: 'admin' as const },
+  { run: '11111111-1', password: 'administrativo123', role: 'administrativo' as const },
+  { run: '22222222-2', password: 'enfermeria123', role: 'enfermeria' as const },
+  { run: '33333333-3', password: 'medico123', role: 'medico' as const },
+  { run: '44444444-4', password: 'paciente123', role: 'paciente' as const },
+];
 
 // Formatea RUN mientras el usuario escribe: "123456789" → "12.345.678-9"
 function formatRUN(raw: string): string {
@@ -95,7 +96,9 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
     // Simula cómo se enviaría al backend (sin puntos, con guion y dígito en minúscula)
     const cleanRun = run.replace(/\./g, '').toLowerCase();
 
-    if (cleanRun !== DEMO_CREDENTIALS.run || password !== DEMO_CREDENTIALS.password) {
+    const account = DEMO_ACCOUNTS.find(acc => acc.run === cleanRun && acc.password === password);
+
+    if (!account) {
       setPassError('RUN o contraseña incorrectos');
       return;
     }
@@ -106,7 +109,7 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
       setLoading(false);
       setSuccess(true);
       setTimeout(() => {
-        onLoginSuccess(DEMO_CREDENTIALS.role);
+        onLoginSuccess(account.role);
       }, 1200);
     }, 900);
   };
@@ -154,13 +157,18 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
           <p className="text-sm text-slate-500 mb-7">Ingresa tus credenciales institucionales</p>
 
           {/* Hint de demo */}
-          <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mb-6 text-xs text-[#185FA5]">
-            <span className="w-2 h-2 rounded-full bg-[#0096c7] shrink-0" />
-            <span>
-              Modo demo: RUN{' '}
-              <strong className="font-semibold">12.345.678-5</strong> · Contraseña{' '}
-              <strong className="font-semibold">admin123</strong>
-            </span>
+          <div className="flex flex-col gap-1 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mb-6 text-xs text-[#185FA5]">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#0096c7] shrink-0" />
+              <span className="font-semibold">Cuentas Demo disponibles:</span>
+            </div>
+            <ul className="list-disc pl-5 space-y-0.5">
+              <li>Admin: <strong>12.345.678-5</strong> / admin123</li>
+              <li>Administrativo: <strong>11.111.111-1</strong> / administrativo123</li>
+              <li>Enfermería: <strong>22.222.222-2</strong> / enfermeria123</li>
+              <li>Médico: <strong>33.333.333-3</strong> / medico123</li>
+              <li>Paciente: <strong>44.444.444-4</strong> / paciente123</li>
+            </ul>
           </div>
 
           {/* Mensaje de éxito */}
