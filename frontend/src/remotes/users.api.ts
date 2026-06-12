@@ -1,14 +1,13 @@
 import axios from "axios";
 
-export const api = axios.create({
-  baseURL: "/proxy/reservas",
+export const usersApi = axios.create({
+  baseURL: "/proxy/usuarios/api/v1",
 });
 
-api.interceptors.request.use((config) => {
+usersApi.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
-

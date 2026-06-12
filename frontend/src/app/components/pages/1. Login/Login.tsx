@@ -1,117 +1,75 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { authRemote } from '../../../../remotes/auth.remote';
 
-const DEMO_ACCOUNTS = [
-  { run: '12345678-5', password: 'admin123', role: 'admin' as const },
-  { run: '11111111-1', password: 'administrativo123', role: 'administrativo' as const },
-  { run: '22222222-2', password: 'enfermeria123', role: 'enfermeria' as const },
-  { run: '33333333-3', password: 'medico123', role: 'medico' as const },
-  { run: '44444444-4', password: 'paciente123', role: 'paciente' as const },
-];
-
-// Formatea RUN mientras el usuario escribe: "123456789" → "12.345.678-9"
-function formatRUN(raw: string): string {
-  // Solo dígitos y K
-  const clean = raw.replace(/[^0-9kK]/g, '').toUpperCase();
-  if (clean.length === 0) return '';
-
-  const body = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-
-  // Puntos al cuerpo (grupos de 3 desde la derecha)
-  const bodyFormatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-  return `${bodyFormatted}-${dv}`;
-}
-
-// Valida RUN chileno con módulo 11
-function validateRUN(formatted: string): boolean {
-  const clean = formatted.replace(/[^0-9kK]/g, '').toUpperCase();
-  if (clean.length < 2) return false;
-
-  const body = clean.slice(0, -1);
-  const dv = clean.slice(-1);
-
-  let sum = 0;
-  let multiplier = 2;
-  for (let i = body.length - 1; i >= 0; i--) {
-    sum += parseInt(body[i]) * multiplier;
-    multiplier = multiplier === 7 ? 2 : multiplier + 1;
-  }
-
-  const remainder = 11 - (sum % 11);
-  const expected =
-    remainder === 11 ? '0' : remainder === 10 ? 'K' : String(remainder);
-
-  return dv === expected;
+function mapBackendRoleToFrontend(roles: string[]): 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente' {
+  const lowercaseRoles = roles.map(r => r.toLowerCase());
+  if (lowercaseRoles.includes('admin') || lowercaseRoles.includes('role_admin')) return 'admin';
+  if (lowercaseRoles.includes('administrativo') || lowercaseRoles.includes('role_administrativo')) return 'administrativo';
+  if (lowercaseRoles.includes('enfermeria') || lowercaseRoles.includes('role_enfermeria')) return 'enfermeria';
+  if (lowercaseRoles.includes('medico') || lowercaseRoles.includes('role_medico')) return 'medico';
+  return 'paciente';
 }
 
 interface LoginViewProps {
   onLoginSuccess: (role: 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente') => void;
   onBack?: () => void;
+  isClinical?: boolean;
+  onRegisterClick?: () => void;
 }
 
-export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
-  const [run, setRun] = useState('');
+export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegisterClick }: LoginViewProps) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [runError, setRunError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [passError, setPassError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleRunChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Ignorar puntos y guiones que el usuario intente tipear
-    const clean = e.target.value.replace(/[^0-9kK]/g, '');
-
-    // Máximo 9 caracteres (8 dígitos + dígito verificador)
-    if (clean.length > 9) return;
-
-    const formatted = clean.length >= 2 ? formatRUN(clean) : clean;
-    setRun(formatted);
-
-    if (runError) setRunError('');
-  };
-
-  const handleLogin = () => {
-    setRunError('');
+  const handleLogin = async () => {
+    setEmailError('');
     setPassError('');
 
     let valid = true;
 
-    if (!run || run.replace(/[^0-9kK]/gi, '').length < 7) {
-      setRunError('Ingresa un RUN válido (ej: 12.345.678-9)');
-      valid = false;
-    } else if (!validateRUN(run)) {
-      setRunError('El RUN ingresado no es válido');
+    if (!email || !email.includes('@')) {
+      setEmailError('Ingresa un correo electrónico válido');
       valid = false;
     }
 
     if (!password || password.length < 4) {
-      setPassError('Ingresa tu contraseña');
+      setPassError('Ingresa tu contraseña (mínimo 4 caracteres)');
       valid = false;
     }
 
     if (!valid) return;
 
-    // Simula cómo se enviaría al backend (sin puntos, con guion y dígito en minúscula)
-    const cleanRun = run.replace(/\./g, '').toLowerCase();
-
-    const account = DEMO_ACCOUNTS.find(acc => acc.run === cleanRun && acc.password === password);
-
-    if (!account) {
-      setPassError('RUN o contraseña incorrectos');
-      return;
-    }
-
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const data = await authRemote.login(email.trim(), password);
+      
+      // Guardar token y datos del usuario en localStorage
+      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('id', String(data.id));
+      localStorage.setItem('email', data.email);
+      localStorage.setItem('roles', JSON.stringify(data.roles));
+
       setLoading(false);
       setSuccess(true);
+
+      const frontendRole = mapBackendRoleToFrontend(data.roles);
+
       setTimeout(() => {
-        onLoginSuccess(account.role);
+        onLoginSuccess(frontendRole);
       }, 1200);
-    }, 900);
+    } catch (error: any) {
+      setLoading(false);
+      console.error('Login error:', error);
+      setPassError('Correo electrónico o contraseña incorrectos');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, next?: () => void) => {
@@ -140,35 +98,35 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
               Red Norte
             </h1>
             <p className="text-white/50 text-xs uppercase tracking-widest mt-1">
-              Sistema de Salud
+              {isClinical ? 'Portal Clínico' : 'Portal de Pacientes'}
             </p>
           </div>
 
           <div className="relative z-10 mt-8 md:mt-0">
             <p className="text-white/60 text-sm leading-relaxed max-w-[220px]">
-              Acceso válido para personal autorizado. Si no puedes acceder, contacta al administrador del sistema en tu establecimiento.
+              {isClinical 
+                ? 'Acceso válido para personal clínico y administrativo autorizado de Red Norte.' 
+                : 'Acceso para pacientes de la Red Norte de Salud para gestionar sus horas y exámenes.'}
             </p>
           </div>
         </div>
 
         {/* PANEL DERECHO – Formulario */}
         <div className="flex-1 p-10 flex flex-col justify-center">
-          <h2 className="text-xl font-bold text-[#004a87] mb-1">Acceso al sistema</h2>
-          <p className="text-sm text-slate-500 mb-7">Ingresa tus credenciales institucionales</p>
+          <h2 className="text-xl font-bold text-[#004a87] mb-1">
+            {isClinical ? 'Acceso Portal Clínico' : 'Acceso Pacientes'}
+          </h2>
+          <p className="text-sm text-slate-500 mb-7">Ingresa tus credenciales registradas</p>
 
           {/* Hint de demo */}
           <div className="flex flex-col gap-1 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mb-6 text-xs text-[#185FA5]">
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-[#0096c7] shrink-0" />
-              <span className="font-semibold">Cuentas Demo disponibles:</span>
+              <span className="font-semibold">Inicio de Sesión:</span>
             </div>
-            <ul className="list-disc pl-5 space-y-0.5">
-              <li>Admin: <strong>12.345.678-5</strong> / admin123</li>
-              <li>Administrativo: <strong>11.111.111-1</strong> / administrativo123</li>
-              <li>Enfermería: <strong>22.222.222-2</strong> / enfermeria123</li>
-              <li>Médico: <strong>33.333.333-3</strong> / medico123</li>
-              <li>Paciente: <strong>44.444.444-4</strong> / paciente123</li>
-            </ul>
+            <p className="text-xs">
+              Ingresa tu correo y contraseña asignada para acceder.
+            </p>
           </div>
 
           {/* Mensaje de éxito */}
@@ -183,38 +141,28 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
             </div>
           )}
 
-          {/* Campo RUN */}
+          {/* Campo Correo Electrónico */}
           <div className="mb-5">
             <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-              RUN
+              Correo Electrónico
             </label>
             <input
-              type="text"
-              value={run}
-              placeholder="Ej: 123456789"
-              maxLength={12}
-              autoComplete="username"
-              inputMode="numeric"
-              onChange={handleRunChange}
+              type="email"
+              value={email}
+              placeholder="Ej: admin@rednorte.cl"
+              autoComplete="email"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError('');
+              }}
               onKeyDown={(e) => handleKeyDown(e, () => document.getElementById('rn-pass')?.focus())}
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm outline-none transition-all font-mono tracking-wide
-                ${runError
+              className={`w-full px-4 py-2.5 border rounded-lg text-sm outline-none transition-all
+                ${emailError
                   ? 'border-red-400 ring-2 ring-red-100'
                   : 'border-slate-200 focus:border-[#0096c7] focus:ring-2 focus:ring-[#0096c7]/15'
                 }`}
             />
-            {/* Ayuda contextual: siempre visible, reemplazada por error si hay */}
-            {!runError ? (
-              <p className="text-[11px] text-slate-400 mt-1.5 flex items-center gap-1">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" className="shrink-0 text-slate-400">
-                  <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2" />
-                  <path d="M6 5.5v3M6 3.5v.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                </svg>
-                Solo ingresa los números — los puntos y guión se agregan solos.
-              </p>
-            ) : (
-              <p className="text-xs text-red-500 mt-1.5">{runError}</p>
-            )}
+            {emailError && <p className="text-xs text-red-500 mt-1.5">{emailError}</p>}
           </div>
 
           {/* Campo Contraseña */}
@@ -268,6 +216,18 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
           >
             ¿Olvidaste tu contraseña?
           </a>
+
+          {!isClinical && onRegisterClick && (
+            <div className="text-center mt-6 text-sm text-slate-500">
+              ¿No tienes cuenta?{' '}
+              <button
+                onClick={(e) => { e.preventDefault(); onRegisterClick(); }}
+                className="font-semibold text-[#0096c7] hover:underline cursor-pointer"
+              >
+                Regístrate aquí
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

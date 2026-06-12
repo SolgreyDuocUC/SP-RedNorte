@@ -11,6 +11,8 @@ spring:
 # En ejecucion local (IDE/Maven) caen a los puertos locales.
 # ===============================
 services:
+  usuarios:
+    url: ${MS_USUARIOS_URI:http://localhost:8004}
   ficha-clinica:
     url: ${MS_FICHA_CLINICA_URI:http://localhost:8001}
   paciente:

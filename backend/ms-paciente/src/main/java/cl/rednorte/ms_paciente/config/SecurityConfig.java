@@ -1,5 +1,6 @@
 package cl.rednorte.ms_paciente.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -9,14 +10,25 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ms-paciente como Resource Server FHIR. Protege los endpoints FHIR
@@ -25,15 +37,19 @@ import org.springframework.web.filter.CorsFilter;
  * consumidores que aún no envían Bearer) — aunque sus endpoints con
  * @PreAuthorize (p.ej. PATCH .../contact) igual exigen un JWT válido.
  *
- * Los tokens los emite ms-login-user; aquí se validan vía JWK set público
- * configurado en application.properties. Los roles llegan en el claim
- * "roles" y se mapean a authorities con prefijo ROLE_ para usar con
- * hasRole()/hasAnyRole() en @PreAuthorize.
+ * Los tokens los emite ms-usuarios (HS256, secreto compartido vía
+ * application.security.jwt.secret-key, mismo valor que JWT_SECRET_KEY en
+ * ms-usuarios). Los roles llegan en el claim "authorities" como objetos
+ * {"authority": "ROLE_X"} ya con prefijo ROLE_, y se mapean directo a
+ * GrantedAuthority para usar con hasRole()/hasAnyRole() en @PreAuthorize.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${application.security.jwt.secret-key}")
+    private String jwtSecretKey;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,7 +62,9 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .jwt(jwt -> jwt
+                    .decoder(jwtDecoder())
+                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
             )
             .headers(h -> h
                 .frameOptions(f -> f.sameOrigin())
@@ -55,14 +73,41 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthorityPrefix("ROLE_");
-        authoritiesConverter.setAuthoritiesClaimName("roles");
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        SecretKeySpec secretKey = new SecretKeySpec(
+                jwtSecretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(secretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
+    }
 
+    private Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        converter.setJwtGrantedAuthoritiesConverter(this::authoritiesFromClaim);
         return converter;
+    }
+
+    /**
+     * Lee el claim "authorities" emitido por ms-usuarios, con forma
+     * [{"authority": "ROLE_X"}, ...], y lo convierte a GrantedAuthority
+     * sin agregar prefijo (ya viene incluido).
+     */
+    private Collection<GrantedAuthority> authoritiesFromClaim(Jwt jwt) {
+        Object rawAuthorities = jwt.getClaims().get("authorities");
+        if (!(rawAuthorities instanceof Collection<?> authorities)) {
+            return List.of();
+        }
+
+        List<GrantedAuthority> granted = new ArrayList<>();
+        for (Object authority : authorities) {
+            if (authority instanceof Map<?, ?> map && map.get("authority") != null) {
+                granted.add(new SimpleGrantedAuthority(map.get("authority").toString()));
+            } else if (authority != null) {
+                granted.add(new SimpleGrantedAuthority(authority.toString()));
+            }
+        }
+        return granted;
     }
 
     @Bean

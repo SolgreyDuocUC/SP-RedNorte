@@ -5,10 +5,11 @@ import logoFull from '@/app/assets/logo-sf-1.svg';
 
 interface PublicHeaderProps {
   onLogin: () => void;
+  onClinicalLogin: () => void;
   onReserva?: () => void;
 }
 
-export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
+export function PublicHeader({ onLogin, onClinicalLogin, onReserva }: PublicHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -55,6 +56,13 @@ export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
           </button>
 
           <button
+            onClick={onClinicalLogin}
+            className="px-5 py-2.5 rounded-full text-sm font-semibold bg-slate-100 text-slate-800 hover:bg-slate-200 transition cursor-pointer"
+          >
+            Portal Clínico
+          </button>
+
+          <button
             onClick={onReserva}
             className="px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-black border border-black hover:bg-neutral-50 transition cursor-pointer"
           >
@@ -85,7 +93,8 @@ export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
 
           <button 
             onClick={onReserva}
-            className="mt-2 w-full py-2 rounded-full bg-[#0096c7] text-white text-sm">
+            className="mt-2 w-full py-2 rounded-full bg-[#0096c7] text-white text-sm"
+          >
             Reservar hora
           </button>
 
@@ -93,7 +102,14 @@ export function PublicHeader({ onLogin, onReserva }: PublicHeaderProps) {
             onClick={onLogin}
             className="w-full py-2 text-sm text-[#0077b6] font-medium"
           >
-            Iniciar sesión
+            Ingresar (Pacientes)
+          </button>
+
+          <button
+            onClick={onClinicalLogin}
+            className="w-full py-2 text-sm text-slate-600 font-medium"
+          >
+            Portal Clínico
           </button>
         </div>
       )}

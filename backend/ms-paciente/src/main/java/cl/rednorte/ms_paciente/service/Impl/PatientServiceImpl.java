@@ -41,6 +41,10 @@ public class PatientServiceImpl implements PatientService {
         entity.setId(UUID.randomUUID().toString());
         entity.setCreatedAt(new Date());
 
+        if (entity.getCoverage() != null && entity.getCoverage().getId() == null) {
+            entity.getCoverage().setId(UUID.randomUUID().toString());
+        }
+
         return mapper.toDto(repository.save(entity));
     }
 

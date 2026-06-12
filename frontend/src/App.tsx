@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LoginView } from './app/components/pages/1. Login/Login';
+import { PatientRegister } from './app/components/pages/1. Login/PatientRegister';
+import { PatientPortalView } from './app/components/pages/11. PatientPortal/PatientPortalView';
 import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
@@ -22,6 +24,8 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente'>('paciente');
   const [showLogin, setShowLogin] = useState(false);
+  const [loginIsClinical, setLoginIsClinical] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [showReserva, setShowReserva] = useState(false);
   const [showReagenda, setShowReagenda] = useState(false);
   const [reagendaData, setReagendaData] = useState<AppointmentDTO | null>(null);
@@ -38,9 +42,28 @@ export default function App() {
   }, []);
 
   if (!isLoggedIn) {
+    if (showRegister) {
+      return (
+        <PatientRegister 
+          onBack={() => {
+            setShowRegister(false);
+            setShowLogin(true);
+          }} 
+          onRegisterSuccess={() => {
+            setShowRegister(false);
+            setShowLogin(true);
+          }} 
+        />
+      );
+    }
     if (showLogin) {
       return (
         <LoginView 
+          isClinical={loginIsClinical}
+          onRegisterClick={() => {
+            setShowLogin(false);
+            setShowRegister(true);
+          }}
           onLoginSuccess={(role) => {
             console.log('User logged in with role:', role);
             setUserRole(role);
@@ -74,10 +97,27 @@ export default function App() {
       );
     }
     return <HomePage 
-      onLogin={() => setShowLogin(true)} 
+      onLogin={() => {
+        setLoginIsClinical(false);
+        setShowLogin(true);
+      }} 
+      onClinicalLogin={() => {
+        setLoginIsClinical(true);
+        setShowLogin(true);
+      }}
       onReserva={() => setShowReserva(true)} 
       onReagenda={(app) => { setReagendaData(app); setShowReagenda(true); }}
     />;
+  }
+
+  // Si está logueado y es paciente, renderizar el Portal de Pacientes directamente
+  if (userRole === 'paciente') {
+    return (
+      <>
+        <Toaster position="top-right" richColors closeButton />
+        <PatientPortalView onLogout={() => setIsLoggedIn(false)} />
+      </>
+    );
   }
 
   const renderView = () => {

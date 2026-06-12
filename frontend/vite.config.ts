@@ -33,6 +33,11 @@ export default defineConfig({
   // Proxy para desarrollo local: replica el comportamiento del reverse proxy de Nginx
   server: {
     proxy: {
+      '/proxy/usuarios': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/usuarios/, ''),
+      },
       '/proxy/reservas': {
         target: 'http://localhost:8011',
         changeOrigin: true,

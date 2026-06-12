@@ -14,6 +14,9 @@ import static org.springframework.cloud.gateway.server.mvc.filter.BeforeFilterFu
 @Configuration
 public class GatewayConfig {
 
+        @Value("${services.usuarios.url}")
+        private String usuariosUrl;
+
         @Value("${services.ficha-clinica.url}")
         private String fichaClinicaUrl;
 
@@ -79,6 +82,17 @@ public class GatewayConfig {
                                                 .route(path("/api/v1/notifications")
                                                                 .or(path("/api/v1/notifications/**")), http())
                                                 .before(uri(notificacionesUrl))
+                                                .build())
+                                .and(route("ruta-usuarios")
+                                                .route(path("/api/v1/auth")
+                                                                .or(path("/api/v1/auth/**"))
+                                                                .or(path("/api/v1/users"))
+                                                                .or(path("/api/v1/users/**"))
+                                                                .or(path("/api/v1/roles"))
+                                                                .or(path("/api/v1/roles/**"))
+                                                                .or(path("/api/v2/practitioner"))
+                                                                .or(path("/api/v2/practitioner/**")), http())
+                                                .before(uri(usuariosUrl))
                                                 .build());
         }
 }

@@ -11,11 +11,12 @@ import type { AppointmentDTO } from '../../remotes/dtos/appointment.dto';
 
 interface HomePageProps {
   onLogin: () => void;
+  onClinicalLogin: () => void;
   onReserva?: () => void;
   onReagenda?: (app: AppointmentDTO) => void;
 }
 
-export function HomePage({ onLogin, onReserva, onReagenda }: HomePageProps) {
+export function HomePage({ onLogin, onClinicalLogin, onReserva, onReagenda }: HomePageProps) {
   const [bookingTab, setBookingTab] = useState<'consultas' | 'examenes' | 'mis-reservas'>('consultas');
 
   const scrollToBooking = () => {
@@ -38,7 +39,7 @@ export function HomePage({ onLogin, onReserva, onReagenda }: HomePageProps) {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      <PublicHeader onLogin={onLogin} onReserva={onReserva} />
+      <PublicHeader onLogin={onLogin} onClinicalLogin={onClinicalLogin} onReserva={onReserva} />
       
       <main className="flex-1">
         <HeroSection 
