@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +18,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(NotificationController.class)
+@TestPropertySource(properties = {
+        "app.security.notification-secret=test-secret-ci",
+        "spring.mail.username=test@example.com",
+        "spring.mail.password=test-password"
+})
 class NotificationControllerTest {
+
+    private static final String TEST_SECRET = "test-secret-ci";
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,7 +61,7 @@ class NotificationControllerTest {
         doNothing().when(emailService).sendEmail(any(NotificationRequest.class));
 
         mockMvc.perform(post("/api/v1/notifications/send")
-                .header("X-Notification-Secret", "RedNorteSuperSecretToken2026!")
+                .header("X-Notification-Secret", TEST_SECRET)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -68,7 +76,7 @@ class NotificationControllerTest {
                 .build();
 
         mockMvc.perform(post("/api/v1/notifications/send")
-                .header("X-Notification-Secret", "RedNorteSuperSecretToken2026!")
+                .header("X-Notification-Secret", TEST_SECRET)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
