@@ -4,7 +4,8 @@ import type { LoginRequestDTO, LoginResponseDTO } from './dtos/auth.dto';
 const AUTH_BASE = '/api/v1/auth';
 
 // ──────────────────────────────────────────────
-// 🔒  Mock auth — cambiar a false para usar el backend real
+// 🔒  Mock auth activo (ms-usuarios todavía no se usa). Backend real
+//     disponible: cambiar a false cuando ms-usuarios esté listo.
 // ──────────────────────────────────────────────
 const USE_MOCK_AUTH = true;
 

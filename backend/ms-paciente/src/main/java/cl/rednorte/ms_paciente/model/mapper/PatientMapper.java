@@ -37,6 +37,9 @@ public class PatientMapper {
         if (dto.getCoverage() != null) {
             entity.setCoverage(coverageMapper.toEntity(dto.getCoverage()));
             entity.getCoverage().setPatient(entity);
+            if (entity.getCoverage().getId() == null) {
+                entity.getCoverage().setId(java.util.UUID.randomUUID().toString());
+            }
         }
 
         return entity;
