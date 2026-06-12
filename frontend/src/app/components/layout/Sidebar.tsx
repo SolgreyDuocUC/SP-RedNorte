@@ -7,6 +7,7 @@ import {
   Bell,
   Activity,
   Settings,
+  Users,
 } from 'lucide-react';
 import { cn } from '../ui/utils';
 
@@ -14,9 +15,10 @@ interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
   isOpen?: boolean;
+  userRole?: string;
 }
 
-const navigationGroups = [
+const getNavigationGroups = (role: string = '') => [
   {
     title: 'Panel Clínico',
     items: [
@@ -41,13 +43,16 @@ const navigationGroups = [
     title: 'Administración',
     items: [
       { id: 'facilities', label: 'Establecimientos', icon: Hospital },
-      { id: 'reports', label: 'Indicadores', icon: Activity, disabled: true }, //  Inhabilitado temporalmente
-      { id: 'settings', label: 'Configuración', icon: Settings, disabled: true }, // Inhabilitado temporalmente
+      { id: 'reports', label: 'Indicadores', icon: Activity, disabled: true },
+      { id: 'settings', label: 'Configuración', icon: Settings, disabled: true },
+      ...(role === 'admin' ? [{ id: 'admin-users', label: 'Colaboradores', icon: Users, disabled: false }] : [])
     ],
   },
 ];
 
-export function Sidebar({ activeView, onViewChange, isOpen = false }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, isOpen = false, userRole = '' }: SidebarProps) {
+  const navigationGroups = getNavigationGroups(userRole);
+
   return (
     <aside
       className={cn(

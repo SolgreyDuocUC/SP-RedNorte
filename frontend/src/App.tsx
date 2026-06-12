@@ -4,6 +4,7 @@ import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
 import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
+import { AdminView } from './app/components/pages/9. AdminView/AdminView';
 import { WaitingListView } from './app/components/pages/5. ListaEspera/WaitingListView';
 import { FacilitiesView } from './app/components/pages/6. CentrosAtencion/FacilitiesView';
 import { NotificationsView } from './app/components/pages/4. Notificaciones/NotificationsView';
@@ -60,6 +61,8 @@ export default function App() {
         return <NotificationsView />;
       case 'history':
         return <HistoryView />;
+      case 'admin-users':
+        return <AdminView />;
       case 'reserva':
         return <Reservahoraview onBack={() => setActiveView('dashboard')} />;
       default:
@@ -93,6 +96,7 @@ export default function App() {
 
         <Sidebar
           activeView={activeView}
+          userRole={userRole}
           onViewChange={(view) => {
             setActiveView(view);
             setSidebarOpen(false); // Auto-cerrar sidebar en móvil al elegir vista

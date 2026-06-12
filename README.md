@@ -42,7 +42,7 @@ SP-RedNorte/
 | **ms-usuarios** | 8004 | **Resilience4j (Circuit Breaker):** Control de credenciales de acceso (`users`), asignación de roles (`roles`, `user_roles`) y tolerancia distributiva a fallos en flujos de autenticación. |
 | **ms-urgencias** | 8005 | **Interoperabilidad FHIR:** Admisión rápida de pacientes y clasificación de gravedad en flujos de atención de urgencia. |
 | **ms-centros** | 8006 | **Interoperabilidad FHIR:** Mapeo de organizaciones de salud, infraestructura y locaciones médicas físicas. |
-| **ms-notificaciones** | 8010 | **SMTP Relay (Brevo):** Componente aislado de mensajería asíncrona. Despacha alertas e invitaciones por correo electrónico real en formato HTML ante reasignaciones de cupos. Protegido perimetralmente mediante secreto en cabecera `X-Notification-Secret`. |
+| **ms-notificaciones** | 8010 | **SMTP Relay (Gmail):** Componente aislado de mensajería asíncrona. Despacha alertas e invitaciones por correo electrónico real en formato HTML ante reasignaciones de cupos. Protegido perimetralmente mediante secreto en cabecera `X-Notification-Secret`. |
 
 ## Stack Tecnológico
 
