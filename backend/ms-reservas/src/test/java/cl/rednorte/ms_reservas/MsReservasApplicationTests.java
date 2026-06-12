@@ -1,10 +1,10 @@
-package cl.rednorte.ms_agenda;
+package cl.rednorte.ms_reservas;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MsAgendaApplicationTests {
+class MsReservasApplicationTests {
 
 	@Test
 	void contextLoads() {

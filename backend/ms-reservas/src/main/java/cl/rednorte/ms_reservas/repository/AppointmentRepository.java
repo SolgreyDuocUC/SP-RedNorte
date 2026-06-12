@@ -11,4 +11,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     List<AppointmentEntity> findByPatientId(String patientId);
 
     List<AppointmentEntity> findByPractitionerId(String practitionerId);
+
+    List<AppointmentEntity> findByStatusOrderByPriorityDescCreatedAtAsc(String status);
+
+    List<AppointmentEntity> findByStatusAndSpecialtyOrderByPriorityDescCreatedAtAsc(String status, String specialty);
 }

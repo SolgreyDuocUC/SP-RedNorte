@@ -1,0 +1,94 @@
+=========================================================
+MS-URGENCIAS — INSTRUCCIONES DOCKER
+=========================================================
+
+Microservicio encargado de gestionar el flujo de
+atención de urgencias (ingreso, triage, espera,
+ficha clínica y alta médica) dentro del sistema RedNorte.
+
+  Puerto : 8005
+  Imagen : rednorte/ms-urgencias:dev
+  Swagger: http://localhost:8005/swagger-ui/index.html
+
+Requisitos previos:
+  - Docker Desktop instalado y en ejecución.
+  - Docker Compose habilitado.
+
+---------------------------------------------------------
+ARRANQUE RECOMENDADO: DESDE LA RAÍZ DEL PROYECTO
+---------------------------------------------------------
+
+La forma correcta de levantar este microservicio es
+usando el orquestador raíz, que levanta TODO de una vez:
+
+  cd SP-RedNorte
+  docker compose up -d --build
+
+Esto levanta en orden automático:
+  1. PostgreSQL
+  2. ms-ficha-clinica
+  3. ms-paciente
+  4. ms-reservas
+  5. ms-usuarios
+  6. ms-urgencias (este servicio)
+  7. Frontend
+
+---------------------------------------------------------
+VARIABLES DE ENTORNO (inyectadas por docker-compose)
+---------------------------------------------------------
+
+  SPRING_PROFILES_ACTIVE              → dev
+  SPRING_DATASOURCE_URL               → ${SPRING_DATASOURCE_URL} (desde .env raíz)
+  SPRING_DATASOURCE_USERNAME          → ${SPRING_DATASOURCE_USERNAME} (desde .env raíz)
+  SPRING_DATASOURCE_PASSWORD          → ${SPRING_DATASOURCE_PASSWORD} (desde .env raíz)
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME → ${SPRING_DATASOURCE_DRIVER_CLASS_NAME} (desde .env raíz)
+  TZ                                   → America/Santiago
+
+Los valores por defecto para entorno local (sin Docker)
+están definidos en application.properties.
+
+---------------------------------------------------------
+COMANDOS ÚTILES (ejecutar desde la raíz SP-RedNorte/)
+---------------------------------------------------------
+
+Ver logs de este microservicio:
+  docker compose logs -f ms-urgencias
+
+Reconstruir solo este microservicio:
+  docker compose up -d --build ms-urgencias
+
+Ver estado de todos los contenedores:
+  docker compose ps
+
+Detener todos los servicios:
+  docker compose stop
+
+Detener y eliminar contenedores (conserva datos de la BD):
+  docker compose down
+
+Eliminar todo incluyendo volúmenes (BORRA LA BD):
+  docker compose down -v
+
+---------------------------------------------------------
+ACCESOS
+---------------------------------------------------------
+
+  API REST   : http://localhost:8005
+  Swagger UI : http://localhost:8005/swagger-ui/index.html
+  PostgreSQL : localhost:5432 (usuario: postgres)
+
+---------------------------------------------------------
+ESTRUCTURA DEL DOCKERFILE
+---------------------------------------------------------
+
+Etapa 1 - BUILD:
+  Imagen  : maven:3.9.9-eclipse-temurin-21
+  Compila : mvn clean package -DskipTests
+  Output  : target/ms-urgencias-0.0.1-SNAPSHOT.jar
+
+Etapa 2 - RUNTIME:
+  Imagen  : eclipse-temurin:21-jre-alpine
+  Expone  : puerto 8005
+  Comando : java -jar app.jar
+
+=========================================================

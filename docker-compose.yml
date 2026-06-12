@@ -181,6 +181,77 @@ services:
       start_period: 90s
 
   # -----------------------------------------------------------
+  # MICROSERVICIO: ms-urgencias
+  # -----------------------------------------------------------
+  ms-urgencias:
+    build:
+      context: ./backend/ms-urgencias
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-urgencias:dev
+    container_name: rednorte-ms-urgencias-dev
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+      TZ: America/Santiago
+
+    ports:
+      - "8005:8005"
+
+    networks:
+      - rednorte-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8005/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # -----------------------------------------------------------
+  # MICROSERVICIO: ms-gateway (API Gateway)
+  # -----------------------------------------------------------
+  ms-gateway:
+    build:
+      context: ./backend/ms-gateway
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-gateway:dev
+    container_name: rednorte-ms-gateway-dev
+    restart: unless-stopped
+
+    depends_on:
+      - ms-ficha-clinica
+      - ms-paciente
+      - ms-reservas
+      - ms-usuarios
+      - ms-urgencias
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MS_FICHA_CLINICA_URI: http://ms-ficha-clinica:8001
+      MS_PACIENTE_URI: http://ms-paciente:8002
+      MS_RESERVAS_URI: http://ms-reservas:8003
+      MS_USUARIOS_URI: http://ms-usuarios:8004
+      MS_URGENCIAS_URI: http://ms-urgencias:8005
+      TZ: America/Santiago
+
+    ports:
+      - "8080:8080"
+
+    networks:
+      - rednorte-network
+
+  # -----------------------------------------------------------
   # FRONTEND
   # -----------------------------------------------------------
   frontend:
@@ -193,6 +264,7 @@ services:
     restart: unless-stopped
 
     depends_on:
+      - ms-gateway
       - ms-reservas
       - ms-paciente
 

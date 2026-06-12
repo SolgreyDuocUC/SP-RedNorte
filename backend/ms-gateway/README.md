@@ -1,44 +1,47 @@
-# SPS-rednorte-api-gateway
+# ms-gateway (ms-rednorte-api-gateway)
 
-Este es el API Gateway principal para la arquitectura de microservicios de RedNorte. Su función es servir como un único punto de entrada (recepcionista) que recibe las peticiones desde el frontend y las enruta al microservicio correspondiente.
+Este es el API Gateway principal para la arquitectura de microservicios de RedNorte. Su funcion es servir como un unico punto de entrada que recibe las peticiones desde el frontend y las enruta al microservicio correspondiente.
 
-## Tecnologías
+## Tecnologias
 * Java 21
-* Spring Boot 3.2.x
-* Spring Cloud Gateway Server WebMVC (2023.0.x)
+* Spring Boot 4.0.6
+* Spring Cloud Gateway Server WebMVC (2025.1.x)
 * Maven
 * Docker
 
 ## Enrutamiento Configurado
 
-Actualmente, el Gateway escucha en el puerto público `8080` y distribuye el tráfico hacia la red interna de contenedores de la siguiente manera:
+El Gateway escucha en el puerto publico `8080` y distribuye el trafico hacia la red interna de contenedores de la siguiente manera:
 
 | Ruta Entrante (Path) | Microservicio Destino | Puerto Interno |
-| :--- | :--- | :--- |
-| `/agendas/**` | `http://ms-agenda-profesional` | `8080` |
-| `/api/v1/**` | `http://ms-ficha-clinica` | `8001` |
-| `/centros/**` | `http://rednorte-ms-centros` | `8080` |
-| `/urgencias/**` | `http://ms-urgencias-flujo` | `8080` |
+| :-- | :-- | :-- |
+| `/api/v1/encounters/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/clinical-notes/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/procedures/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/conditions/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/history/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/observations/**` | `ms-ficha-clinica` | `8001` |
+| `/api/v1/patients/**` | `ms-paciente` | `8002` |
+| `/api/v1/coverages/**` | `ms-paciente` | `8002` |
+| `/api/v1/appointments/**` | `ms-reservas` | `8003` |
+| `/api/v1/slots/**` | `ms-reservas` | `8003` |
+| `/api/v1/users/**` | `ms-usuarios` | `8004` |
+| `/api/v1/roles/**` | `ms-usuarios` | `8004` |
+| `/urgencias/**` | `ms-urgencias` | `8005` |
 
-> **Nota Técnica:** La configuración de estas rutas se encuentra programada en código Java puro dentro de la clase `GatewayConfig.java` para garantizar mayor estabilidad frente a la versión WebMVC.
+> **Nota Tecnica:** La configuracion de estas rutas se encuentra programada en codigo Java puro dentro de la clase `GatewayConfig.java`. Las URLs destino son configurables via `application.yaml` (`services.*.url`), que a su vez leen las variables de entorno `MS_FICHA_CLINICA_URI`, `MS_PACIENTE_URI`, `MS_RESERVAS_URI`, `MS_USUARIOS_URI` y `MS_URGENCIAS_URI` inyectadas por `docker-compose.yml`. En ejecucion local (IDE/Maven) caen por defecto a `http://localhost:<puerto>`.
 
 ## Despliegue con Docker
 
-El Gateway cuenta con su propio `Dockerfile` y forma parte de la red orquestada de RedNorte. Para compilar y levantar este servicio, utiliza los siguientes comandos:
+El Gateway cuenta con su propio `Dockerfile` (build multi-etapa) y forma parte de la red orquestada de RedNorte. Para levantar todo el stack:
 
-1. **Compilar el JAR:**
 ```bash
-.\mvnw.cmd clean package -DskipTests
-```
-
-2. **Levantar el contenedor:**
-(Desde la carpeta SPS-RedNorte-Infraestructura)
-```bash
-docker-compose up --build -d ms-api-gateway
+docker-compose up --build -d ms-gateway
 ```
 
 ## Pruebas de Funcionamiento
-Puedes probar el Gateway apuntando al `localhost:8080`. Si el Gateway enruta correctamente, recibirás la respuesta del microservicio destino (incluyendo códigos HTTP 403 o 401 si el destino requiere autenticación).
 
-Ejemplo de endpoint público:
-* `GET http://localhost:8080/urgencias/espera/12345678-9`
+Puedes probar el Gateway apuntando a `localhost:8080`. Si el Gateway enruta correctamente, recibiras la respuesta del microservicio destino.
+
+Ejemplo de endpoint:
+* `GET http://localhost:8080/api/v1/appointments`
