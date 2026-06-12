@@ -218,6 +218,28 @@ services:
       start_period: 90s
 
   # -----------------------------------------------------------
+  # MICROSERVICIO: ms-centros (Centros y Organizaciones FHIR)
+  # -----------------------------------------------------------
+  ms-centros:
+    build:
+      context: ./backend/ms-centros
+      dockerfile: Dockerfile
+
+    image: rednorte/ms-centros:dev
+    container_name: rednorte-ms-centros-dev
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      TZ: America/Santiago
+
+    ports:
+      - "8006:8006"
+
+    networks:
+      - rednorte-network
+
+  # -----------------------------------------------------------
   # MICROSERVICIO: ms-gateway (API Gateway)
   # -----------------------------------------------------------
   ms-gateway:
@@ -235,6 +257,7 @@ services:
       - ms-reservas
       - ms-usuarios
       - ms-urgencias
+      - ms-centros
 
     environment:
       SPRING_PROFILES_ACTIVE: dev
@@ -243,6 +266,7 @@ services:
       MS_RESERVAS_URI: http://ms-reservas:8003
       MS_USUARIOS_URI: http://ms-usuarios:8004
       MS_URGENCIAS_URI: http://ms-urgencias:8005
+      MS_CENTROS_URI: http://ms-centros:8006
       TZ: America/Santiago
 
     ports:

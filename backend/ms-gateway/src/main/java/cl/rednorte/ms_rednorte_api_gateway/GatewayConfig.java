@@ -29,6 +29,9 @@ public class GatewayConfig {
         @Value("${services.urgencias.url}")
         private String urgenciasUrl;
 
+        @Value("${services.centros.url}")
+        private String centrosUrl;
+
         @Bean
         public RouterFunction<ServerResponse> customRoutes() {
                 return route("ruta-ficha-clinica")
@@ -58,6 +61,11 @@ public class GatewayConfig {
                                 .and(route("ruta-urgencias")
                                                 .route(path("/urgencias/**"), http())
                                                 .before(uri(urgenciasUrl))
+                                                .build())
+                                .and(route("ruta-centros")
+                                                .route(path("/api/v1/organizations/**")
+                                                                .or(path("/api/v1/locations/**")), http())
+                                                .before(uri(centrosUrl))
                                                 .build());
         }
 }
