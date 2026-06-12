@@ -52,7 +52,7 @@ export default function App() {
       case 'dashboard':
         return <DashboardView userRole={userRole} />;
       case 'appointments':
-        return <AppointmentsView />;
+        return <AppointmentsView userRole={userRole} />;
       case 'waiting-list':
         return <WaitingListView />;
       case 'facilities':
