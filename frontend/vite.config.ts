@@ -43,6 +43,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/pacientes/, ''),
       },
+      '/proxy/usuarios': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/usuarios/, ''),
+      },
       '/proxy/ficha-clinica': {
         target: 'http://localhost:8011',
         changeOrigin: true,

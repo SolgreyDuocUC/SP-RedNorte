@@ -8,6 +8,7 @@ import cl.rednorte.ms_usuarios.model.mapper.UserMapper;
 import cl.rednorte.ms_usuarios.repository.UserRepository;
 import cl.rednorte.ms_usuarios.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final UserMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -33,8 +35,7 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity entity = mapper.toEntity(userDTO);
-        // En un MVP real sin tokens, la contraseña debería encriptarse,
-        // pero el usuario pidió algo funcional rápido.
+        entity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         return mapper.toDto(repository.save(entity));
     }
 
@@ -65,7 +66,7 @@ public class UserServiceImpl implements UserService {
         existing.setEnabled(userDTO.isEnabled());
 
         if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
-            existing.setPassword(userDTO.getPassword());
+            existing.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         return mapper.toDto(repository.save(existing));

@@ -1,39 +1,42 @@
 import { 
-  Users, 
-  Stethoscope, 
-  Clock, 
-  AlertTriangle, 
   Search, 
   Plus, 
-  Filter, 
-  MoreHorizontal, 
-  ChevronRight, 
-  Activity,
-  UserCircle
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { useState } from 'react';
 import { DashboardAdmin } from './DashboardAdmin';
 import { DashboardAdministrative } from './DashboardAdministrative';
 import { DashboardDoctor } from './DashboardDoctor';
 import { DashboardNurse } from './DashboardNurse';
+import type { AppRole } from '../1. Login/Login';
 
-type UserRole = 'ADMIN' | 'ADMINISTRATIVO' | 'ENFERMERO' | 'MEDICO';
+interface DashboardViewProps {
+  role: AppRole;
+  onNewBooking?: () => void;
+}
 
-export function DashboardView({ onNewBooking }: { onNewBooking?: () => void }) {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
+// Mapa de nombre legible por rol
+const ROLE_LABELS: Record<AppRole, string> = {
+  admin: 'Administrador',
+  administrativo: 'Administrativo',
+  enfermeria: 'Enfermería',
+  medico: 'Médico',
+  paciente: 'Paciente',
+};
+
+export function DashboardView({ role, onNewBooking }: DashboardViewProps) {
 
   const renderDashboardByRole = () => {
-    switch (currentRole) {
-      case 'ADMIN':
+    switch (role) {
+      case 'admin':
         return <DashboardAdmin />;
-      case 'ADMINISTRATIVO':
+      case 'administrativo':
         return <DashboardAdministrative />;
-      case 'ENFERMERO':
+      case 'enfermeria':
         return <DashboardNurse />;
-      case 'MEDICO':
+      case 'medico':
         return <DashboardDoctor />;
+      case 'paciente':
+        // Por ahora, paciente ve el dashboard administrativo (se puede crear uno propio)
+        return <DashboardAdministrative />;
       default:
         return <DashboardAdmin />;
     }
@@ -41,34 +44,6 @@ export function DashboardView({ onNewBooking }: { onNewBooking?: () => void }) {
 
   return (
     <div className="mt-[104px] md:mt-[88px] min-h-screen bg-[#f8fafc] p-4 md:p-8 space-y-8 font-sans">
-      
-      {/* ROLE SWITCHER (Solo para demostración de arquitectura) */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-[#004a87]/10 flex items-center justify-center">
-            <UserCircle className="h-6 w-6 text-[#004a87]" />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Simulación de Rol</p>
-            <p className="text-sm font-bold text-[#004a87]">{currentRole}</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(['ADMIN', 'ADMINISTRATIVO', 'ENFERMERO', 'MEDICO'] as UserRole[]).map((role) => (
-            <button
-              key={role}
-              onClick={() => setCurrentRole(role)}
-              className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all ${
-                currentRole === role 
-                ? 'bg-[#004a87] text-white shadow-md' 
-                : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-              }`}
-            >
-              {role}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* HEADER DE BIENVENIDA Y ACCIONES RÁPIDAS (RF16, RF19) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -76,6 +51,9 @@ export function DashboardView({ onNewBooking }: { onNewBooking?: () => void }) {
           <h2 className="text-3xl font-bold text-[#004a87] tracking-tight">RedNorte Clínica</h2>
           <p className="text-slate-500 text-sm mt-1">
             <span className="font-semibold text-[#00a7b1]">Sede Iquique</span> · {new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <span className="ml-2 inline-flex items-center gap-1.5 bg-[#e6f4f9] text-[#004a87] text-xs font-bold px-3 py-1 rounded-full">
+              {ROLE_LABELS[role]}
+            </span>
           </p>
         </div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { LoginView } from './app/components/pages/1. Login/Login';
+import { LoginView, type AppRole } from './app/components/pages/1. Login/Login';
+import { authStorage } from './remotes/auth.storage';
 import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
@@ -11,9 +12,11 @@ import { HistoryView } from './app/components/pages/7. VistaHistorial/HistoryVie
 import { HomePage } from './app/home/HomePage';
 import { Toaster } from './app/components/ui/sonner';
 import { Reservahoraview } from './app/components/pages/8. Reservas/Reservahoraview';
+import { AdminView } from './app/components/pages/9. AdminView/AdminView';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<AppRole | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [showReserva, setShowReserva] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
@@ -24,9 +27,10 @@ export default function App() {
       return (
         <LoginView 
           onLoginSuccess={(role) => {
-            console.log('User logged in with role:', role);
+            setUserRole(role);
             setIsLoggedIn(true);
             setShowLogin(false);
+            setActiveView('dashboard');
           }} 
           onBack={() => setShowLogin(false)}
         />
@@ -47,7 +51,7 @@ export default function App() {
   const renderView = () => {
     switch (activeView) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView role={userRole!} />;
       case 'appointments':
         return <AppointmentsView />;
       case 'waiting-list':
@@ -60,6 +64,8 @@ export default function App() {
         return <HistoryView />;
       case 'reserva':
         return <Reservahoraview onBack={() => setActiveView('dashboard')} />;
+      case 'admin-users':
+        return <AdminView />;
       default:
         return (
           <div className="flex h-full items-center justify-center">
@@ -76,7 +82,12 @@ export default function App() {
     <div className="h-screen w-full flex flex-col pt-16 md:pt-20 bg-background overflow-hidden relative">
       <Toaster position="top-right" richColors closeButton />
       <Header 
-        onLogout={() => setIsLoggedIn(false)} 
+        onLogout={() => {
+          authStorage.clearToken();
+          setIsLoggedIn(false);
+          setUserRole(null);
+          setActiveView('dashboard');
+        }}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
@@ -96,6 +107,7 @@ export default function App() {
             setSidebarOpen(false); // Auto-cerrar sidebar en móvil al elegir vista
           }}
           isOpen={sidebarOpen}
+          role={userRole!}
         />
 
         <main className="flex-1 h-full overflow-y-auto overflow-x-hidden md:ml-64 relative">

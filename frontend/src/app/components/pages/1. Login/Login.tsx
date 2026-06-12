@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { authRemote } from '@/remotes/auth.remote';
+import { authStorage } from '@/remotes/auth.storage';
 
-// Credenciales simuladas para el MVP (rol admin)
-const DEMO_CREDENTIALS = {
-  run: '12345678-5', // Formato limpio para backend (dígito verificador válido)
-  password: 'admin123',
-  role: 'admin' as const,
-};
+export type AppRole = 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente';
 
 // Formatea RUN mientras el usuario escribe: "123456789" → "12.345.678-9"
 function formatRUN(raw: string): string {
@@ -46,7 +43,7 @@ function validateRUN(formatted: string): boolean {
 }
 
 interface LoginViewProps {
-  onLoginSuccess: (role: 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente') => void;
+  onLoginSuccess: (role: AppRole) => void;
   onBack?: () => void;
 }
 
@@ -71,7 +68,7 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
     if (runError) setRunError('');
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setRunError('');
     setPassError('');
 
@@ -92,23 +89,23 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
 
     if (!valid) return;
 
-    // Simula cómo se enviaría al backend (sin puntos, con guion y dígito en minúscula)
+    // Formato esperado por el backend (sin puntos, con guion y dígito en minúscula)
     const cleanRun = run.replace(/\./g, '').toLowerCase();
-
-    if (cleanRun !== DEMO_CREDENTIALS.run || password !== DEMO_CREDENTIALS.password) {
-      setPassError('RUN o contraseña incorrectos');
-      return;
-    }
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const { token, user } = await authRemote.login({ username: cleanRun, password });
+      authStorage.setToken(token);
       setLoading(false);
       setSuccess(true);
       setTimeout(() => {
-        onLoginSuccess(DEMO_CREDENTIALS.role);
+        onLoginSuccess(user.roles[0] as AppRole);
       }, 1200);
-    }, 900);
+    } catch {
+      setLoading(false);
+      setPassError('RUN o contraseña incorrectos');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, next?: () => void) => {
@@ -152,16 +149,6 @@ export function LoginView({ onLoginSuccess, onBack }: LoginViewProps) {
         <div className="flex-1 p-10 flex flex-col justify-center">
           <h2 className="text-xl font-bold text-[#004a87] mb-1">Acceso al sistema</h2>
           <p className="text-sm text-slate-500 mb-7">Ingresa tus credenciales institucionales</p>
-
-          {/* Hint de demo */}
-          <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 mb-6 text-xs text-[#185FA5]">
-            <span className="w-2 h-2 rounded-full bg-[#0096c7] shrink-0" />
-            <span>
-              Modo demo: RUN{' '}
-              <strong className="font-semibold">12.345.678-5</strong> · Contraseña{' '}
-              <strong className="font-semibold">admin123</strong>
-            </span>
-          </div>
 
           {/* Mensaje de éxito */}
           {success && (

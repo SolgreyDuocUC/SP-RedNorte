@@ -17,6 +17,8 @@ services:
     url: ${MS_PACIENTE_URI:http://localhost:8002}
   reservas:
     url: ${MS_RESERVAS_URI:http://localhost:8003}
+  usuarios:
+    url: ${MS_USUARIOS_URI:http://localhost:8086}
   urgencias:
     url: ${MS_URGENCIAS_URI:http://localhost:8005}
   centros:

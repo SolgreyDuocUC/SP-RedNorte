@@ -32,6 +32,11 @@ springdoc:
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:}
+  security:
+    jwt:
+      # HS256. En prod, sobreescribir con un secreto fuerte vía APP_JWT_SECRET.
+      secret: ${APP_JWT_SECRET:dev-only-insecure-secret-change-me-please-32bytes}
+      expiration: ${APP_JWT_EXPIRATION:8h}
   login-user:
     base-url: ${LOGIN_USER_BASE_URL:http://localhost:8087}
     token: ${LOGIN_USER_TOKEN:}
