@@ -5,6 +5,7 @@ export interface AppointmentDTO {
   id?: string;
   patientId: string;
   practitionerId: string;
+  specialty: string; // requerido por el backend (columna NOT NULL)
   start: string;  // ISO 8601 — backend serializes/deserializes Date as ISO
   end: string;
   status: AppointmentStatus;

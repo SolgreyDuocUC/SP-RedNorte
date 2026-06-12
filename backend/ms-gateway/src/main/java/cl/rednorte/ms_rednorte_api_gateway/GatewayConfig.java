@@ -23,9 +23,6 @@ public class GatewayConfig {
         @Value("${services.reservas.url}")
         private String reservasUrl;
 
-        @Value("${services.usuarios.url}")
-        private String usuariosUrl;
-
         @Value("${services.urgencias.url}")
         private String urgenciasUrl;
 
@@ -55,11 +52,6 @@ public class GatewayConfig {
                                                 .route(path("/api/v1/appointments/**")
                                                                 .or(path("/api/v1/slots/**")), http())
                                                 .before(uri(reservasUrl))
-                                                .build())
-                                .and(route("ruta-usuarios")
-                                                .route(path("/api/v1/users/**")
-                                                                .or(path("/api/v1/roles/**")), http())
-                                                .before(uri(usuariosUrl))
                                                 .build())
                                 .and(route("ruta-urgencias")
                                                 .route(path("/urgencias/**"), http())

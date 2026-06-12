@@ -16,6 +16,7 @@ class AppointmentService {
     const dto: CreateAppointmentDTO = {
       patientId:        data.identifier?.replace(/[^0-9kK]/g, '').toUpperCase() ?? 'unknown',
       practitionerId:   data.doctorId ?? data.specialtyId ?? 'unknown',
+      specialty:        data.specialtyName ?? data.specialtyId ?? 'Medicina General',
       start:            startDate.toISOString(),
       end:              endDate.toISOString(),
       status:           'booked',

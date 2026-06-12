@@ -43,6 +43,26 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/pacientes/, ''),
       },
+      '/proxy/ficha-clinica': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/ficha-clinica/, ''),
+      },
+      '/proxy/centros': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/centros/, ''),
+      },
+      '/proxy/urgencias': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/urgencias/, ''),
+      },
+      '/proxy/notificaciones': {
+        target: 'http://localhost:8011',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/notificaciones/, ''),
+      },
     },
   },
 });
