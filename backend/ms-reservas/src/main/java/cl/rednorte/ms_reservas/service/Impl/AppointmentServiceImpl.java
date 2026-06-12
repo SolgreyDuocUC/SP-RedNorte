@@ -44,6 +44,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Value("${services.notificaciones.url}")
     private String notificacionesUrl;
 
+    @Value("${app.security.notification-secret:}")
+    private String notificationSecret;
+
     @Override
     @Transactional
     public AppointmentDTO create(AppointmentDTO dto) {
@@ -231,6 +234,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             restClient.post()
                     .uri(notificacionesUrl + "/api/v1/notifications/send")
+                    .header("X-Notification-Secret", notificationSecret)
                     .body(notification)
                     .retrieve()
                     .toBodilessEntity();
