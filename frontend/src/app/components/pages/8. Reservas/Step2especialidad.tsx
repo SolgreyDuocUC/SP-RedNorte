@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react';
 import {
   Heart, Brain, Bone, Eye, Wind, Stethoscope,
   Baby, Activity, ArrowLeft, ArrowRight, CheckCircle2,
 } from 'lucide-react';
 import { BookingData, AppointmentType, Doctor } from '../../../types/Booking';
 import { SPECIALTIES, MOCK_DOCTORS, doctorInitials } from '../../../../core/constants/BookingConst';
+import { slotsRemote } from '../../../../remotes/slots.remote';
 
 const ICON_MAP: Record<string, React.FC<{ size?: number; className?: string }>> = {
   Heart, Brain, Bone, Eye, Wind, Stethoscope, Baby, Activity,
@@ -19,6 +21,27 @@ interface Step2EspecialidadProps {
 export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2EspecialidadProps) {
   const appointmentType = data.appointmentType ?? 'PRESENCIAL';
   const specialtyId     = data.specialtyId     ?? '';
+
+  const [realSlotsCount, setRealSlotsCount] = useState<Record<string, number> | null>(null);
+
+  useEffect(() => {
+    if (!specialtyId) {
+      setRealSlotsCount(null);
+      return;
+    }
+    slotsRemote.getAvailable(specialtyId)
+      .then(slots => {
+        const counts: Record<string, number> = {};
+        slots.forEach(s => {
+          counts[s.practitionerId] = (counts[s.practitionerId] || 0) + 1;
+        });
+        setRealSlotsCount(counts);
+      })
+      .catch(err => {
+        console.error('No se pudo cargar cupos reales, usando mocks.', err);
+        setRealSlotsCount(null);
+      });
+  }, [specialtyId]);
 
   function handleTypeChange(type: AppointmentType) {
     onChange({ appointmentType: type });
@@ -120,12 +143,15 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
             Profesionales disponibles
           </p>
           <div className="flex flex-col gap-3">
-            {doctorsForSpecialty.map(doctor => {
+            {doctorsForSpecialty
+              .filter(d => realSlotsCount === null || (realSlotsCount[d.id] ?? 0) > 0)
+              .map(doctor => {
               const isSelected = data.doctorId === doctor.id;
               const ini        = doctorInitials(doctor.name);
+              const slotsCount = realSlotsCount !== null ? (realSlotsCount[doctor.id] || 0) : (doctor.slots ?? 0);
               const slotsColor =
-                (doctor.slots ?? 0) > 4  ? 'bg-[#e6f7f4] text-[#085041]' :
-                (doctor.slots ?? 0) > 0  ? 'bg-amber-50 text-amber-700'  :
+                slotsCount > 4  ? 'bg-[#e6f7f4] text-[#085041]' :
+                slotsCount > 0  ? 'bg-amber-50 text-amber-700'  :
                                             'bg-red-50 text-red-500';
 
               return (
@@ -161,9 +187,9 @@ export function Step2Especialidad({ data, onChange, onNext, onBack }: Step2Espec
                             <p className="text-xs text-slate-500 mt-0.5">{doctor.title}</p>
                           )}
                         </div>
-                        {doctor.slots !== undefined && (
+                          {slotsCount !== undefined && (
                           <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${slotsColor}`}>
-                            {doctor.slots > 0 ? `${doctor.slots} horas` : 'Sin horas'}
+                            {slotsCount > 0 ? `${slotsCount} horas` : 'Sin horas'}
                           </span>
                         )}
                       </div>

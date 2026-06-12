@@ -2,10 +2,10 @@ import { ArrowRight, HeartPulse, ShieldCheck, Users, Clock3 } from 'lucide-react
 
 interface HeroSectionProps {
   onEspecialidadesClick: () => void;
-  onExamenesClick: () => void;
+  onConsultarClick: () => void;
 }
 
-export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSectionProps) {
+export function HeroSection({ onEspecialidadesClick, onConsultarClick }: HeroSectionProps) {
   return (
     <section
       className="relative flex items-center justify-center overflow-hidden min-h-[640px] lg:min-h-[680px] pt-24 pb-20 md:py-24 bg-gradient-to-b from-sky-50/60 via-white to-white"
@@ -72,10 +72,10 @@ export function HeroSection({ onEspecialidadesClick, onExamenesClick }: HeroSect
             </button>
 
             <button
-              onClick={onExamenesClick}
+              onClick={onConsultarClick}
               className="w-full sm:w-auto px-9 py-3.5 rounded-full text-base font-medium bg-white border border-gray-200 text-[#0077b6] hover:border-[#0096c7] hover:bg-sky-50/60 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2 text-center shadow-sm"
             >
-              Consulta tus exámenes
+              Consultar mis agendas médicas y exámenes
               <ArrowRight className="w-4 h-4 opacity-80" />
             </button>
           </div>

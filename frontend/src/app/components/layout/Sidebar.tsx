@@ -28,7 +28,9 @@ const getNavigationGroups = (role: string = '') => [
   {
     title: 'Atención del Paciente',
     items: [
-      { id: 'appointments', label: 'Citas Médicas', icon: Calendar },
+      ...(role === 'admin' || role === 'administrativo'
+        ? [{ id: 'appointments', label: 'Citas Médicas', icon: Calendar }]
+        : []),
       { id: 'history', label: 'Historial Clínico', icon: FileText },
     ],
   },
@@ -45,7 +47,10 @@ const getNavigationGroups = (role: string = '') => [
       { id: 'facilities', label: 'Establecimientos', icon: Hospital },
       { id: 'reports', label: 'Indicadores', icon: Activity, disabled: true },
       { id: 'settings', label: 'Configuración', icon: Settings, disabled: true },
-      ...(role === 'admin' ? [{ id: 'admin-users', label: 'Colaboradores', icon: Users, disabled: false }] : [])
+      ...(role === 'admin' ? [
+        { id: 'admin-users', label: 'Colaboradores', icon: Users, disabled: false },
+        { id: 'admin-facilities', label: 'Gestión Centros', icon: Hospital, disabled: false }
+      ] : [])
     ],
   },
 ];

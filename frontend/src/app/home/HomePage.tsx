@@ -7,14 +7,16 @@ import { BookingSection } from '../home/BookingSection';
 import { ServiciosSection } from '../home/ServiciosSection';
 import { CentrosSection } from '../home/CentrosSection';
 import { FloatingElements } from '../home/FloatingElements';
+import type { AppointmentDTO } from '../../remotes/dtos/appointment.dto';
 
 interface HomePageProps {
   onLogin: () => void;
   onReserva?: () => void;
+  onReagenda?: (app: AppointmentDTO) => void;
 }
 
-export function HomePage({ onLogin, onReserva }: HomePageProps) {
-  const [bookingTab, setBookingTab] = useState<'consultas' | 'examenes'>('consultas');
+export function HomePage({ onLogin, onReserva, onReagenda }: HomePageProps) {
+  const [bookingTab, setBookingTab] = useState<'consultas' | 'examenes' | 'mis-reservas'>('consultas');
 
   const scrollToBooking = () => {
     const el = document.getElementById('booking-section');
@@ -29,8 +31,8 @@ export function HomePage({ onLogin, onReserva }: HomePageProps) {
     setTimeout(scrollToBooking, 50);
   };
 
-  const handleExamenesClick = () => {
-    setBookingTab('examenes');
+  const handleConsultarClick = () => {
+    setBookingTab('mis-reservas');
     setTimeout(scrollToBooking, 50);
   };
 
@@ -41,14 +43,17 @@ export function HomePage({ onLogin, onReserva }: HomePageProps) {
       <main className="flex-1">
         <HeroSection 
           onEspecialidadesClick={handleEspecialidadesClick} 
-          onExamenesClick={handleExamenesClick} 
+          onConsultarClick={handleConsultarClick} 
         />
         <InfoSection />
-        <BookingSection 
-          onReserva={onReserva} 
-          activeTab={bookingTab} 
-          setActiveTab={setBookingTab} 
-        />
+        <div id="booking-section">
+          <BookingSection 
+            onReserva={onReserva} 
+            activeTab={bookingTab} 
+            setActiveTab={setBookingTab} 
+            onReagenda={onReagenda}
+          />
+        </div>
         <ServiciosSection />
         <CentrosSection />
       </main>

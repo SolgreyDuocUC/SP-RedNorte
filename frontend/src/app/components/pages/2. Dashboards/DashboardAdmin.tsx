@@ -7,19 +7,43 @@ import {
   Stethoscope 
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { 
-  mockPatients, 
-  mockAppointments, 
-  mockFacilities, 
-  mockProfessionals 
-} from '../../../mocks/mockData';
-import { Appointment, Facility, Professional } from '../../../types/clinical';
+import { useState, useEffect } from 'react'
+import { AppointmentDTO } from '../../../../remotes/dtos/appointment.dto';
+import { PatientDTO } from '../../../../remotes/dtos/patient.dto';
+import { FacilityDTO } from '../../../../remotes/facilities.remote';
+import { patientRemote } from '../../../../remotes/patient.remote';
+import { appointmentsRemote } from '../../../../remotes/appointments.remote';
+import { facilitiesRemote } from '../../../../remotes/facilities.remote';
 
 export function DashboardAdmin() {
+  const [patientsCount, setPatientsCount] = useState(0);
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
+  const [cancellationsCount, setCancellationsCount] = useState(0);
+  const [facilities, setFacilities] = useState<FacilityDTO[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [patientsData, appointmentsData, facilitiesData] = await Promise.all([
+          patientRemote.getAll(),
+          appointmentsRemote.getAll(),
+          facilitiesRemote.getAll()
+        ]);
+        setPatientsCount(patientsData.length);
+        setAppointmentsCount(appointmentsData.length);
+        setCancellationsCount(appointmentsData.filter(a => a.status === 'cancelled').length);
+        setFacilities(facilitiesData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   const stats = {
-    totalPatients: mockPatients.length,
-    totalAppointments: mockAppointments.length,
-    cancellations: mockAppointments.filter((a: Appointment) => a.estado === 'Cancelado').length,
+    totalPatients: patientsCount,
+    totalAppointments: appointmentsCount,
+    cancellations: cancellationsCount,
     reassignments: 4, // Simulated KPI
   };
 
@@ -88,34 +112,38 @@ export function DashboardAdmin() {
           </CardHeader>
           <CardContent className="p-0">
             <ul className="divide-y divide-slate-100">
-              {mockFacilities.map((f: Facility) => (
+              {facilities.map((f: FacilityDTO) => (
                 <li key={f.id} className="p-3 hover:bg-slate-50 transition-colors">
-                  <p className="text-sm font-bold text-slate-800">{f.nombre}</p>
-                  <p className="text-xs text-slate-500">{f.comuna} · {f.tipo}</p>
+                  <p className="text-sm font-bold text-slate-800">{f.name}</p>
+                  <p className="text-xs text-slate-500">Centro Médico · {f.status}</p>
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
 
-        {/* Lista de Profesionales */}
+        {/* Acceso a Profesionales */}
         <Card className="shadow-md">
           <CardHeader className="bg-slate-50 border-b">
             <CardTitle className="text-sm font-bold flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-[#00a7b1]" /> Profesionales del Sistema
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[300px] overflow-y-auto">
-              <ul className="divide-y divide-slate-100">
-                {mockProfessionals.map((p: Professional) => (
-                  <li key={p.id} className="p-3 hover:bg-slate-50 transition-colors">
-                    <p className="text-sm font-bold text-slate-800">{p.nombre}</p>
-                    <p className="text-xs text-slate-500">{p.especialidad} · {p.establecimiento}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <CardContent className="p-8 flex flex-col items-center justify-center text-center">
+            <Users className="h-12 w-12 text-slate-300 mb-4" />
+            <h3 className="text-lg font-bold text-slate-700">Gestión de Colaboradores</h3>
+            <p className="text-sm text-slate-500 mt-2 mb-6 max-w-sm">
+              Desde aquí puedes crear, editar, eliminar profesionales médicos y asignarles sus horarios de atención en cada sede.
+            </p>
+            <button 
+              onClick={() => {
+                const event = new CustomEvent('navigate', { detail: 'admin-users' });
+                window.dispatchEvent(event);
+              }}
+              className="bg-[#004a87] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm hover:bg-[#003561] transition-colors"
+            >
+              Ir al Panel de Colaboradores
+            </button>
           </CardContent>
         </Card>
       </div>

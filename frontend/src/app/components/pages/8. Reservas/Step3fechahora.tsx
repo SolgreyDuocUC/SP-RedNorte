@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
 import {
@@ -9,6 +9,8 @@ import {
   WEEKDAYS_SHORT,
   formatDateLabel,
 } from '../../../../core/constants/BookingConst';
+import { slotsRemote } from '../../../../remotes/slots.remote';
+import type { SlotDTO } from '../../../../remotes/dtos/appointment.dto';
 
 interface Step3FechaHoraProps {
   data: Partial<BookingData>;
@@ -21,6 +23,18 @@ export function Step3FechaHora({ data, onChange, onNext, onBack }: Step3FechaHor
   const today = new Date();
   const [calYear,  setCalYear]  = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [realSlots, setRealSlots] = useState<SlotDTO[] | null>(null);
+
+  useEffect(() => {
+    if (data.doctorId) {
+      slotsRemote.getByPractitioner(data.doctorId)
+        .then(slots => setRealSlots(slots))
+        .catch(err => {
+          console.error("Error fetching slots, falling back to mock", err);
+          setRealSlots(null);
+        });
+    }
+  }, [data.doctorId]);
 
   const selectedDate = data.date  ?? '';
   const selectedSlot = data.slot  ?? '';
@@ -163,24 +177,47 @@ export function Step3FechaHora({ data, onChange, onNext, onBack }: Step3FechaHor
             <Clock size={12} /> Horarios disponibles
           </p>
           <div className="grid grid-cols-4 gap-2">
-            {MOCK_SLOTS.map(({ time, available }) => (
-              <button
-                key={time}
-                onClick={() => available && handleSlotSelect(time)}
-                disabled={!available}
-                className={`
-                  py-2.5 rounded-xl text-xs font-semibold border-[1.5px] transition-all
-                  ${!available
-                    ? 'border-slate-100 bg-slate-50 text-slate-300 line-through cursor-not-allowed'
-                    : selectedSlot === time
-                      ? 'border-[#5bc0eb] bg-[#5bc0eb] text-white shadow-sm'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-[#5bc0eb] hover:bg-[#eaf8ff]'
-                  }
-                `}
-              >
-                {time}
-              </button>
-            ))}
+            {(() => {
+              let displaySlots = MOCK_SLOTS;
+              
+              if (realSlots !== null) {
+                // Filter slots matching selectedDate
+                const slotsForDay = realSlots.filter(s => {
+                  const d = new Date(s.start);
+                  const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                  return dStr === selectedDate;
+                });
+                
+                // If there are real slots for this day, map them. Otherwise, show nothing or empty.
+                if (slotsForDay.length > 0) {
+                  displaySlots = slotsForDay.map(s => {
+                    const timeStr = new Date(s.start).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                    return { time: timeStr, available: s.status === 'free' };
+                  });
+                } else {
+                  return <p className="text-sm text-slate-400 col-span-4 py-4 text-center">No hay horas disponibles en este día.</p>;
+                }
+              }
+
+              return displaySlots.map(({ time, available }) => (
+                <button
+                  key={time}
+                  onClick={() => available && handleSlotSelect(time)}
+                  disabled={!available}
+                  className={`
+                    py-2.5 rounded-xl text-xs font-semibold border-[1.5px] transition-all
+                    ${!available
+                      ? 'border-slate-100 bg-slate-50 text-slate-300 line-through cursor-not-allowed'
+                      : selectedSlot === time
+                        ? 'border-[#5bc0eb] bg-[#5bc0eb] text-white shadow-sm'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#5bc0eb] hover:bg-[#eaf8ff]'
+                    }
+                  `}
+                >
+                  {time}
+                </button>
+              ));
+            })()}
           </div>
           <p className="text-[11px] text-slate-400 mt-2">
             Los horarios tachados ya están reservados.

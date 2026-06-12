@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { Search, MessageCircle } from 'lucide-react';
 import { especialidades, examenes } from '../types/home-slides';
+import { PatientAppointmentsPanel } from './PatientAppointmentsPanel';
+import type { AppointmentDTO } from '../../remotes/dtos/appointment.dto';
 
 interface BookingSectionProps {
   onReserva?: () => void;
-  activeTab?: 'consultas' | 'examenes';
-  setActiveTab?: (tab: 'consultas' | 'examenes') => void;
+  activeTab?: 'consultas' | 'examenes' | 'mis-reservas';
+  setActiveTab?: (tab: 'consultas' | 'examenes' | 'mis-reservas') => void;
+  onReagenda?: (app: AppointmentDTO) => void;
 }
 
-export function BookingSection({ onReserva, activeTab, setActiveTab }: BookingSectionProps) {
-  const [localTab, setLocalTab] = useState<'consultas' | 'examenes'>('consultas');
-  
-  const bookTab = activeTab !== undefined ? activeTab : localTab;
-  const setBookTab = setActiveTab !== undefined ? setActiveTab : setLocalTab;
+export function BookingSection({ onReserva, activeTab, setActiveTab, onReagenda }: BookingSectionProps) {
+  const defaultTab = activeTab || 'consultas';
+  const [internalTab, setInternalTab] = useState<'consultas' | 'examenes' | 'mis-reservas'>(defaultTab);
+
+  const bookTab = setActiveTab ? activeTab! : internalTab;
+  const setBookTab = setActiveTab ? setActiveTab : setInternalTab;
   
   const [typeTab, setTypeTab] = useState<'especialidad' | 'profesional'>('especialidad');
   const [search, setSearch] = useState('');
@@ -37,8 +41,8 @@ export function BookingSection({ onReserva, activeTab, setActiveTab }: BookingSe
         {/* PANEL */}
         <div className="flex-1 w-full">
 
-          {/* TABS PRINCIPALES (más aire + estilo card) */}
-          <div className="flex gap-2 mb-5">
+          {/* TABS PRINCIPALES */}
+          <div className="flex flex-wrap gap-2 mb-5">
             <button
               onClick={() => setBookTab('consultas')}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
@@ -54,93 +58,107 @@ export function BookingSection({ onReserva, activeTab, setActiveTab }: BookingSe
               onClick={() => setBookTab('examenes')}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
                 bookTab === 'examenes'
-                  ? 'bg-[#023e8a] text-white shadow-sm'
+                  ? 'bg-white border border-gray-200 text-[#0096c7] shadow-sm'
                   : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
               Exámenes
             </button>
+
+            <button
+              onClick={() => setBookTab('mis-reservas')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+                bookTab === 'mis-reservas'
+                  ? 'bg-[#023e8a] text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              Mis Reservas
+            </button>
           </div>
 
-          {/* CARD */}
-          <div className="border border-gray-200 rounded-2xl p-6 md:p-8 bg-white shadow-sm space-y-6">
+          {bookTab === 'mis-reservas' ? (
+            <PatientAppointmentsPanel onReagenda={onReagenda} />
+          ) : (
+            <div className="border border-gray-200 rounded-2xl p-6 md:p-8 bg-white shadow-sm space-y-6">
 
-            {/* SUB TABS (más tipo selector moderno) */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setTypeTab('especialidad')}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
-                  typeTab === 'especialidad'
-                    ? 'bg-[#0096c7] text-white shadow'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Especialidad
-              </button>
-
-              <button
-                onClick={() => setTypeTab('profesional')}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
-                  typeTab === 'profesional'
-                    ? 'bg-[#0096c7] text-white shadow'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Profesional
-              </button>
-            </div>
-
-            {/* SEARCH (más grande y “tipo app”) */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={
-                  typeTab === 'especialidad'
-                    ? `Buscar ${bookTab === 'consultas' ? 'especialidad' : 'examen'}...`
-                    : 'Buscar profesional...'
-                }
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm
-                focus:outline-none focus:ring-2 focus:ring-[#0096c7]/30 focus:border-[#0096c7]
-                transition"
-              />
-            </div>
-
-            {/* QUICK CHIPS (más aire entre chips) */}
-            <div className="flex flex-wrap gap-3">
-              {filtered.slice(0, 8).map((item) => (
+              {/* SUB TABS */}
+              <div className="flex gap-2">
                 <button
-                  key={item}
-                  className="px-4 py-2 rounded-full border border-gray-200 text-xs text-gray-600
-                  hover:border-[#0096c7] hover:text-[#0096c7] hover:bg-[#e0f7fa]
-                  transition-all"
+                  onClick={() => setTypeTab('especialidad')}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                    typeTab === 'especialidad'
+                      ? 'bg-[#0096c7] text-white shadow'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
                 >
-                  {item}
+                  Especialidad
                 </button>
-              ))}
+
+                <button
+                  onClick={() => setTypeTab('profesional')}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
+                    typeTab === 'profesional'
+                      ? 'bg-[#0096c7] text-white shadow'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Profesional
+                </button>
+              </div>
+
+              {/* SEARCH */}
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder={
+                    typeTab === 'especialidad'
+                      ? `Buscar ${bookTab === 'consultas' ? 'especialidad' : 'examen'}...`
+                      : 'Buscar profesional...'
+                  }
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl text-sm
+                  focus:outline-none focus:ring-2 focus:ring-[#0096c7]/30 focus:border-[#0096c7]
+                  transition"
+                />
+              </div>
+
+              {/* QUICK CHIPS */}
+              <div className="flex flex-wrap gap-3">
+                {filtered.slice(0, 8).map((item) => (
+                  <button
+                    key={item}
+                    className="px-4 py-2 rounded-full border border-gray-200 text-xs text-gray-600
+                    hover:border-[#0096c7] hover:text-[#0096c7] hover:bg-[#e0f7fa]
+                    transition-all"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+
+              {/* ACTIONS */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+
+                <button 
+                  onClick={onReserva}
+                  className="flex-1 px-6 py-3 rounded-full bg-[#0096c7] text-white text-sm font-bold
+                hover:bg-[#0077b6] transition shadow-sm">
+                  Buscar disponibilidad
+                </button>
+
+                <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-full
+                border border-gray-200 text-sm text-gray-600 hover:border-green-500 hover:text-green-600
+                transition">
+                  <MessageCircle className="h-4 w-4 text-green-500" />
+                  WhatsApp
+                </button>
+              </div>
+
             </div>
-
-            {/* ACTIONS (más separadas y claras) */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-
-              <button 
-                onClick={onReserva}
-                className="flex-1 px-6 py-3 rounded-full bg-[#0096c7] text-white text-sm font-bold
-              hover:bg-[#0077b6] transition shadow-sm">
-                Buscar disponibilidad
-              </button>
-
-              <button className="flex items-center justify-center gap-2 px-6 py-3 rounded-full
-              border border-gray-200 text-sm text-gray-600 hover:border-green-500 hover:text-green-600
-              transition">
-                <MessageCircle className="h-4 w-4 text-green-500" />
-                WhatsApp
-              </button>
-            </div>
-
-          </div>
+          )}
         </div>
       </div>
     </section>

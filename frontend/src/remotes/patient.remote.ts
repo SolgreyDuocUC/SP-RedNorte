@@ -18,7 +18,7 @@ export const patientRemote = {
   // ── Patients ───────────────────────────────────────────────────────────────
 
   getAll(): Promise<PatientDTO[]> {
-    return patientApi.get<PatientDTO[]>(PATIENTS_BASE).then(r => r.data);
+    return patientApi.get<{content: PatientDTO[]}>(PATIENTS_BASE).then(r => r.data.content || r.data as any);
   },
 
   getById(id: string): Promise<PatientDTO> {

@@ -7,6 +7,8 @@ export interface CoverageDTO {
 
 // Matches backend cl.rednorte.ms_paciente.dto.PatientDTO
 export interface PatientDTO {
+  names: any;
+  identifiers: any;
   id?: string;
   identifierType: 'RUN' | 'PASSPORT' | string;
   identifierValue: string;

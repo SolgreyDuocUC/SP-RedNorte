@@ -7,10 +7,12 @@ import {
   Trash2, 
   Search,
   Briefcase,
-  UserCheck
+  UserCheck,
+  Calendar
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { slotsRemote } from '../../../../remotes/slots.remote';
 
 // Roles disponibles en la plataforma
 const ROLES = [
@@ -35,6 +37,8 @@ const mockColaboradores: Collaborator[] = [
   { id: '3', run: '22.222.222-2', nombre: 'Enf. Marta Rojas', especialidad: 'Toma de Muestras', establecimiento: 'Sede Iquique', rol: 'enfermeria' },
 ];
 
+import { MOCK_DOCTORS } from '../../../../core/constants/BookingConst';
+
 export function AdminView() {
   const [colaboradores, setColaboradores] = useState<Collaborator[]>(mockColaboradores);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,6 +50,36 @@ export function AdminView() {
   const [establecimiento, setEstablecimiento] = useState('Sede Iquique');
   const [rol, setRol] = useState('medico');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados Gestión de Horarios (Slots)
+  const [selectedDoctorForSchedule, setSelectedDoctorForSchedule] = useState<Collaborator | null>(null);
+  const [slotStart, setSlotStart] = useState('');
+  const [slotEnd, setSlotEnd] = useState('');
+  const [isCreatingSlot, setIsCreatingSlot] = useState(false);
+
+  const handleCreateSlot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDoctorForSchedule || !slotStart || !slotEnd) return;
+    setIsCreatingSlot(true);
+    try {
+      await slotsRemote.create({
+        practitionerId: selectedDoctorForSchedule.id,
+        specialty: selectedDoctorForSchedule.especialidad,
+        start: new Date(slotStart).toISOString(),
+        end: new Date(slotEnd).toISOString(),
+        status: 'free'
+      });
+      toast.success('Cupo creado con éxito', { description: `Horario agendado para ${selectedDoctorForSchedule.nombre}` });
+      setSlotStart('');
+      setSlotEnd('');
+      setSelectedDoctorForSchedule(null);
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al crear el cupo', { description: 'Revisa tu conexión al servidor ms-reservas.' });
+    } finally {
+      setIsCreatingSlot(false);
+    }
+  };
 
   // Filtrado de colaboradores
   const filteredColaboradores = colaboradores.filter(c => 
@@ -66,8 +100,9 @@ export function AdminView() {
 
     setIsSubmitting(true);
     setTimeout(() => {
+      const newId = `colab-${Date.now()}`;
       const newCollaborator: Collaborator = {
-        id: `colab-${Date.now()}`,
+        id: newId,
         run: run.trim(),
         nombre: nombre.trim(),
         especialidad: especialidad.trim(),
@@ -77,6 +112,18 @@ export function AdminView() {
 
       setColaboradores(prev => [newCollaborator, ...prev]);
       
+      if (rol === 'medico') {
+        MOCK_DOCTORS.push({
+          id: newId,
+          name: newCollaborator.nombre,
+          specialty: newCollaborator.especialidad.toLowerCase(),
+          title: 'Médico (Agregado)',
+          experience: 0,
+          bio: 'Profesional agregado por administrador.',
+          slots: 0
+        });
+      }
+
       // Reset formulario
       setRun('');
       setNombre('');
@@ -248,6 +295,18 @@ export function AdminView() {
                         <Shield className="h-3 w-3" />
                         {ROLES.find(r => r.id === c.rol)?.label || c.rol}
                       </div>
+                      
+                      {/* Botón para gestionar Horarios (solo médicos) */}
+                      {c.rol === 'medico' && (
+                        <button
+                          onClick={() => setSelectedDoctorForSchedule(c)}
+                          className="p-2 text-slate-400 hover:text-[#0096c7] hover:bg-sky-50 rounded-lg transition-colors"
+                          title="Gestionar Horarios (Cupos)"
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleDelete(c.id, c.nombre)}
                         className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -263,6 +322,51 @@ export function AdminView() {
           </div>
         </div>
       </div>
+
+      {/* MODAL DE GESTIÓN DE HORARIOS */}
+      {selectedDoctorForSchedule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+            <h3 className="text-lg font-bold text-[#023e8a] mb-2 flex items-center gap-2">
+              <Calendar className="h-5 w-5" /> Horarios de {selectedDoctorForSchedule.nombre}
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">Agrega cupos de atención para que aparezcan en el portal de pacientes.</p>
+            
+            <form onSubmit={handleCreateSlot} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 uppercase">Fecha y Hora de Inicio</label>
+                <input 
+                  type="datetime-local" 
+                  required
+                  value={slotStart}
+                  onChange={e => setSlotStart(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-500 uppercase">Fecha y Hora de Fin</label>
+                <input 
+                  type="datetime-local" 
+                  required
+                  value={slotEnd}
+                  onChange={e => setSlotEnd(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={() => setSelectedDoctorForSchedule(null)} className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition-colors">
+                  Cerrar
+                </button>
+                <button type="submit" disabled={isCreatingSlot} className="flex-1 px-4 py-2 bg-[#0096c7] hover:bg-[#0077b6] text-white rounded-lg text-sm font-semibold transition-colors">
+                  {isCreatingSlot ? 'Guardando...' : 'Añadir Cupo'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LoginView } from './app/components/pages/1. Login/Login';
 import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
 import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
 import { AdminView } from './app/components/pages/9. AdminView/AdminView';
+import { AdminFacilitiesView } from './app/components/pages/10. AdminFacilities/AdminFacilitiesView';
 import { WaitingListView } from './app/components/pages/5. ListaEspera/WaitingListView';
 import { FacilitiesView } from './app/components/pages/6. CentrosAtencion/FacilitiesView';
 import { NotificationsView } from './app/components/pages/4. Notificaciones/NotificationsView';
@@ -12,14 +13,27 @@ import { HistoryView } from './app/components/pages/7. VistaHistorial/HistoryVie
 import { HomePage } from './app/home/HomePage';
 import { Toaster } from './app/components/ui/sonner';
 import { Reservahoraview } from './app/components/pages/8. Reservas/Reservahoraview';
+import { ReagendarView } from './app/components/pages/8. Reservas/ReagendarView';
+import type { AppointmentDTO } from './remotes/dtos/appointment.dto';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente'>('paciente');
   const [showLogin, setShowLogin] = useState(false);
   const [showReserva, setShowReserva] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard');
+  const [showReagenda, setShowReagenda] = useState(false);
+  const [reagendaData, setReagendaData] = useState<AppointmentDTO | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard');
+
+  useEffect(() => {
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      setActiveView(customEvent.detail);
+    };
+    window.addEventListener('navigate', handleNavigate);
+    return () => window.removeEventListener('navigate', handleNavigate);
+  }, []);
 
   if (!isLoggedIn) {
     if (showLogin) {
@@ -44,7 +58,24 @@ export default function App() {
         </div>
       );
     }
-    return <HomePage onLogin={() => setShowLogin(true)} onReserva={() => setShowReserva(true)} />;
+    if (showReagenda && reagendaData) {
+      return (
+        <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+           <div className="max-w-5xl mx-auto h-[85vh] bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
+             <ReagendarView 
+               appointmentToReschedule={reagendaData} 
+               onBack={() => { setShowReagenda(false); setReagendaData(null); }} 
+               onSuccess={() => { setShowReagenda(false); setReagendaData(null); }} 
+             />
+           </div>
+        </div>
+      );
+    }
+    return <HomePage 
+      onLogin={() => setShowLogin(true)} 
+      onReserva={() => setShowReserva(true)} 
+      onReagenda={(app) => { setReagendaData(app); setShowReagenda(true); }}
+    />;
   }
 
   const renderView = () => {
@@ -63,6 +94,8 @@ export default function App() {
         return <HistoryView />;
       case 'admin-users':
         return <AdminView />;
+      case 'admin-facilities':
+        return <AdminFacilitiesView />;
       case 'reserva':
         return <Reservahoraview onBack={() => setActiveView('dashboard')} />;
       default:

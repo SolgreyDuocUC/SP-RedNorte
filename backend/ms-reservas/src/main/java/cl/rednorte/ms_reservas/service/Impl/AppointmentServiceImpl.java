@@ -220,10 +220,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                     "<ul>" +
                     "<li><strong>Especialidad:</strong> %s</li>" +
                     "<li><strong>Fecha/Hora de Inicio:</strong> %s</li>" +
+                    "<li><strong>Código de Reserva:</strong> %s</li>" +
                     "</ul>" +
+                    "<p>Guarda tu Código de Reserva: lo necesitarás si deseas cancelar tu hora.</p>" +
                     "<p>Gracias por atenderte en la Red de Salud RedNorte.</p>",
                     patient.getFirstName(), patient.getLastName(),
-                    entity.getSpecialty(), startStr
+                    entity.getSpecialty(), startStr, entity.getId()
             );
 
             NotificationRequest notification = NotificationRequest.builder()
