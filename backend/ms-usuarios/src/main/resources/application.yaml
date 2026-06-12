@@ -62,3 +62,9 @@ logging:
     "[cl.rednorte.ms_usuarios]": INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{36} - %msg%n"
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY:63e00738b0fb4a40926cbbfbeee2c33ea30db4d7b02162e05d90b2c7699276df}
+

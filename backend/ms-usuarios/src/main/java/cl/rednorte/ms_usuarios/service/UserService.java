@@ -14,4 +14,8 @@ public interface UserService {
     UserDTO update(UUID id, UserDTO userDTO);
 
     void delete(UUID id);
+
+    cl.rednorte.ms_usuarios.model.UserEntity findEntityByEmail(String email);
+
+    boolean matchesPassword(String rawPassword, String encodedPassword);
 }

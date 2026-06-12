@@ -5,6 +5,8 @@ import cl.rednorte.ms_usuarios.exception.BusinessException;
 import cl.rednorte.ms_usuarios.exception.ResourceNotFoundException;
 import cl.rednorte.ms_usuarios.model.UserEntity;
 import cl.rednorte.ms_usuarios.model.mapper.UserMapper;
+import cl.rednorte.ms_usuarios.model.RoleEntity;
+import cl.rednorte.ms_usuarios.repository.RoleRepository;
 import cl.rednorte.ms_usuarios.repository.UserRepository;
 import cl.rednorte.ms_usuarios.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final UserMapper mapper;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     @Transactional
@@ -33,8 +38,18 @@ public class UserServiceImpl implements UserService {
         }
 
         UserEntity entity = mapper.toEntity(userDTO);
-        // En un MVP real sin tokens, la contraseña debería encriptarse,
-        // pero el usuario pidió algo funcional rápido.
+        if (userDTO.getPassword() != null) {
+            entity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+
+        if (userDTO.getRoles() != null) {
+            Set<RoleEntity> managedRoles = userDTO.getRoles().stream()
+                    .map(roleDto -> roleRepository.findByName(roleDto.getName())
+                            .orElseGet(() -> roleRepository.save(RoleEntity.builder().name(roleDto.getName()).build())))
+                    .collect(Collectors.toSet());
+            entity.setRoles(managedRoles);
+        }
+
         return mapper.toDto(repository.save(entity));
     }
 
@@ -65,7 +80,7 @@ public class UserServiceImpl implements UserService {
         existing.setEnabled(userDTO.isEnabled());
 
         if (userDTO.getPassword() != null && !userDTO.getPassword().isBlank()) {
-            existing.setPassword(userDTO.getPassword());
+            existing.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         return mapper.toDto(repository.save(existing));
@@ -78,5 +93,17 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("Usuario no encontrado con ID: " + id);
         }
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserEntity findEntityByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
+    }
+
+    @Override
+    public boolean matchesPassword(String raw, String encoded) {
+        return passwordEncoder.matches(raw, encoded);
     }
 }
