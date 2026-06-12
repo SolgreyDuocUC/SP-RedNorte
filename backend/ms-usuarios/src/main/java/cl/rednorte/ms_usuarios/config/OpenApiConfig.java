@@ -1,8 +1,8 @@
 package cl.rednorte.ms_usuarios.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
 
     @Bean
-    public OpenAPI openApi() {
+    public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info()
-                        .title("RedNorte - Microservicio de Usuarios")
-                        .description("API REST para la gestión de usuarios y roles del sistema RedNorte.")
-                        .version("v1.0.0")
-                        .contact(new Contact().name("Equipo RedNorte")));
+            .info(new Info()
+                .title("MS Usuarios - RedNorte API")
+                .version("1.0.0")
+                .description("Microservicio de Gestión de Usuarios, Pacientes y Profesionales")
+                .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 }

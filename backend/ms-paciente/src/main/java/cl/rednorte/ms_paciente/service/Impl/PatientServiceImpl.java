@@ -1,6 +1,8 @@
 package cl.rednorte.ms_paciente.service.Impl;
 
+import cl.rednorte.ms_paciente.dto.PatientContactDTO;
 import cl.rednorte.ms_paciente.dto.PatientDTO;
+import cl.rednorte.ms_paciente.exceptions.ResourceNotFoundException;
 import cl.rednorte.ms_paciente.exceptions.BusinessException;
 import cl.rednorte.ms_paciente.exceptions.DuplicateResourceException;
 import cl.rednorte.ms_paciente.model.PatientEntity;
@@ -98,6 +100,20 @@ public class PatientServiceImpl implements PatientService {
 
             return mapper.toDto(repository.save(existing));
         }).orElseThrow(() -> new BusinessException("Patient not found"));
+    }
+
+    @Override
+    public PatientDTO updateContact(String id, PatientContactDTO dto) {
+        PatientEntity existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + id));
+
+        // Partial update: solo cambia los campos no-null. Cualquier otro
+        // campo del paciente (identifier, name, gender, etc.) permanece.
+        if (dto.phone() != null)   existing.setPhone(dto.phone());
+        if (dto.email() != null)   existing.setEmail(dto.email());
+        if (dto.address() != null) existing.setAddress(dto.address());
+
+        return mapper.toDto(repository.save(existing));
     }
 
     @Override
