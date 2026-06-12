@@ -2,9 +2,25 @@ name: RedNorte - CI Pipeline Backend
 
 on:
   push:
-    branches: ["main", "preprod", "qa"]
+    branches:
+      [
+        "main",
+        "develop",
+        "production",
+        "feature-backend",
+        "feature-frontend",
+        "qa",
+      ]
   pull_request:
-    branches: ["main", "preprod", "qa"]
+    branches:
+      [
+        "main",
+        "develop",
+        "production",
+        "feature-backend",
+        "feature-frontend",
+        "qa",
+      ]
 
 jobs:
   build-and-test:
