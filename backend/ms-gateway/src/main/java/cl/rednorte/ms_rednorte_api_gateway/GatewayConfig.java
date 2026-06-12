@@ -32,6 +32,9 @@ public class GatewayConfig {
         @Value("${services.centros.url}")
         private String centrosUrl;
 
+        @Value("${services.notificaciones.url}")
+        private String notificacionesUrl;
+
         @Bean
         public RouterFunction<ServerResponse> customRoutes() {
                 return route("ruta-ficha-clinica")
@@ -66,6 +69,10 @@ public class GatewayConfig {
                                                 .route(path("/api/v1/organizations/**")
                                                                 .or(path("/api/v1/locations/**")), http())
                                                 .before(uri(centrosUrl))
+                                                .build())
+                                .and(route("ruta-notificaciones")
+                                                .route(path("/api/v1/notifications/**"), http())
+                                                .before(uri(notificacionesUrl))
                                                 .build());
         }
 }

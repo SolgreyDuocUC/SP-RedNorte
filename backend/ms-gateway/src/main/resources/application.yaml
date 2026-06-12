@@ -23,4 +23,6 @@ services:
     url: ${MS_URGENCIAS_URI:http://localhost:8005}
   centros:
     url: ${MS_CENTROS_URI:http://localhost:8006}
+  notificaciones:
+    url: ${MS_NOTIFICACIONES_URI:http://localhost:8010}
 

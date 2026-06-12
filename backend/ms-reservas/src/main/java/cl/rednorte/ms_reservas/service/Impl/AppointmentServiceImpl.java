@@ -1,6 +1,8 @@
 package cl.rednorte.ms_reservas.service.Impl;
 
 import cl.rednorte.ms_reservas.dto.AppointmentDTO;
+import cl.rednorte.ms_reservas.dto.PatientIntegrationDTO;
+import cl.rednorte.ms_reservas.dto.NotificationRequest;
 import cl.rednorte.ms_reservas.exceptions.BusinessException;
 import cl.rednorte.ms_reservas.model.AppointmentEntity;
 import cl.rednorte.ms_reservas.model.SlotEntity;
@@ -10,8 +12,10 @@ import cl.rednorte.ms_reservas.repository.SlotRepository;
 import cl.rednorte.ms_reservas.service.AppointmentService;
 import cl.rednorte.ms_reservas.service.ReassignmentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.util.Date;
 import java.util.List;
@@ -33,6 +37,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final SlotRepository slotRepository;
     private final AppointmentMapper mapper;
     private final ReassignmentService reassignmentService;
+
+    @Value("${services.paciente.url}")
+    private String pacienteUrl;
+
+    @Value("${services.notificaciones.url}")
+    private String notificacionesUrl;
 
     @Override
     @Transactional
@@ -77,7 +87,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             entity.setStatus(STATUS_WAITLIST);
         }
 
-        return mapper.toDto(repository.save(entity));
+        AppointmentEntity saved = repository.save(entity);
+
+        // Si se reservó exitosamente, enviar notificación por correo
+        if (STATUS_BOOKED.equalsIgnoreCase(saved.getStatus())) {
+            sendConfirmationEmail(saved);
+        }
+
+        return mapper.toDto(saved);
     }
 
     @Override
@@ -142,7 +159,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (dto.getPriority() != null)
             existing.setPriority(dto.getPriority());
 
-        return mapper.toDto(repository.save(existing));
+        String oldStatus = existing.getStatus();
+        if (dto.getStatus() != null)
+            existing.setStatus(dto.getStatus());
+
+        AppointmentEntity saved = repository.save(existing);
+
+        // Si cambió el estado a "booked", enviar correo
+        if (STATUS_BOOKED.equalsIgnoreCase(saved.getStatus()) && !STATUS_BOOKED.equalsIgnoreCase(oldStatus)) {
+            sendConfirmationEmail(saved);
+        }
+
+        return mapper.toDto(saved);
     }
 
     @Override
@@ -165,5 +193,52 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         return saved;
+    }
+
+    private void sendConfirmationEmail(AppointmentEntity entity) {
+        try {
+            System.out.println("Buscando información de paciente para ID: " + entity.getPatientId());
+            RestClient restClient = RestClient.create();
+            PatientIntegrationDTO patient = restClient.get()
+                    .uri(pacienteUrl + "/api/v1/patients/" + entity.getPatientId())
+                    .retrieve()
+                    .body(PatientIntegrationDTO.class);
+
+            if (patient == null || patient.getEmail() == null || patient.getEmail().isBlank()) {
+                System.out.println("No se pudo obtener el correo electrónico del paciente con ID: " + entity.getPatientId());
+                return;
+            }
+
+            String subject = "Confirmación de Cita Médica - RedNorte";
+            String startStr = entity.getStart() != null ? entity.getStart().toString() : "No especificado";
+            String htmlBody = String.format(
+                    "<h3>Hola %s %s,</h3>" +
+                    "<p>Tu cita médica ha sido agendada con éxito.</p>" +
+                    "<ul>" +
+                    "<li><strong>Especialidad:</strong> %s</li>" +
+                    "<li><strong>Fecha/Hora de Inicio:</strong> %s</li>" +
+                    "</ul>" +
+                    "<p>Gracias por atenderte en la Red de Salud RedNorte.</p>",
+                    patient.getFirstName(), patient.getLastName(),
+                    entity.getSpecialty(), startStr
+            );
+
+            NotificationRequest notification = NotificationRequest.builder()
+                    .recipient(patient.getEmail())
+                    .subject(subject)
+                    .body(htmlBody)
+                    .build();
+
+            restClient.post()
+                    .uri(notificacionesUrl + "/api/v1/notifications/send")
+                    .body(notification)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            System.out.println("Notificación de cita enviada correctamente a: " + patient.getEmail());
+        } catch (Exception e) {
+            System.err.println("Error al enviar la notificación por correo: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
