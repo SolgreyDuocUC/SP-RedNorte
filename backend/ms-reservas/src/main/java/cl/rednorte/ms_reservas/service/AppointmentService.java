@@ -17,6 +17,10 @@ public interface AppointmentService {
 
     List<AppointmentDTO> findByPractitionerId(String practitionerId);
 
+    List<AppointmentDTO> findWaitlist();
+
+    List<AppointmentDTO> findWaitlistBySpecialty(String specialty);
+
     AppointmentDTO update(String id, AppointmentDTO dto);
 
     void delete(String id);

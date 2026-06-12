@@ -1,0 +1,46 @@
+name: RedNorte - CI Pipeline Backend
+
+on:
+  push:
+    branches: ["main", "preprod", "qa"]
+  pull_request:
+    branches: ["main", "preprod", "qa"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar entorno JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Compilar y Ejecutar Pruebas con Maven (Inyección de Entorno)
+        env:
+          # Inyección de Configuraciones desde GitHub Variables (CORREGIDO)
+          SPRING_DATASOURCE_URL: ${{ vars.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${{ vars.SPRING_DATASOURCE_DRIVER_CLASS_NAME }}
+          FRONTEND_PORT: ${{ vars.FRONTEND_PORT }}
+          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          SPRING_MAIL_HOST: ${{ vars.SPRING_MAIL_HOST }}
+          SPRING_MAIL_PORT: ${{ vars.SPRING_MAIL_PORT }}
+
+          # Inyección de Credenciales desde GitHub Secrets (Encriptados)
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          SPRING_MAIL_USERNAME: ${{ secrets.SPRING_MAIL_USERNAME }}
+          SPRING_MAIL_PASSWORD: ${{ secrets.SPRING_MAIL_PASSWORD }}
+          NOTIFICATION_SERVICE_SECRET: ${{ secrets.NOTIFICATION_SERVICE_SECRET }}
+
+        run: |
+          cd backend
+          mvn clean verify

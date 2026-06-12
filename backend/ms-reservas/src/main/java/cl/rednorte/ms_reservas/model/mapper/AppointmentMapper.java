@@ -2,8 +2,10 @@ package cl.rednorte.ms_reservas.model.mapper;
 
 import cl.rednorte.ms_reservas.dto.AppointmentDTO;
 import cl.rednorte.ms_reservas.model.AppointmentEntity;
-
+import cl.rednorte.ms_reservas.model.SlotEntity;
 import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +21,13 @@ public class AppointmentMapper {
                 .id(dto.getId())
                 .patientId(dto.getPatientId())
                 .practitionerId(dto.getPractitionerId())
+                .specialty(dto.getSpecialty()) // Nuevo campo
                 .start(dto.getStart())
                 .end(dto.getEnd())
                 .status(dto.getStatus())
                 .description(dto.getDescription())
+                .priority(dto.getPriority()) // Nuevo campo
+                .slot(dto.getSlotId() != null ? SlotEntity.builder().id(dto.getSlotId()).build() : null) // Relación lógica inicial
                 .build();
     }
 
@@ -35,10 +40,13 @@ public class AppointmentMapper {
                 .id(entity.getId())
                 .patientId(entity.getPatientId())
                 .practitionerId(entity.getPractitionerId())
+                .specialty(entity.getSpecialty()) // Nuevo campo
                 .start(entity.getStart())
                 .end(entity.getEnd())
                 .status(entity.getStatus())
                 .description(entity.getDescription())
+                .priority(entity.getPriority()) // Nuevo campo
+                .slotId(entity.getSlot() != null ? entity.getSlot().getId() : null) // Extrae el ID del slot relacional
                 .build();
     }
 
@@ -58,7 +66,7 @@ public class AppointmentMapper {
         if (entity.getDescription() != null)
             appointment.setDescription(entity.getDescription());
 
-        // Basic status mapping logic
+        // Mapeo nativo a enumeración FHIR (soporta WAITLIST, BOOKED, CANCELLED)
         if (entity.getStatus() != null) {
             try {
                 appointment.setStatus(Appointment.AppointmentStatus.fromCode(entity.getStatus().toLowerCase()));
@@ -79,6 +87,25 @@ public class AppointmentMapper {
             Appointment.AppointmentParticipantComponent practitionerParticipant = new Appointment.AppointmentParticipantComponent();
             practitionerParticipant.setActor(new Reference("Practitioner/" + entity.getPractitionerId()));
             appointment.addParticipant(practitionerParticipant);
+        }
+
+        // Extensión FHIR: Vincular la referencia al Slot de agenda si existe
+        if (entity.getSlot() != null) {
+            appointment.addSlot(new Reference("Slot/" + entity.getSlot().getId()));
+        }
+
+        // Prioridad para el algoritmo de reasignación (1 = Normal, 2 = Urgente, 3 = Crítico)
+        if (entity.getPriority() != null) {
+            appointment.setPriority(entity.getPriority());
+        }
+
+        // Especialidad: clave para emparejar con la lista de espera
+        if (entity.getSpecialty() != null) {
+            CodeableConcept specialtyCode = new CodeableConcept();
+            specialtyCode.addCoding(new Coding()
+                    .setSystem("http://snomed.info/sct")
+                    .setDisplay(entity.getSpecialty()));
+            appointment.addServiceType(specialtyCode);
         }
 
         return appointment;
@@ -116,6 +143,25 @@ public class AppointmentMapper {
                         builder.practitionerId(ref.replace("Practitioner/", ""));
                     }
                 }
+            }
+        }
+
+        // Recuperar la referencia del Slot desde el recurso FHIR
+        if (appointment.hasSlot() && !appointment.getSlot().isEmpty()) {
+            String slotRef = appointment.getSlot().get(0).getReference();
+            if (slotRef.startsWith("Slot/")) {
+                builder.slot(SlotEntity.builder().id(slotRef.replace("Slot/", "")).build());
+            }
+        }
+
+        if (appointment.hasPriority()) {
+            builder.priority(appointment.getPriority());
+        }
+
+        if (appointment.hasServiceType() && !appointment.getServiceType().isEmpty()) {
+            CodeableConcept code = appointment.getServiceType().get(0);
+            if (code.hasCoding() && !code.getCoding().isEmpty()) {
+                builder.specialty(code.getCoding().get(0).getDisplay());
             }
         }
 

@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ms_usuarios}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # En prod la confianza del JWT se delega al IdP (Keycloak/Azure AD/Auth0).
+  # El MS solo valida tokens emitidos por ese issuer.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${IDP_ISSUER_URI}
+          jwk-set-uri: ${IDP_JWK_SET_URI}
+
+app:
+  security:
+    jwt:
+      dev-keypair-enabled: false
+
+logging:
+  level:
+    "[cl.rednorte.ms_usuarios]": INFO

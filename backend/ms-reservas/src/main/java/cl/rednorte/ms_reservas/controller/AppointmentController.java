@@ -42,6 +42,16 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.findByPractitionerId(practitionerId));
     }
 
+    @GetMapping("/waitlist")
+    public ResponseEntity<List<AppointmentDTO>> getWaitlist() {
+        return ResponseEntity.ok(appointmentService.findWaitlist());
+    }
+
+    @GetMapping("/waitlist/{specialty}")
+    public ResponseEntity<List<AppointmentDTO>> getWaitlistBySpecialty(@PathVariable String specialty) {
+        return ResponseEntity.ok(appointmentService.findWaitlistBySpecialty(specialty));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AppointmentDTO> updateAppointment(@PathVariable String id, @RequestBody AppointmentDTO dto) {
         return ResponseEntity.ok(appointmentService.update(id, dto));

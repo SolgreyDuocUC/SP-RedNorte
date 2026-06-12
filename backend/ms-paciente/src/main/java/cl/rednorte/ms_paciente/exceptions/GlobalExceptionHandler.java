@@ -34,6 +34,26 @@ public class GlobalExceptionHandler {
         return buildResponse(ex, HttpStatus.BAD_REQUEST, request);
     }
 
+    /**
+     * Spring Security: AccessDeniedException lanzada por @PreAuthorize.
+     * Debe responder 403, no caer al catch-all 500.
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(ex, HttpStatus.FORBIDDEN, request);
+    }
+
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthn(
+            org.springframework.security.core.AuthenticationException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(ex, HttpStatus.UNAUTHORIZED, request);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(
             Exception ex,

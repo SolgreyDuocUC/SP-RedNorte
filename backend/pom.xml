@@ -52,7 +52,6 @@
         pero hereda la configuración definida en este POM padre.
     -->
     <modules>
-        <module>ms-agenda</module>
         <module>ms-centros</module>
         <module>ms-ficha-clinica</module>
         <module>ms-gateway</module>

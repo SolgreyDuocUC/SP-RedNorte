@@ -2,3 +2,6 @@
 .env*.local
 *.env
 node_modules
+
+# Notas locales con credenciales/preparación - NUNCA subir a git
+texto.preparacion.txt

@@ -1,0 +1,28 @@
+server:
+  port: 8011
+
+spring:
+  application:
+    name: ms-rednorte-api-gateway
+
+# ===============================
+# URLs de los microservicios destino
+# En docker-compose se inyectan via MS_*_URI (ver docker-compose.yml).
+# En ejecucion local (IDE/Maven) caen a los puertos locales.
+# ===============================
+services:
+  ficha-clinica:
+    url: ${MS_FICHA_CLINICA_URI:http://localhost:8001}
+  paciente:
+    url: ${MS_PACIENTE_URI:http://localhost:8002}
+  reservas:
+    url: ${MS_RESERVAS_URI:http://localhost:8003}
+  usuarios:
+    url: ${MS_USUARIOS_URI:http://localhost:8004}
+  urgencias:
+    url: ${MS_URGENCIAS_URI:http://localhost:8005}
+  centros:
+    url: ${MS_CENTROS_URI:http://localhost:8006}
+  notificaciones:
+    url: ${MS_NOTIFICACIONES_URI:http://localhost:8010}
+

@@ -1,5 +1,6 @@
 package cl.rednorte.ms_paciente.service;
 
+import cl.rednorte.ms_paciente.dto.PatientContactDTO;
 import cl.rednorte.ms_paciente.dto.PatientDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,13 @@ public interface PatientService {
     PatientDTO createOrUpdate(PatientDTO dto);
 
     PatientDTO update(String id, PatientDTO dto);
+
+    /**
+     * Actualiza solo datos de contacto (phone, email, address). NO toca
+     * campos clínicos ni el identifier. Usado por el flujo del paciente
+     * auto-autenticado para mantener sus datos al día.
+     */
+    PatientDTO updateContact(String id, PatientContactDTO dto);
 
     void delete(String id);
 

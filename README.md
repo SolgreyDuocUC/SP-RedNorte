@@ -1,33 +1,48 @@
 # SP-RedNorte — Sistema de Salud
 
-Plataforma de gestión clínica desarrollada para la Red Norte de salud. El sistema está construido bajo una arquitectura de microservicios con un frontend React y un backend Spring Boot.
+Plataforma de gestión clínica interoperable desarrollada para la Red Norte de salud. El sistema está diseñado bajo una arquitectura de microservicios desacoplada utilizando un frontend en React y un ecosistema backend robusto en Spring Boot.
 
 ---
 
-## Arquitectura General
+## Arquitectura General del Sistema
+
+El proyecto está estructurado como un monorepo que divide de forma exacta las capas de presentación, orquestación, lógica de negocio e interoperabilidad de datos:
 
 ```text
 SP-RedNorte/
-├── backend/          # Microservicios Spring Boot (Java 21)
-│   ├── ms-ficha-clinica   → Puerto 8001
-│   ├── ms-paciente        → Puerto 8002
-│   ├── ms-reservas        → Puerto 8003
-│   └── ms-usuarios        → Puerto 8004
-└── frontend/         # Aplicación React + Vite
+├── .github/workflows/  # Pipelines de Integración Continua (GitHub Actions)
+├── backend/            # Microservicios Spring Boot (Java 21)
+│   ├── ms-ficha-clinica       → Puerto 8001
+│   ├── ms-paciente            → Puerto 8002
+│   ├── ms-reservas            → Puerto 8003
+│   ├── ms-usuarios            → Puerto 8004
+│   ├── ms-urgencias           → Puerto 8005
+│   ├── ms-centros             → Puerto 8006
+│   ├── ms-notificaciones      → Puerto 8010
+│   └── ms-gateway             → Puerto 8011 (API Gateway / BFF)
+└── frontend/           # Aplicación SPA (React + TypeScript + Vite)
 ```
 
 ---
 
-## Microservicios
+## Flujo de Comunicación y Capas
 
-| Servicio          | Puerto | Responsabilidad                                        |
-|-------------------|--------|--------------------------------------------------------|
-| ms-ficha-clinica  | 8001   | Historial clínico, notas, diagnósticos, procedimientos |
-| ms-paciente       | 8002   | Registro de pacientes y coberturas de salud            |
-| ms-reservas       | 8003   | Gestión de citas y agenda médica                       |
-| ms-usuarios       | 8004   | Usuarios del sistema y roles                           |
+1. **Capa de Presentación:** El Frontend interactúa exclusivamente con el puerto `8011`.
+2. **Orquestación y Seguridad:** `ms-gateway` implementa Spring Cloud Gateway para centralizar la seguridad perimetral, la validación de tokens JWT y el ruteo dinámico transparente.
+3. **Interoperabilidad:** Ciertos módulos clínicos críticos (`ms-centros` y `ms-urgencias`) se encuentran mapeados e integrados nativamente con servidores HAPI FHIR R4.
 
----
+## Ecosistema de Microservicios
+
+| Servicio | Puerto | Patrón / Responsabilidad Técnica |
+| :--- | :--- | :--- |
+| **ms-gateway** | 8011 | **API Gateway / BFF:** Orquestador central de tráfico, proxy reverso y cabeceras de seguridad. |
+| **ms-ficha-clinica** | 8001 | **Facade Pattern:** Unifica datos complejos (`clinical_notes`, `encounters`, `observations`, `conditions`, `procedures`) en un historial clínico consolidado. |
+| **ms-paciente** | 8002 | **Domain Service:** Gestión del core de afiliados, datos demográficos (`patients`) y coberturas previsionales (`coverages`). |
+| **ms-reservas** | 8003 | **Algoritmos Core:** Control de agendas médicas (`slots`) y citas (`appointments`). Ejecuta de forma autónoma la lógica de reasignación prioritaria (Crítico > Urgente > Normal) bajo formato FIFO para listas de espera. |
+| **ms-usuarios** | 8004 | **Resilience4j (Circuit Breaker):** Control de credenciales de acceso (`users`), asignación de roles (`roles`, `user_roles`) y tolerancia distributiva a fallos en flujos de autenticación. |
+| **ms-urgencias** | 8005 | **Interoperabilidad FHIR:** Admisión rápida de pacientes y clasificación de gravedad en flujos de atención de urgencia. |
+| **ms-centros** | 8006 | **Interoperabilidad FHIR:** Mapeo de organizaciones de salud, infraestructura y locaciones médicas físicas. |
+| **ms-notificaciones** | 8010 | **SMTP Relay (Brevo):** Componente aislado de mensajería asíncrona. Despacha alertas e invitaciones por correo electrónico real en formato HTML ante reasignaciones de cupos. Protegido perimetralmente mediante secreto en cabecera `X-Notification-Secret`. |
 
 ## Stack Tecnológico
 
@@ -62,13 +77,12 @@ Usuario:  root
 
 ```text
 main        → Producción (rama estable)
-preprod     → Pre-producción (validación final)
-qa          → Pruebas técnicas
-dev-Solgrey → Desarrollo individual
-dev-Martin  → Desarrollo individual
+develop
+production
+feature-backend
+feature-frontend
+qa
 ```
-
-**Flujo obligatorio:** `dev-* → qa → preprod → main`
 
 Toda integración se realiza mediante Pull Request. No se permiten merges directos a ninguna rama protegida.
 
