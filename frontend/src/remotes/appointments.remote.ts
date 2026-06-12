@@ -5,7 +5,11 @@ const BASE = '/api/v1/appointments';
 
 export const appointmentsRemote = {
   getAll(): Promise<AppointmentDTO[]> {
-    return api.get<AppointmentDTO[]>(BASE).then(r => r.data);
+    return api.get<any>(BASE).then(r => {
+      if (Array.isArray(r.data)) return r.data;
+      if (r.data && Array.isArray(r.data.content)) return r.data.content;
+      return [];
+    }).catch(() => []);
   },
 
   getById(id: string): Promise<AppointmentDTO> {

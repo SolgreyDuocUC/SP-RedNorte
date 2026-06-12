@@ -8,7 +8,11 @@ export const patientRemote = {
   // ── Coverages ─────────────────────────────────────────────────────────────
 
   getCoverages(): Promise<CoverageDTO[]> {
-    return patientApi.get<CoverageDTO[]>(COVERAGES_BASE).then(r => r.data);
+    return patientApi.get<any>(COVERAGES_BASE).then(r => {
+      if (Array.isArray(r.data)) return r.data;
+      if (r.data && Array.isArray(r.data.content)) return r.data.content;
+      return [];
+    }).catch(() => []);
   },
 
   createCoverage(dto: CoverageDTO): Promise<CoverageDTO> {
@@ -18,7 +22,11 @@ export const patientRemote = {
   // ── Patients ───────────────────────────────────────────────────────────────
 
   getAll(): Promise<PatientDTO[]> {
-    return patientApi.get<{content: PatientDTO[]}>(PATIENTS_BASE).then(r => r.data.content || r.data as any);
+    return patientApi.get<any>(PATIENTS_BASE).then(r => {
+      if (Array.isArray(r.data)) return r.data;
+      if (r.data && Array.isArray(r.data.content)) return r.data.content;
+      return [];
+    }).catch(() => []);
   },
 
   getById(id: string): Promise<PatientDTO> {
