@@ -1,6 +1,6 @@
 import {
   CheckCircle2, Calendar, Clock, UserCheck,
-  Hash, ArrowRight, Phone, Mail, Zap, Monitor,
+  Hash, ArrowRight, Phone, Mail, Zap, Monitor, Sparkles
 } from 'lucide-react';
 import { BookingData } from '../../../types/Booking';
 import { doctorInitials } from '../../../../core/constants/BookingConst';
@@ -23,121 +23,132 @@ export function BookingSuccess({
   const isTelemedicina = data.appointmentType === 'TELEMEDICINA';
 
   return (
-    <div className="flex flex-col items-center text-center gap-6 py-4">
-      {/* Ícono éxito */}
-      <div className="w-16 h-16 rounded-full bg-[#e6f7f4] flex items-center justify-center">
-        <CheckCircle2 size={36} className="text-[#1d7874]" />
+    <div className="flex flex-col items-center text-center gap-6 py-2 max-w-md mx-auto animate-fadeIn">
+      {/* Ícono de éxito animado */}
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-40 scale-125" />
+        <div className="w-20 h-20 rounded-full bg-[#e6f7f4] flex items-center justify-center relative shadow-sm border border-[#9fe1cb]">
+          <CheckCircle2 size={44} className="text-[#1d7874]" />
+        </div>
       </div>
 
       <div>
-        <h2 className="text-2xl font-semibold text-[#0b3c5d]">¡Reserva confirmada!</h2>
-        <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
-          Tu hora ha sido agendada exitosamente. Recibirás un correo y SMS con los detalles.
+        <h2 className="text-2xl font-bold text-[#0b3c5d] tracking-tight flex items-center justify-center gap-1.5">
+          ¡Reserva Confirmada! <Sparkles size={18} className="text-[#5bc0eb]" />
+        </h2>
+        <p className="text-sm text-slate-500 mt-2 px-4 leading-relaxed">
+          Tu atención médica ha sido agendada con éxito. Ya enviamos las instrucciones a tus canales de contacto.
         </p>
       </div>
 
-      {/* Detalle reserva */}
-      <div className="w-full bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden text-left">
+      {/* Tarjeta estilo Comprobante / Ticket */}
+      <div className="w-full bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden text-left relative">
+        <div className="absolute top-0 inset-x-0 h-1 bg-[#1d7874]" />
+        
+        {/* Código de reserva (Destacado arriba para lectura rápida) */}
+        <div className="flex items-center justify-between px-5 py-3.5 bg-slate-50 border-b border-slate-100">
+          <span className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <Hash size={14} className="text-[#5bc0eb]" /> Identificador de Cita
+          </span>
+          <span className="text-base font-black text-[#0b3c5d] font-mono tracking-wider bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-sm">
+            {bookingCode}
+          </span>
+        </div>
 
-        {/* Paciente */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-          <div className="w-9 h-9 rounded-full bg-[#0b3c5d] text-white flex items-center justify-center text-xs font-bold shrink-0">
+        {/* Datos del Paciente */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-white">
+          <div className="w-10 h-10 rounded-full bg-[#0b3c5d] text-white flex items-center justify-center text-sm font-bold shrink-0 shadow-inner">
             {patientIni || '?'}
           </div>
-          <div>
-            <p className="text-sm font-semibold text-[#0b3c5d]">
-              {data.firstName} {data.lastName}
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[#0b3c5d] capitalize truncate">
+              {data.firstName?.toLowerCase()} {data.lastName?.toLowerCase()}
             </p>
-            <p className="text-xs text-slate-400">
-              {data.identifier} · {data.prevision}
+            <p className="text-xs text-slate-500 font-mono mt-0.5">
+              {data.identifier} <span className="text-slate-300 mx-1">·</span> {data.prevision}
             </p>
           </div>
         </div>
 
-        {/* Datos de contacto */}
+        {/* Datos de contacto (Fondo sutil de verificación) */}
         {(data.phone || data.email) && (
-          <div className="flex flex-wrap gap-x-5 gap-y-1 px-5 py-3 border-b border-slate-100">
+          <div className="flex flex-col gap-1.5 px-5 py-3 bg-slate-50/50 border-b border-slate-100 text-slate-600 font-mono text-[11px]">
             {data.phone && (
-              <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                <Phone size={11} className="text-slate-400" /> {data.phone}
+              <span className="flex items-center gap-2">
+                <Phone size={12} className="text-slate-400" /> {data.phone}
               </span>
             )}
             {data.email && (
-              <span className="text-xs text-slate-500 flex items-center gap-1.5">
-                <Mail size={11} className="text-slate-400" /> {data.email}
+              <span className="flex items-center gap-2 truncate">
+                <Mail size={12} className="text-slate-400" /> {data.email}
               </span>
             )}
           </div>
         )}
 
-        {/* Filas de la cita */}
-        {[
-          {
-            icon: isTelemedicina ? <Monitor size={15} /> : <Zap size={15} />,
-            label: 'Modalidad',
-            value: isTelemedicina ? 'Telemedicina' : 'Presencial',
-          },
-          {
-            icon: <Calendar size={15} />,
-            label: 'Fecha',
-            value: data.dateLabel ?? '—',
-          },
-          {
-            icon: <Clock size={15} />,
-            label: 'Hora',
-            value: data.slot ? `${data.slot} hrs` : '—',
-          },
-        ].map(({ icon, label, value }, i, arr) => (
-          <div key={label}>
-            <div className="flex items-center justify-between px-5 py-2.5">
-              <span className="flex items-center gap-2 text-sm text-slate-500">
-                <span className="text-slate-400">{icon}</span>
+        {/* Bloque Detalle de Cita */}
+        <div className="p-2 bg-white">
+          {[
+            {
+              icon: isTelemedicina ? <Monitor size={15} /> : <Zap size={15} />,
+              label: 'Modalidad de atención',
+              value: isTelemedicina ? 'Telemedicina' : 'Presencial en Sucursal',
+              color: isTelemedicina ? 'text-indigo-600 bg-indigo-50' : 'text-amber-600 bg-amber-50'
+            },
+            {
+              icon: <Calendar size={15} />,
+              label: 'Fecha asignada',
+              value: data.dateLabel ?? '—',
+            },
+            {
+              icon: <Clock size={15} />,
+              label: 'Horario',
+              value: data.slot ? `${data.slot} hrs` : '—',
+            },
+          ].map(({ icon, label, value, color }, i) => (
+            <div key={label} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+              <span className="flex items-center gap-2.5 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                <span className="text-slate-400 shrink-0">{icon}</span>
                 {label}
               </span>
-              <span className="text-sm font-semibold text-[#0b3c5d]">{value}</span>
+              <span className={`text-sm font-bold text-[#0b3c5d] px-2 py-0.5 rounded-md ${color ?? ''}`}>
+                {value}
+              </span>
             </div>
-            {i < arr.length - 1 && <hr className="border-slate-100 mx-5" />}
-          </div>
-        ))}
+          ))}
+        </div>
 
-        {/* Médico */}
-        <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-100">
-          <div className="w-9 h-9 rounded-full bg-[#1d7874] text-white flex items-center justify-center text-xs font-bold shrink-0">
+        {/* Datos del Especialista */}
+        <div className="flex items-center gap-3 px-5 py-4 bg-slate-50 border-t border-slate-100">
+          <div className="w-10 h-10 rounded-full bg-[#1d7874] text-white flex items-center justify-center text-sm font-bold shrink-0 shadow-inner">
             {doctorIni || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[#0b3c5d] truncate">{data.doctorName ?? '—'}</p>
-            {data.doctorTitle && (
-              <p className="text-xs text-slate-400">{data.doctorTitle}</p>
-            )}
+            <p className="text-sm font-bold text-[#0b3c5d] truncate">{data.doctorName ?? '—'}</p>
+            <p className="text-xs text-[#1d7874] font-medium mt-0.5 bg-[#1d7874]/5 px-1.5 py-0.5 rounded inline-block">
+              {data.doctorTitle || 'Médico Asignado'}
+            </p>
           </div>
-          <span className="shrink-0">
+          <span className="shrink-0 bg-emerald-100 p-1.5 rounded-full">
             <UserCheck size={16} className="text-[#1d7874]" />
-          </span>
-        </div>
-
-        {/* Código de reserva */}
-        <div className="flex items-center justify-between px-5 py-3 bg-[#eaf8ff] border-t border-[#c8edf8]">
-          <span className="flex items-center gap-2 text-sm text-[#0b3c5d] font-medium">
-            <Hash size={15} className="text-[#5bc0eb]" /> N° de reserva
-          </span>
-          <span className="text-sm font-bold text-[#0b3c5d] font-mono tracking-wide">
-            {bookingCode}
           </span>
         </div>
       </div>
 
-      {/* Acciones */}
-      <div className="flex flex-col sm:flex-row gap-4 w-full mt-2">
+      {/* Botones de acción organizados por jerarquía */}
+      <div className="flex flex-col sm:flex-row gap-3 w-full mt-3">
         <button
+          type="button"
           onClick={onViewAppointments}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0b3c5d] text-white text-base font-bold hover:bg-[#0e4d76] transition-all shadow-md"
+          className="flex-1 order-1 sm:order-2 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0b3c5d] text-white text-base font-bold hover:bg-[#0e4d76] active:scale-[0.99] transition-all shadow-md cursor-pointer select-none"
         >
-          Ver mis horas agendadas <ArrowRight size={20} />
+          Volver al menú principal <ArrowRight size={18} />
         </button>
+        
         <button
+          type="button"
           onClick={onNewBooking}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-300 text-base font-bold text-slate-600 hover:bg-slate-50 transition-all"
+          className="flex-1 order-2 sm:order-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border-2 border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.99] transition-all cursor-pointer select-none shadow-sm"
         >
           Agendar otra hora
         </button>
