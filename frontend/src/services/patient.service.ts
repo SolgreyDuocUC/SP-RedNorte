@@ -1,53 +1,33 @@
 import type { Patient, PatientSearch } from '../app/types';
+import { patientApi } from '../remotes/patient.api';
 
 class PatientService {
-  private baseUrl = '/patients';
-
   async getPatientById(id: string): Promise<Patient> {
-    // Mock implementation
-    return {
-      id,
-      rut: '12345678-9',
-      firstName: 'Juan',
-      lastName: 'Pérez González',
-      dateOfBirth: '1985-03-15',
-      email: 'juan.perez@email.com',
-      phone: '+56 9 1234 5678',
-      address: 'Av. Ejemplo 123',
-      commune: 'Iquique',
-      region: 'Tarapacá',
-    };
+    const response = await patientApi.get(`/${id}`);
+    return response.data;
   }
 
   async searchPatients(search: PatientSearch): Promise<Patient[]> {
-    // Mock implementation
-    return [
-      {
-        id: '1',
-        rut: '12345678-9',
-        firstName: 'Juan',
-        lastName: 'Pérez González',
-        dateOfBirth: '1985-03-15',
-        email: 'juan.perez@email.com',
-        phone: '+56 9 1234 5678',
-      },
-    ];
+    if (search.field === 'rut') {
+      try {
+        const response = await patientApi.get(`/identifier/RUT/${search.query}`);
+        return [response.data];
+      } catch (e) {
+        return [];
+      }
+    }
+    const response = await patientApi.get('', { params: { [search.field]: search.query } });
+    return response.data.content || (Array.isArray(response.data) ? response.data : [response.data]);
   }
 
   async createPatient(patient: Omit<Patient, 'id'>): Promise<Patient> {
-    // Mock implementation
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      ...patient,
-    };
+    const response = await patientApi.post('', patient);
+    return response.data;
   }
 
   async updatePatient(id: string, patient: Partial<Patient>): Promise<Patient> {
-    // Mock implementation
-    return {
-      id,
-      ...patient,
-    } as Patient;
+    const response = await patientApi.put(`/${id}`, patient);
+    return response.data;
   }
 }
 
