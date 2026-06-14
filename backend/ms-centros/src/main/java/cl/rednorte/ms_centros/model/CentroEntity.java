@@ -16,24 +16,27 @@ import java.util.List;
 public class CentroEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_centro")
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "nombre", nullable = false, length = 150)
     private String name;
 
-    private String type; // hospital, clinic, primary-care, specialized-center
-
+    @Column(name = "direccion", nullable = false, length = 255)
     private String address;
 
-    private String commune;
-
-    private String region;
-
+    @Column(name = "telefono", length = 20)
     private String phone;
 
+    @Column(name = "correo_electronico", length = 100)
     private String email;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_comuna", nullable = false)
+    private ComunaEntity comuna;
+
+    @Column(name = "estado_centro", nullable = false)
     private String status; // active, suspended, inactive
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -41,4 +44,11 @@ public class CentroEntity {
     @Column(name = "specialty")
     @Builder.Default
     private List<String> specialties = new ArrayList<>();
+
+    //Metodo de restricción de datos
+
+    public void setSpecialties(List<String> specialties) {
+        this.specialties = specialties;
+    }
+
 }

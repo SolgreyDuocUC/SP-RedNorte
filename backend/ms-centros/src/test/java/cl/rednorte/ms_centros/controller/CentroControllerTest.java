@@ -1,5 +1,6 @@
 package cl.rednorte.ms_centros.controller;
 
+import cl.rednorte.ms_centros.dto.CentrosDto;
 import cl.rednorte.ms_centros.service.CentroService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,16 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class CentroControllerTest {
@@ -35,98 +34,76 @@ class CentroControllerTest {
     private CentroController centroController;
 
     private ObjectMapper objectMapper;
+    private CentrosDto centroDtoSample;
 
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(centroController).build();
         objectMapper = new ObjectMapper();
+
+        centroDtoSample = CentrosDto.builder()
+                .id(1L)
+                .name("Centro Médico Villa Alemana")
+                .address("Av. Valparaíso 1234")
+                .phone("+56912345678")
+                .email("villaalemana@rednorte.cl")
+                .status("active")
+                .specialties(Arrays.asList("Pediatría", "Cardiología"))
+                .comuna(new CentrosDto.ComunaResponseDto(45L, "Villa Alemana"))
+                .build();
     }
 
     @Test
-    void crearOrganizacion_ShouldReturnSuccessMessage() throws Exception {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("id", "org-1");
-        payload.put("name", "Org Test");
-
-        when(centroService.crearOrganizacion(anyString(), anyString())).thenReturn("org-1");
-
-        mockMvc.perform(post("/api/v1/organizations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Organización creada exitosamente con ID: org-1"));
-
-        verify(centroService, times(1)).crearOrganizacion("org-1", "Org Test");
-    }
-
-    @Test
-    void obtenerOrganizacion_ShouldReturnOrganization() throws Exception {
-        Map<String, Object> org = new HashMap<>();
-        org.put("id", "org-1");
-        org.put("name", "Org Test");
-
-        when(centroService.obtenerOrganizacion("org-1")).thenReturn(org);
-
-        mockMvc.perform(get("/api/v1/organizations/org-1"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(org)));
-
-        verify(centroService, times(1)).obtenerOrganizacion("org-1");
-    }
-
-    @Test
-    void listarOrganizaciones_ShouldReturnList() throws Exception {
-        when(centroService.listarOrganizaciones()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/api/v1/organizations"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
-
-        verify(centroService, times(1)).listarOrganizaciones();
-    }
-
-    @Test
-    void crearUbicacion_ShouldReturnSuccessMessage() throws Exception {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("id", "loc-1");
-        payload.put("organization_id", "org-1");
-        payload.put("name", "Loc Test");
-        payload.put("status", "active");
-
-        when(centroService.crearUbicacion(anyString(), anyString(), anyString(), anyString())).thenReturn("loc-1");
+    void guardarOActualizar_ShouldReturnCreatedAndDto() throws Exception {
+        // Simulamos que el servicio procesa el DTO y retorna el mismo objeto guardado con ID
+        when(centroService.guardarOActualizarCentro(any(CentrosDto.class))).thenReturn(centroDtoSample);
 
         mockMvc.perform(post("/api/v1/locations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Ubicación creada exitosamente con ID: loc-1"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(centroDtoSample)))
+                .andExpect(status().isCreated()) // Esperamos HTTP 201 Created
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Centro Médico Villa Alemana"))
+                .andExpect(jsonPath("$.status").value("active"))
+                .andExpect(jsonPath("$.comuna.nombre").value("Villa Alemana"));
 
-        verify(centroService, times(1)).crearUbicacion("loc-1", "org-1", "Loc Test", "active");
+        verify(centroService, times(1)).guardarOActualizarCentro(any(CentrosDto.class));
     }
 
     @Test
-    void obtenerUbicacion_ShouldReturnLocation() throws Exception {
-        Map<String, Object> loc = new HashMap<>();
-        loc.put("id", "loc-1");
-        loc.put("name", "Loc Test");
-
-        when(centroService.obtenerUbicacion("loc-1")).thenReturn(loc);
-
-        mockMvc.perform(get("/api/v1/locations/loc-1"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(loc)));
-
-        verify(centroService, times(1)).obtenerUbicacion("loc-1");
-    }
-
-    @Test
-    void listarUbicaciones_ShouldReturnList() throws Exception {
-        when(centroService.listarUbicaciones()).thenReturn(Collections.emptyList());
+    void listarTodos_ShouldReturnList() throws Exception {
+        List<CentrosDto> lista = Collections.singletonList(centroDtoSample);
+        when(centroService.listarUbicaciones()).thenReturn(lista);
 
         mockMvc.perform(get("/api/v1/locations"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
+                .andExpect(status().isOk()) // Esperamos HTTP 200 OK
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Centro Médico Villa Alemana"))
+                .andExpect(jsonPath("$.length()").value(1));
 
         verify(centroService, times(1)).listarUbicaciones();
+    }
+
+    @Test
+    void obtenerPorId_ShouldReturnDto() throws Exception {
+        when(centroService.obtenerUbicacion(1L)).thenReturn(centroDtoSample);
+
+        mockMvc.perform(get("/api/v1/locations/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Centro Médico Villa Alemana"));
+
+        verify(centroService, times(1)).obtenerUbicacion(1L);
+    }
+
+    @Test
+    void eliminar_ShouldReturnNoContent() throws Exception {
+        // Como el método del service es void, solo le decimos a Mockito que haga "nada"
+        doNothing().when(centroService).eliminarUbicacion(1L);
+
+        mockMvc.perform(delete("/api/v1/locations/1"))
+                .andExpect(status().isNoContent()); // Esperamos el HTTP 204 No Content estándar
+
+        verify(centroService, times(1)).eliminarUbicacion(1L);
     }
 }

@@ -1,80 +1,74 @@
 package cl.rednorte.ms_centros.controller;
 
+import cl.rednorte.ms_centros.dto.CentrosDto;
 import cl.rednorte.ms_centros.service.CentroService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
+@Tag(name = "Centros Médicos", description = "CRUD para la gestión de centros de atención y clínicas")
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/locations")
+@RequiredArgsConstructor // Adiós constructor manual, Lombok lo hace por nosotros
 public class CentroController {
 
     private final CentroService centroService;
 
-    public CentroController(CentroService centroService) {
-        this.centroService = centroService;
+    @Operation(summary = "Crear o actualizar un centro médico")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Centro médico procesado con éxito"),
+            @ApiResponse(responseCode = "400", description = "Validación fallida de los datos de entrada"),
+            @ApiResponse(responseCode = "404", description = "Comuna asociada no encontrada")
+    })
+    @PostMapping
+    public ResponseEntity<CentrosDto> guardarOActualizar(@Valid @RequestBody CentrosDto dto) {
+        // Tu service maneja internamente si es creación o actualización basándose en si el ID es nulo o no
+        CentrosDto resultado = centroService.guardarOActualizarCentro(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
-    // ==========================================
-    // ORGANIZACIONES
-    // ==========================================
-
-    @PostMapping("/organizations")
-    public ResponseEntity<String> crearOrganizacion(@RequestBody Map<String, String> payload) {
-        String id = payload.get("id");
-        String name = payload.get("name");
-        String orgId = centroService.crearOrganizacion(id, name);
-        return ResponseEntity.ok("Organización creada exitosamente con ID: " + orgId);
-    }
-
-    @GetMapping("/organizations/{id}")
-    public ResponseEntity<Map<String, Object>> obtenerOrganizacion(@PathVariable String id) {
-        return ResponseEntity.ok(centroService.obtenerOrganizacion(id));
-    }
-
-    @GetMapping("/organizations")
-    public ResponseEntity<List<Map<String, Object>>> listarOrganizaciones() {
-        return ResponseEntity.ok(centroService.listarOrganizaciones());
-    }
-
-    // ==========================================
-    // UBICACIONES / CENTROS (LOCATIONS)
-    // ==========================================
-
-    @PostMapping("/locations")
-    public ResponseEntity<String> crearUbicacion(@RequestBody Map<String, Object> payload) {
-        String id = (String) payload.get("id");
-        String organizationId = (String) payload.get("organization_id");
-        String name = (String) payload.get("name");
-        String status = (String) payload.get("status");
-        List<String> specialties = (List<String>) payload.get("specialties");
-        String type = (String) payload.get("type");
-        String address = (String) payload.get("address");
-        String commune = (String) payload.get("commune");
-        String region = (String) payload.get("region");
-        String phone = (String) payload.get("phone");
-        String email = (String) payload.get("email");
-        
-        String locId = centroService.crearUbicacion(id, organizationId, name, status, specialties,
-                type, address, commune, region, phone, email);
-        return ResponseEntity.ok("Ubicación creada exitosamente con ID: " + locId);
-    }
-
-    @GetMapping("/locations/{id}")
-    public ResponseEntity<Map<String, Object>> obtenerUbicacion(@PathVariable String id) {
-        return ResponseEntity.ok(centroService.obtenerUbicacion(id));
-    }
-
-    @GetMapping("/locations")
-    public ResponseEntity<List<Map<String, Object>>> listarUbicaciones() {
+    @Operation(summary = "Listar todos los centros médicos registrados")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
+    })
+    @GetMapping
+    public ResponseEntity<List<CentrosDto>> listarTodos() {
         return ResponseEntity.ok(centroService.listarUbicaciones());
     }
 
-    @DeleteMapping("/locations/{id}")
-    public ResponseEntity<Void> eliminarUbicacion(@PathVariable String id) {
+    @Operation(summary = "Obtener detalles de un centro médico por su ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Centro médico encontrado"),
+            @ApiResponse(responseCode = "404", description = "Centro médico no encontrado (CentroNotFoundException)")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<CentrosDto> obtenerPorId(
+            @Parameter(description = "ID único del centro médico", example = "1")
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(centroService.obtenerUbicacion(id));
+    }
+
+    @Operation(summary = "Eliminar un centro médico por su ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Centro médico eliminado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Centro médico no encontrado")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "ID del centro médico a eliminar", example = "1")
+            @PathVariable Long id
+    ) {
         centroService.eliminarUbicacion(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // Retorna el estándar HTTP 204 No Content
     }
 }
