@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { useState } from 'react';
-import { DashboardAdmin } from './DashboardAdmin';
+import { AdminDashboardView } from '../9. AdminView/AdminDashboardView';
 import { DashboardAdministrative } from './DashboardAdministrative';
 import { DashboardDoctor } from './DashboardDoctor';
 import { DashboardNurse } from './DashboardNurse';
@@ -34,7 +34,10 @@ export function DashboardView({
   const renderDashboardByRole = () => {
     switch (userRole) {
       case 'admin':
-        return <DashboardAdmin />;
+        return <AdminDashboardView onNavigate={(view) => {
+          const event = new CustomEvent('navigate', { detail: view });
+          window.dispatchEvent(event);
+        }} />;
       case 'administrativo':
         return <DashboardAdministrative onRegisterPatient={onRegisterPatient} onNewBooking={onNewBooking} />;
       case 'enfermeria':
@@ -51,7 +54,10 @@ export function DashboardView({
           </div>
         );
       default:
-        return <DashboardAdmin />;
+        return <AdminDashboardView onNavigate={(view) => {
+          const event = new CustomEvent('navigate', { detail: view });
+          window.dispatchEvent(event);
+        }} />;
     }
   };
 

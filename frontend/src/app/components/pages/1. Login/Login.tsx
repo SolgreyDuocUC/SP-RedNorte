@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { authRemote } from '../../../../remotes/auth.remote';
+import { toast } from 'sonner';
+import { Toaster } from '../../ui/sonner';
 
 function mapBackendRoleToFrontend(roles: string[]): 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente' {
   const lowercaseRoles = roles.map(r => r.toLowerCase());
@@ -68,7 +70,16 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
     } catch (error: any) {
       setLoading(false);
       console.error('Login error:', error);
-      setPassError('Correo electrónico o contraseña incorrectos');
+      
+      if (error.response?.status === 404 || error.response?.status === 500) {
+        setPassError('Usuario no registrado en el sistema.');
+        toast.error('Usuario no encontrado', {
+          description: 'Por favor, contacta a tu jefatura o al administrador del centro para solicitar acceso.',
+          duration: 6000,
+        });
+      } else {
+        setPassError('Correo electrónico o contraseña incorrectos');
+      }
     }
   };
 
@@ -78,6 +89,7 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
 
   return (
     <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4">
+      <Toaster position="top-center" richColors closeButton />
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row">
 
         {/* PANEL IZQUIERDO – Identidad institucional */}

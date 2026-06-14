@@ -7,6 +7,9 @@ import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
 import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
 import { AdminView } from './app/components/pages/9. AdminView/AdminView';
+import { AdminDashboardView } from './app/components/pages/9. AdminView/AdminDashboardView';
+import { AdminSpecialtiesView } from './app/components/pages/9. AdminView/AdminSpecialtiesView';
+import { AdminSupportView } from './app/components/pages/9. AdminView/AdminSupportView';
 import { AdminFacilitiesView } from './app/components/pages/10. AdminFacilities/AdminFacilitiesView';
 import { NewAppointment } from './app/components/pages/10. AdminFacilities/NewAppointment';
 import { RegisterPatient } from './app/components/pages/10. AdminFacilities/RegisterPatient';
@@ -154,10 +157,16 @@ export default function App() {
         return <NotificationsView />;
       case 'history':
         return <HistoryView />;
+      case 'admin-dashboard':
+        return <AdminDashboardView onNavigate={(view) => setActiveView(view)} />;
       case 'admin-users':
         return <AdminView />;
       case 'admin-facilities':
         return <AdminFacilitiesView />;
+      case 'admin-specialties':
+        return <AdminSpecialtiesView />;
+      case 'admin-support':
+        return <AdminSupportView />;
       case 'reserva':
         return <Reservahoraview onBack={() => setActiveView('dashboard')} />;
       default:

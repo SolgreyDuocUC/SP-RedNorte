@@ -8,6 +8,9 @@ import {
   Activity,
   Settings,
   Users,
+  Shield,
+  LifeBuoy,
+  Stethoscope,
 } from 'lucide-react';
 import { cn } from '../ui/utils';
 
@@ -44,13 +47,17 @@ const getNavigationGroups = (role: string = '') => [
   {
     title: 'Administración',
     items: [
-      { id: 'facilities', label: 'Establecimientos', icon: Hospital },
-      { id: 'reports', label: 'Indicadores', icon: Activity, disabled: true },
-      { id: 'settings', label: 'Configuración', icon: Settings, disabled: true },
-      ...(role === 'admin' ? [
+      ...(role !== 'admin' ? [
+        { id: 'facilities', label: 'Establecimientos', icon: Hospital },
+        { id: 'reports', label: 'Indicadores', icon: Activity, disabled: true },
+        { id: 'settings', label: 'Configuración', icon: Settings, disabled: true },
+      ] : [
+        { id: 'admin-dashboard', label: 'Dashboard Admin', icon: Shield, disabled: false },
+        { id: 'admin-facilities', label: 'Establecimientos', icon: Hospital, disabled: false },
         { id: 'admin-users', label: 'Colaboradores', icon: Users, disabled: false },
-        { id: 'admin-facilities', label: 'Gestión Centros', icon: Hospital, disabled: false }
-      ] : [])
+        { id: 'admin-specialties', label: 'Especialidades', icon: Stethoscope, disabled: false },
+        { id: 'admin-support', label: 'Mesa de Soporte', icon: LifeBuoy, disabled: false },
+      ])
     ],
   },
 ];
