@@ -1,0 +1,4 @@
+package cl.rednorte.ms_centros.service.Impl;
+
+public class ComunaServiceImpl {
+}
