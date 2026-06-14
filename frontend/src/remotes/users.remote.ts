@@ -7,7 +7,13 @@ export interface UserRoleDTO {
 
 export interface UserDTO {
   id?: string;
-  username: string;
+  run: string;
+  nombre: string;
+  segundoNombre?: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
+  numeroTelefono?: string;
+  direccion?: string;
   password?: string;
   email: string;
   enabled: boolean;

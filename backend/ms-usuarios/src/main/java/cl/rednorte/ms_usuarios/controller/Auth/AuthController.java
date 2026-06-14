@@ -29,7 +29,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
 
-        UserEntity user = userService.findEntityByEmail(request.getEmail());
+        UserEntity user = userService.findEntityByRun(request.getRun());
 
         if (!userService.matchesPassword(request.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).build();

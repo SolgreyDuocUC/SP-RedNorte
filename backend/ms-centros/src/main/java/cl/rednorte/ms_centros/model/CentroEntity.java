@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "centros")
@@ -44,6 +45,15 @@ public class CentroEntity {
     @Column(name = "specialty")
     @Builder.Default
     private List<String> specialties = new ArrayList<>();
+
+    // Dentro de CentroEntity.java
+    @ManyToMany
+    @JoinTable(
+            name = "centro_especialidad",
+            joinColumns = @JoinColumn(name = "id_centro"),
+            inverseJoinColumns = @JoinColumn(name = "id_especialidad")
+    )
+    private Set<EspecialidadEntity> especialidades;
 
     //Metodo de restricción de datos
 

@@ -45,6 +45,11 @@ export function AdminView() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nombre, setNombre] = useState('');
+  const [segundoNombre, setSegundoNombre] = useState('');
+  const [apellidoPaterno, setApellidoPaterno] = useState('');
+  const [apellidoMaterno, setApellidoMaterno] = useState('');
+  const [numeroTelefono, setNumeroTelefono] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [especialidad, setEspecialidad] = useState('');
   const [establecimiento, setEstablecimiento] = useState('Sede Iquique');
   const [rol, setRol] = useState('medico');
@@ -76,15 +81,10 @@ export function AdminView() {
         else if (rawRole.includes('enfermeria')) rolStr = 'enfermeria';
         else if (rawRole.includes('administrativo')) rolStr = 'administrativo';
 
-        // Parse RUN and Name from username (format: RUN|Name)
-        const parts = u.username.split('|');
-        const runVal = parts[0] || '';
-        const nombreVal = parts[1] || u.username;
-
         return {
           id: u.id || '',
-          run: runVal,
-          nombre: nombreVal,
+          run: u.run || '',
+          nombre: `${u.nombre} ${u.apellidoPaterno}`.trim() || '',
           especialidad: rolStr === 'medico' ? 'Medicina General' : 'Personal',
           establecimiento: 'Sede Iquique',
           rol: rolStr,
@@ -129,7 +129,10 @@ export function AdminView() {
     setIsUpdatingPassword(true);
     try {
       const payload: UserDTO = {
-        username: `${selectedColabForPassword.run}|${selectedColabForPassword.nombre}`,
+        run: selectedColabForPassword.run,
+        nombre: selectedColabForPassword.nombre,
+        apellidoPaterno: '',
+        apellidoMaterno: '',
         email: selectedColabForPassword.email,
         password: newPassword,
         enabled: true,
@@ -160,7 +163,7 @@ export function AdminView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!run.trim() || !email.trim() || !nombre.trim() || !password.trim()) {
+    if (!run.trim() || !email.trim() || !nombre.trim() || !apellidoPaterno.trim() || !apellidoMaterno.trim() || !password.trim()) {
       toast.error('Campos incompletos', { description: 'Por favor completa todos los campos requeridos.' });
       return;
     }
@@ -168,7 +171,13 @@ export function AdminView() {
     setIsSubmitting(true);
     try {
       const payload: UserDTO = {
-        username: `${run.trim()}|${nombre.trim()}`,
+        run: run.trim(),
+        nombre: nombre.trim(),
+        segundoNombre: segundoNombre.trim(),
+        apellidoPaterno: apellidoPaterno.trim(),
+        apellidoMaterno: apellidoMaterno.trim(),
+        numeroTelefono: numeroTelefono.trim(),
+        direccion: direccion.trim(),
         email: email.trim(),
         password: password,
         enabled: true,
@@ -178,7 +187,7 @@ export function AdminView() {
       const newUser = await usersRemote.create(payload);
 
       toast.success('Colaborador creado', {
-        description: `${nombre.trim()} ha sido agregado con éxito en el sistema.`
+        description: `${nombre.trim()} ${apellidoPaterno.trim()} ha sido agregado con éxito en el sistema.`
       });
 
       // Reset formulario
@@ -186,6 +195,11 @@ export function AdminView() {
       setEmail('');
       setPassword('');
       setNombre('');
+      setSegundoNombre('');
+      setApellidoPaterno('');
+      setApellidoMaterno('');
+      setNumeroTelefono('');
+      setDireccion('');
       setEspecialidad('');
       setRol('medico');
       
@@ -283,13 +297,67 @@ export function AdminView() {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Primer Nombre</label>
+                    <input
+                      required
+                      value={nombre}
+                      onChange={e => setNombre(e.target.value)}
+                      placeholder="Ej. Juan"
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Segundo Nombre</label>
+                    <input
+                      value={segundoNombre}
+                      onChange={e => setSegundoNombre(e.target.value)}
+                      placeholder="Opcional"
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Apellido Paterno</label>
+                    <input
+                      required
+                      value={apellidoPaterno}
+                      onChange={e => setApellidoPaterno(e.target.value)}
+                      placeholder="Ej. Pérez"
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-slate-500 uppercase">Apellido Materno</label>
+                    <input
+                      required
+                      value={apellidoMaterno}
+                      onChange={e => setApellidoMaterno(e.target.value)}
+                      placeholder="Ej. González"
+                      className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500 uppercase">Nombre Completo</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Número de Teléfono</label>
                   <input
-                    required
-                    value={nombre}
-                    onChange={e => setNombre(e.target.value)}
-                    placeholder="Ej. Dr. Juan Pérez"
+                    value={numeroTelefono}
+                    onChange={e => setNumeroTelefono(e.target.value)}
+                    placeholder="Ej. +56912345678"
+                    className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-500 uppercase">Dirección</label>
+                  <input
+                    value={direccion}
+                    onChange={e => setDireccion(e.target.value)}
+                    placeholder="Ej. Av. Arturo Prat 1234"
                     className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-[#0096c7]/20 focus:border-[#0096c7] outline-none transition-all"
                   />
                 </div>

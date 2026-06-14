@@ -15,7 +15,7 @@ public interface UserService {
 
     void delete(UUID id);
 
-    cl.rednorte.ms_usuarios.model.UserEntity findEntityByEmail(String email);
+    cl.rednorte.ms_usuarios.model.UserEntity findEntityByRun(String run);
 
     boolean matchesPassword(String rawPassword, String encodedPassword);
 }

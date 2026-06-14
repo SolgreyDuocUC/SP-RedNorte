@@ -1,12 +1,15 @@
 package cl.rednorte.ms_usuarios.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,51 +17,67 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "practitioners")
+@Table(name = "profesionales")
 public class Practitioner {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column (name = "practitioner_id", nullable = false, length = 100)
-    private int practitionerId;
+    @Column(name = "id_profesional")
+    private Integer practitionerId;
 
-    @Column (name = "run_practitioner", nullable = false, length = 12)
+    @NotNull(message = "El RUN no puede ser nulo")
+    @Size(min = 1, max = 12, message = "El RUN debe tener entre 1 y 12 caracteres")
+    @Column(name = "run_profesional", nullable = false, length = 12, unique = true)
     private String runPractitioner;
 
-    @Column (name = "active_practitioner" , nullable = false)
+    @NotNull(message = "El estado activo es obligatorio")
+    @Column(name = "activo", nullable = false)
     private boolean activePractitioner;
 
-    @Column (name = "first_name_practitioner", nullable = false, length = 200)
+    @NotNull(message = "El primer nombre no puede ser nulo")
+    @Size(max = 200, message = "El primer nombre no puede superar los 200 caracteres")
+    @Column(name = "primer_nombre", nullable = false, length = 200)
     private String firstNamePractitioner;
 
-    @Column (name = "second_name_practitioner", nullable = false, length = 200)
+    @Size(max = 200, message = "El segundo nombre no puede superar los 200 caracteres")
+    @Column(name = "segundo_nombre", length = 200)
     private String secondNamePractitioner;
 
-    @Column (name = "last_name_practitioner", nullable = false, length = 200)
+    @NotNull(message = "El apellido no puede ser nulo")
+    @Size(max = 200, message = "El apellido no puede superar los 200 caracteres")
+    @Column(name = "apellidos", nullable = false, length = 200)
     private String lastNamePractitioner;
 
-    @Column (name = "gender_practitioner", nullable = false, length = 1)
+    @NotNull(message = "El género no puede ser nulo")
+    @Size(min = 1, max = 1, message = "El género debe ser de 1 solo carácter")
+    @Column(name = "genero", nullable = false, length = 1)
     private String genderPractitioner;
 
-    @Column (name = "birthday_practitioner", nullable = false )
-    private Timestamp birthdayPractitioner;
+    @NotNull(message = "La fecha de nacimiento no puede ser nula")
+    @Column(name = "fecha_nacimiento", nullable = false)
+    private LocalDate birthdayPractitioner;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "practitioner_id")
-    private List<ContactPoint> contactPointsPractitioner;
+    @OneToMany(mappedBy = "practitioner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContactPoint> contactPointsPractitioner = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "deceased_id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "id_defuncion", referencedColumnName = "deceased_id")
     private Deceased deceasedPractitioner;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "practitioner_id")
-    private List<Address> addressesPractitioner;
+    @OneToMany(mappedBy = "practitioner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addressesPractitioner = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "practitioner_id")
-    private List <Qualification> qualificationsPractitioner;
+    @OneToMany(mappedBy = "practitioner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Qualification> qualificationsPractitioner = new ArrayList<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "practitioner_centros", joinColumns = @JoinColumn(name = "practitioner_id"))
+    @Column(name = "centro_id")
+    private List<Long> centroIds = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "practitioner_especialidades", joinColumns = @JoinColumn(name = "practitioner_id"))
+    @Column(name = "especialidad_id")
+    private List<Long> especialidadIds = new ArrayList<>();
 
 }

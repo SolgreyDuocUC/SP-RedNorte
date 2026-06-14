@@ -16,7 +16,6 @@ public class Address {
     @Column(name = "address_id", nullable = false, length = 100)
     private int addressId;
 
-
     @Column(name = "use_address", nullable = true, length = 200)
     private String useAddress;
 
@@ -34,5 +33,9 @@ public class Address {
 
     @Column(name = "country_address", nullable = true, length = 200)
     private String countryAddress;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practitioner_id")
+    private Practitioner practitioner;
 
 }

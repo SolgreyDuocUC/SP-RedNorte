@@ -25,4 +25,10 @@ public class PractitionerDTO {
     private List<ContactDTO> contactPointsPractitioner;
     private List<AddressDTO> addressesPractitioner;
     private DeceasedDTO deceasedPractitioner;
+
+    // Relaciones enriquecidas con OpenFeign (3FN)
+    private List<Long> centroIds;
+    private List<Long> especialidadIds;
+    private List<cl.rednorte.ms_usuarios.dto.feign.CentroFeignDto> centros;
+    private List<cl.rednorte.ms_usuarios.dto.feign.EspecialidadFeignDto> especialidades;
 }

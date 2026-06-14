@@ -9,8 +9,8 @@ export interface AuthResponseDTO {
 }
 
 export const authRemote = {
-  login: async (email: string, password: string): Promise<AuthResponseDTO> => {
-    const response = await authApi.post<AuthResponseDTO>('/login', { email, password });
+  login: async (run: string, password: string): Promise<AuthResponseDTO> => {
+    const response = await authApi.post<AuthResponseDTO>('/login', { run, password });
     return response.data;
   }
 };

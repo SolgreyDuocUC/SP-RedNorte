@@ -12,12 +12,20 @@ import java.util.stream.Collectors;
 public class UserMapper {
 
     public UserDTO toDto(UserEntity entity) {
-        if (entity == null)
+        if (entity == null) {
             return null;
+        }
 
         return UserDTO.builder()
                 .id(entity.getId())
-                .username(entity.getUsername())
+                .run(entity.getRun())
+                .nombre(entity.getNombre())
+                .segundoNombre(entity.getSegundoNombre())
+                .apellidoPaterno(entity.getApellidoPaterno())
+                .apellidoMaterno(entity.getApellidoMaterno())
+                .numeroTelefono(entity.getNumeroTelefono())
+                .direccion(entity.getDireccion())
+                .password(entity.getPassword())
                 .email(entity.getEmail())
                 .enabled(entity.isEnabled())
                 .roles(entity.getRoles() != null ? entity.getRoles().stream()
@@ -27,12 +35,19 @@ public class UserMapper {
     }
 
     public UserEntity toEntity(UserDTO dto) {
-        if (dto == null)
+        if (dto == null) {
             return null;
+        }
 
         return UserEntity.builder()
                 .id(dto.getId())
-                .username(dto.getUsername())
+                .run(dto.getRun())
+                .nombre(dto.getNombre())
+                .segundoNombre(dto.getSegundoNombre())
+                .apellidoPaterno(dto.getApellidoPaterno())
+                .apellidoMaterno(dto.getApellidoMaterno())
+                .numeroTelefono(dto.getNumeroTelefono())
+                .direccion(dto.getDireccion())
                 .password(dto.getPassword())
                 .email(dto.getEmail())
                 .enabled(dto.isEnabled())

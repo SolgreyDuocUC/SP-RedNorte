@@ -1,6 +1,8 @@
 package cl.rednorte.ms_usuarios.service.Impl;
 
 import cl.rednorte.ms_usuarios.dto.*;
+import cl.rednorte.ms_usuarios.integration.feign.CentroClient;
+import cl.rednorte.ms_usuarios.integration.feign.EspecialidadClient;
 import cl.rednorte.ms_usuarios.model.*;
 import cl.rednorte.ms_usuarios.repository.PractitionerRepository;
 import cl.rednorte.ms_usuarios.service.PractitionerService;
@@ -16,6 +18,8 @@ import java.util.stream.Collectors;
 public class PractitionerServiceImpl implements PractitionerService {
 
     private final PractitionerRepository practitionerRepository;
+    private final CentroClient centroClient;
+    private final EspecialidadClient especialidadClient;
 
     @Override
     public List<PractitionerDTO> findAll() {
@@ -62,7 +66,7 @@ public class PractitionerServiceImpl implements PractitionerService {
     }
 
     private PractitionerDTO convertToDTO(Practitioner p) {
-        return PractitionerDTO.builder()
+        PractitionerDTO dto = PractitionerDTO.builder()
                 .practitionerId(p.getPractitionerId())
                 .runPractitioner(p.getRunPractitioner())
                 .activePractitioner(p.isActivePractitioner())
@@ -70,7 +74,7 @@ public class PractitionerServiceImpl implements PractitionerService {
                 .secondNamePractitioner(p.getSecondNamePractitioner())
                 .lastNamePractitioner(p.getLastNamePractitioner())
                 .genderPractitioner(p.getGenderPractitioner())
-                .birthdayPractitioner(p.getBirthdayPractitioner())
+                .birthdayPractitioner(p.getBirthdayPractitioner() != null ? java.sql.Timestamp.valueOf(p.getBirthdayPractitioner().atStartOfDay()) : null)
                 .qualificationsPractitioner(p.getQualificationsPractitioner() != null ? 
                     p.getQualificationsPractitioner().stream()
                         .map(q -> QualificationDTO.builder()
@@ -83,9 +87,31 @@ public class PractitionerServiceImpl implements PractitionerService {
                         .map(c -> ContactDTO.builder()
                             .contactId(c.getContactPointId())
                             .contactType(c.getSystemContact())
-                            .contactValue(c.getValueContatc()) // Corrigiendo typo del modelo
+                            .contactValue(c.getValueContatc())
                             .build())
                         .collect(Collectors.toList()) : null)
+                .centroIds(p.getCentroIds())
+                .especialidadIds(p.getEspecialidadIds())
                 .build();
+
+        if (p.getCentroIds() != null && !p.getCentroIds().isEmpty()) {
+            dto.setCentros(p.getCentroIds().stream()
+                    .map(id -> {
+                        try { return centroClient.obtenerCentroPorId(id); } catch(Exception e) { return null; }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList()));
+        }
+
+        if (p.getEspecialidadIds() != null && !p.getEspecialidadIds().isEmpty()) {
+            dto.setEspecialidades(p.getEspecialidadIds().stream()
+                    .map(id -> {
+                        try { return especialidadClient.obtenerEspecialidadPorId(id); } catch(Exception e) { return null; }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
     }
 }

@@ -22,4 +22,8 @@ public class ContactPoint {
     @Column(name = "value_contact", nullable = true, length = 200)
     private String valueContatc;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practitioner_id")
+    private Practitioner practitioner;
+
 }

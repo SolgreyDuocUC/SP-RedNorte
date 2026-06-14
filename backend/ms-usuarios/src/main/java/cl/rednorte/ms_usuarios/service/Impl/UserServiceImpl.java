@@ -30,8 +30,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDTO save(UserDTO userDTO) {
-        if (repository.existsByUsername(userDTO.getUsername())) {
-            throw new BusinessException("El nombre de usuario ya existe");
+        if (repository.existsByRun(userDTO.getRun())) {
+            throw new BusinessException("El RUN ya existe");
         }
         if (repository.existsByEmail(userDTO.getEmail())) {
             throw new BusinessException("El email ya existe");
@@ -75,7 +75,13 @@ public class UserServiceImpl implements UserService {
         UserEntity existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
 
-        existing.setUsername(userDTO.getUsername());
+        existing.setRun(userDTO.getRun());
+        existing.setNombre(userDTO.getNombre());
+        existing.setSegundoNombre(userDTO.getSegundoNombre());
+        existing.setApellidoPaterno(userDTO.getApellidoPaterno());
+        existing.setApellidoMaterno(userDTO.getApellidoMaterno());
+        existing.setNumeroTelefono(userDTO.getNumeroTelefono());
+        existing.setDireccion(userDTO.getDireccion());
         existing.setEmail(userDTO.getEmail());
         existing.setEnabled(userDTO.isEnabled());
 
@@ -97,9 +103,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserEntity findEntityByEmail(String email) {
-        return repository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
+    public UserEntity findEntityByRun(String run) {
+        return repository.findByRun(run)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con RUN: " + run));
     }
 
     @Override

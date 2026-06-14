@@ -25,7 +25,7 @@ public class JpaUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String emailOrUsername) throws UsernameNotFoundException {
 
         UserEntity user = userRepository.findByEmail(emailOrUsername)
-                .or(() -> userRepository.findByUsername(emailOrUsername))
+                .or(() -> userRepository.findByRun(emailOrUsername))
                 .orElseThrow(() -> new UsernameNotFoundException(
                         String.format("No user found with email or username '%s'", emailOrUsername)
                 ));

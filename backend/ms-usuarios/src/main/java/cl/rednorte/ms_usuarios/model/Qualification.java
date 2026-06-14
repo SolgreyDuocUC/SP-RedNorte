@@ -24,4 +24,8 @@ public class Qualification {
     @Column (name = "qualification_period", nullable = true)
     private Timestamp qualificationPeriod;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practitioner_id")
+    private Practitioner practitioner;
+
 }

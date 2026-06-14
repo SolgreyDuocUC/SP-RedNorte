@@ -12,7 +12,13 @@ import java.util.UUID;
 @Builder
 public class UserDTO {
     private UUID id;
-    private String username;
+    private String run;
+    private String nombre;
+    private String segundoNombre;
+    private String apellidoPaterno;
+    private String apellidoMaterno;
+    private String numeroTelefono;
+    private String direccion;
     private String password;
     private String email;
     private boolean enabled;

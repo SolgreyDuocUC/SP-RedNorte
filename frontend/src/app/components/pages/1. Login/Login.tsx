@@ -21,21 +21,23 @@ interface LoginViewProps {
 }
 
 export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegisterClick }: LoginViewProps) {
-  const [email, setEmail] = useState('');
+  const [run, setRun] = useState('');
   const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [runError, setRunError] = useState('');
   const [passError, setPassError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handleLogin = async () => {
-    setEmailError('');
+    setRunError('');
     setPassError('');
+    setShowErrorModal(false);
 
     let valid = true;
 
-    if (!email || !email.includes('@')) {
-      setEmailError('Ingresa un correo electrónico válido');
+    if (!run || run.length < 8) {
+      setRunError('Ingresa un RUN válido');
       valid = false;
     }
 
@@ -49,14 +51,14 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
     setLoading(true);
 
     try {
-      const data = await authRemote.login(email.trim(), password);
+      const data = await authRemote.login(run.trim(), password);
       
       // Guardar token y datos del usuario en localStorage
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('id', String(data.id));
-      localStorage.setItem('email', data.email);
+      localStorage.setItem('run', run.trim());
       localStorage.setItem('roles', JSON.stringify(data.roles));
 
       setLoading(false);
@@ -73,12 +75,9 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
       
       if (error.response?.status === 404 || error.response?.status === 500) {
         setPassError('Usuario no registrado en el sistema.');
-        toast.error('Usuario no encontrado', {
-          description: 'Por favor, contacta a tu jefatura o al administrador del centro para solicitar acceso.',
-          duration: 6000,
-        });
+        setShowErrorModal(true);
       } else {
-        setPassError('Correo electrónico o contraseña incorrectos');
+        setPassError('RUN o contraseña incorrectos');
       }
     }
   };
@@ -137,7 +136,7 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
               <span className="font-semibold">Inicio de Sesión:</span>
             </div>
             <p className="text-xs">
-              Ingresa tu correo y contraseña asignada para acceder.
+              Ingresa tu RUN y contraseña asignada para acceder.
             </p>
           </div>
 
@@ -153,28 +152,24 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
             </div>
           )}
 
-          {/* Campo Correo Electrónico */}
-          <div className="mb-5">
-            <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              value={email}
-              placeholder="Ej: admin@rednorte.cl"
-              autoComplete="email"
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError('');
-              }}
-              onKeyDown={(e) => handleKeyDown(e, () => document.getElementById('rn-pass')?.focus())}
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm outline-none transition-all
-                ${emailError
-                  ? 'border-red-400 ring-2 ring-red-100'
-                  : 'border-slate-200 focus:border-[#0096c7] focus:ring-2 focus:ring-[#0096c7]/15'
-                }`}
-            />
-            {emailError && <p className="text-xs text-red-500 mt-1.5">{emailError}</p>}
+
+          {/* RUN Input */}
+          <div className="space-y-2 mb-5">
+            <label className="text-sm font-semibold text-slate-700">RUN</label>
+            <div className={`relative flex items-center border rounded-xl overflow-hidden transition-all bg-slate-50 ${runError ? 'border-red-400 ring-4 ring-red-400/10' : 'border-slate-200 focus-within:border-[#0096c7] focus-within:ring-4 focus-within:ring-[#0096c7]/10'}`}>
+              <div className="pl-4 pr-3 text-slate-400">
+                <User className="h-5 w-5" />
+              </div>
+              <input
+                type="text"
+                required
+                value={run}
+                onChange={(e) => setRun(e.target.value)}
+                className="w-full py-3.5 pr-4 bg-transparent outline-none text-sm text-slate-700 placeholder:text-slate-400"
+                placeholder="Ej. 12.345.678-9"
+              />
+            </div>
+            {runError && <p className="text-xs font-medium text-red-500 mt-1">{runError}</p>}
           </div>
 
           {/* Campo Contraseña */}
@@ -242,6 +237,32 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
           )}
         </div>
       </div>
+
+      {/* Modal Emergente de Error */}
+      {showErrorModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center transform scale-100 transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Acceso Denegado</h3>
+            <p className="text-slate-600 text-sm mb-6">
+              El usuario ingresado no se encuentra registrado en el sistema o no tiene permisos válidos. 
+              <br /><br />
+              Por favor, contacta a tu <strong>jefatura</strong> o al <strong>administrador del centro</strong> para solicitar acceso.
+            </p>
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="w-full bg-[#023e8a] hover:bg-[#0077b6] text-white font-bold py-3 px-4 rounded-xl transition-colors"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
