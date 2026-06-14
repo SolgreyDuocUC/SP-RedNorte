@@ -6,7 +6,7 @@ import { Header } from './app/components/layout/Header';
 import { Sidebar } from './app/components/layout/Sidebar';
 import { DashboardView } from './app/components/pages/2. Dashboards/DashboardView';
 import { AppointmentsView } from './app/components/pages/3. AgendaMedica/AppointmentsView';
-import { AdminView } from './app/components/pages/9. AdminView/AdminView';
+import { AdminView } from './app/components/pages/9. AdminView/EmploysView';
 import { AdminDashboardView } from './app/components/pages/9. AdminView/AdminDashboardView';
 import { AdminSpecialtiesView } from './app/components/pages/9. AdminView/AdminSpecialtiesView';
 import { AdminSupportView } from './app/components/pages/9. AdminView/AdminSupportView';

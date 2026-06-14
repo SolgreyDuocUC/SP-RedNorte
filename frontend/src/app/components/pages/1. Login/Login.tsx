@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import { authRemote } from '../../../../remotes/auth.remote';
 import { toast } from 'sonner';
 import { Toaster } from '../../ui/sonner';
@@ -12,6 +12,18 @@ function mapBackendRoleToFrontend(roles: string[]): 'admin' | 'administrativo' |
   if (lowercaseRoles.includes('medico') || lowercaseRoles.includes('role_medico')) return 'medico';
   return 'paciente';
 }
+
+const formatRun = (value: string) => {
+  let cleanValue = value.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (cleanValue.length === 0) return '';
+  if (cleanValue.length > 1) {
+    const cuerpo = cleanValue.slice(0, -1);
+    const dv = cleanValue.slice(-1);
+    const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${cuerpoFormateado}-${dv}`;
+  }
+  return cleanValue;
+};
 
 interface LoginViewProps {
   onLoginSuccess: (role: 'admin' | 'administrativo' | 'enfermeria' | 'medico' | 'paciente') => void;
@@ -35,8 +47,9 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
     setShowErrorModal(false);
 
     let valid = true;
+    const runToSend = run.replace(/\./g, '').trim();
 
-    if (!run || run.length < 8) {
+    if (!runToSend || runToSend.length < 8) {
       setRunError('Ingresa un RUN válido');
       valid = false;
     }
@@ -51,14 +64,14 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
     setLoading(true);
 
     try {
-      const data = await authRemote.login(run.trim(), password);
+      const data = await authRemote.login(runToSend, password);
       
       // Guardar token y datos del usuario en localStorage
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('id', String(data.id));
-      localStorage.setItem('run', run.trim());
+      localStorage.setItem('run', runToSend);
       localStorage.setItem('roles', JSON.stringify(data.roles));
 
       setLoading(false);
@@ -164,7 +177,7 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
                 type="text"
                 required
                 value={run}
-                onChange={(e) => setRun(e.target.value)}
+                onChange={(e) => setRun(formatRun(e.target.value))}
                 className="w-full py-3.5 pr-4 bg-transparent outline-none text-sm text-slate-700 placeholder:text-slate-400"
                 placeholder="Ej. 12.345.678-9"
               />

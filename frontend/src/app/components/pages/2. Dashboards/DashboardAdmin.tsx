@@ -8,8 +8,6 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { useState, useEffect } from 'react'
-import { AppointmentDTO } from '../../../../remotes/dtos/appointment.dto';
-import { PatientDTO } from '../../../../remotes/dtos/patient.dto';
 import { FacilityDTO } from '../../../../remotes/facilities.remote';
 import { patientRemote } from '../../../../remotes/patient.remote';
 import { appointmentsRemote } from '../../../../remotes/appointments.remote';
@@ -44,7 +42,7 @@ export function DashboardAdmin() {
     totalPatients: patientsCount,
     totalAppointments: appointmentsCount,
     cancellations: cancellationsCount,
-    reassignments: 4, // Simulated KPI
+    reassignments: 4,
   };
 
   return (
