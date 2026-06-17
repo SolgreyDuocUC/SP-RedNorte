@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Date;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class PatientServiceImpl implements PatientService {
 
     private final PatientRepository repository;
     private final PatientMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public PatientDTO create(PatientDTO dto) {
@@ -41,6 +43,16 @@ public class PatientServiceImpl implements PatientService {
         entity.setId(UUID.randomUUID().toString());
         entity.setCreatedAt(new Date());
 
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+        } else {
+            // Generar una contraseña por defecto usando los primeros 4 caracteres del identifierValue
+            String defaultPwd = dto.getIdentifierValue().length() >= 4 
+                ? dto.getIdentifierValue().substring(0, 4) 
+                : dto.getIdentifierValue();
+            entity.setPassword(passwordEncoder.encode(defaultPwd));
+        }
+
         if (entity.getCoverage() != null && entity.getCoverage().getId() == null) {
             entity.getCoverage().setId(UUID.randomUUID().toString());
         }
@@ -50,9 +62,18 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public Optional<PatientDTO> findByIdentifier(String type, String value) {
-
         return repository.findByIdentifierTypeAndIdentifierValue(type, value)
                 .map(mapper::toDto);
+    }
+
+    @Override
+    public Optional<PatientEntity> findEntityByIdentifier(String type, String value) {
+        return repository.findByIdentifierTypeAndIdentifierValue(type, value);
+    }
+
+    @Override
+    public boolean matchesPassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     @Override

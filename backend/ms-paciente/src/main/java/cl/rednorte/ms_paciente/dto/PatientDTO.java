@@ -24,6 +24,7 @@ public class PatientDTO {
     private String phone;
     private String email;
     private String address;
+    private String password;
     private Boolean active;
 
     private CoverageDTO coverage;

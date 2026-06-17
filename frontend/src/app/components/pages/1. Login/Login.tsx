@@ -64,7 +64,7 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
     setLoading(true);
 
     try {
-      const data = await authRemote.login(runToSend, password);
+      const data = await authRemote.login(runToSend, password, isClinical);
       
       // Guardar token y datos del usuario en localStorage
       localStorage.setItem('token', data.accessToken);
@@ -87,10 +87,18 @@ export function LoginView({ onLoginSuccess, onBack, isClinical = false, onRegist
       console.error('Login error:', error);
       
       if (error.response?.status === 404 || error.response?.status === 500) {
-        setPassError('Usuario no registrado en el sistema.');
-        setShowErrorModal(true);
+        if (!isClinical) {
+          setPassError('El RUN o la contraseña son incorrectas, intenta registrarte o cambiar tu contraseña.');
+        } else {
+          setPassError('Usuario no registrado en el sistema.');
+          setShowErrorModal(true);
+        }
       } else {
-        setPassError('RUN o contraseña incorrectos');
+        if (!isClinical) {
+          setPassError('El RUN o la contraseña son incorrectas, intenta registrarte o cambiar tu contraseña.');
+        } else {
+          setPassError('RUN o contraseña incorrectos');
+        }
       }
     }
   };

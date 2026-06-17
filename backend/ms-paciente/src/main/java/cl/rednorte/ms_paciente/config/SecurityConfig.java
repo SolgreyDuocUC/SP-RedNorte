@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -58,6 +60,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/patients/auth/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated()
@@ -72,6 +75,11 @@ public class SecurityConfig {
                 .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
             );
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -116,7 +124,16 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(corsProperties.isAllowCredentials());
-        config.setAllowedOrigins(corsProperties.getAllowedOrigins());
+        
+        List<String> origins = corsProperties.getAllowedOrigins();
+        if (origins != null && !origins.isEmpty()) {
+            if (origins.contains("*")) {
+                config.setAllowedOriginPatterns(List.of("*"));
+            } else {
+                config.setAllowedOrigins(origins);
+            }
+        }
+        
         config.setAllowedMethods(corsProperties.getAllowedMethods());
         config.setAllowedHeaders(corsProperties.getAllowedHeaders());
         config.setMaxAge(corsProperties.getMaxAgeSeconds());

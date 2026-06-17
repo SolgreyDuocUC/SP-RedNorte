@@ -11,7 +11,11 @@ public interface PatientService {
 
     PatientDTO create(PatientDTO dto);
 
+    boolean matchesPassword(String rawPassword, String encodedPassword);
+
     Optional<PatientDTO> findByIdentifier(String type, String value);
+    
+    Optional<cl.rednorte.ms_paciente.model.PatientEntity> findEntityByIdentifier(String type, String value);
 
     Optional<PatientDTO> findById(String id);
 

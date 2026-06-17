@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { usersRemote, UserDTO } from '../../../../remotes/users.remote';
+import { authRemote } from '../../../../remotes/auth.remote';
 import { toast } from 'sonner';
 
 interface PatientRegisterProps {
@@ -37,15 +37,17 @@ export function PatientRegister({ onBack, onRegisterSuccess }: PatientRegisterPr
     setLoading(true);
 
     try {
-      const payload: UserDTO = {
-        username: `${run.trim()}|${nombre.trim()}`,
+      const payload = {
+        identifierType: 'RUN',
+        identifierValue: run.trim().replace(/\./g, ''), // Eliminar puntos del RUN
+        firstName: nombre.split(' ')[0] || nombre,
+        lastName: nombre.split(' ').slice(1).join(' ') || '',
         email: email.trim(),
         password: password,
-        enabled: true,
-        roles: [{ name: 'ROLE_PACIENTE' }]
+        active: true
       };
 
-      await usersRemote.create(payload);
+      await authRemote.registerPatient(payload);
       toast.success('Cuenta creada con éxito', { description: 'Ya puedes iniciar sesión en tu portal.' });
       onRegisterSuccess();
     } catch (error: any) {
