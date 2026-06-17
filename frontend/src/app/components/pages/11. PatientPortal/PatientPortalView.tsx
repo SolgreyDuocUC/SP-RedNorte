@@ -57,45 +57,17 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
 
   const loadUserInfo = async () => {
     try {
-      // 1. Fetch user to get name/RUN
-      const user = await usersRemote.getById(userId);
-      const parts = user.username.split('|');
-      const runVal = parts[0] || '';
-      const nombreVal = parts[1] || user.username;
+      const patient = await patientRemote.getById(userId);
+      const nameVal = `${patient.firstName} ${patient.lastName}`.trim() || 'Paciente';
+      const runVal = patient.identifierValue || '';
       
-      setPatientName(nombreVal);
+      setPatientName(nameVal);
       setPatientRun(runVal);
-      setPatientEmail(user.email);
+      setPatientEmail(patient.email || '');
+      setPatientId(patient.id || null);
 
-      // 2. Fetch or create FHIR patient resource
-      try {
-        const fhirPatient = await patientRemote.getByIdentifier('RUN', runVal);
-        setPatientId(fhirPatient.id || null);
-        if (fhirPatient.id) {
-          loadAppointments(fhirPatient.id);
-        }
-      } catch (err) {
-        // Patient doesn't exist in ms-paciente, let's auto-create
-        const nameParts = nombreVal.split(' ');
-        const first = nameParts[0] || nombreVal;
-        const last = nameParts.slice(1).join(' ') || 'Paciente';
-
-        const createdPatient = await patientRemote.create({
-          identifierType: 'RUN',
-          identifierValue: runVal,
-          firstName: first,
-          lastName: last,
-          email: user.email,
-          active: true,
-          gender: 'UNKNOWN',
-          phone: '',
-          address: '',
-          coverage: { type: 'FONASA' }
-        });
-        setPatientId(createdPatient.id || null);
-        if (createdPatient.id) {
-          loadAppointments(createdPatient.id);
-        }
+      if (patient.id) {
+        loadAppointments(patient.id);
       }
     } catch (error) {
       console.error('Error loading patient info:', error);
@@ -143,14 +115,7 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
 
     setIsUpdatingPassword(true);
     try {
-      const payload: UserDTO = {
-        username: `${patientRun}|${patientName}`,
-        email: patientEmail,
-        password: newPassword,
-        enabled: true,
-        roles: [{ name: 'ROLE_PACIENTE' }]
-      };
-      await usersRemote.update(userId, payload);
+      await patientRemote.update(userId, { password: newPassword });
       toast.success('Contraseña actualizada con éxito');
       setNewPassword('');
     } catch (error) {
@@ -168,7 +133,7 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
         onClick: async () => {
           setIsDeletingAccount(true);
           try {
-            await usersRemote.delete(userId);
+            await patientRemote.delete(userId);
             toast.success('Tu cuenta ha sido eliminada. Lamentamos que te vayas.');
             
             // Clean localStorage

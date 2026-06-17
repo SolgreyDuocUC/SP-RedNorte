@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const patientApi = axios.create({
-  baseURL: "/proxy/pacientes/api/v1/patients",
+  baseURL: "/proxy/pacientes",
 });
 
 patientApi.interceptors.request.use((config) => {
