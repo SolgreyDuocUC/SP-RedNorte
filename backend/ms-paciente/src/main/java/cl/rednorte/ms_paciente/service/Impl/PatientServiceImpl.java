@@ -123,6 +123,10 @@ public class PatientServiceImpl implements PatientService {
             existing.setAddress(dto.getAddress());
             existing.setActive(dto.getActive() != null ? dto.getActive() : true);
 
+            if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+            }
+
             return mapper.toDto(repository.save(existing));
         }).orElseThrow(() -> new BusinessException("Patient not found"));
     }
