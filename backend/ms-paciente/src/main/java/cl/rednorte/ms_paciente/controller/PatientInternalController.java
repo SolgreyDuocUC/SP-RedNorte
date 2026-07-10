@@ -26,6 +26,7 @@ public class PatientInternalController {
     @PreAuthorize("hasRole('INTEGRACION')")
     public ResponseEntity<PatientPublicDTO> findByRut(@PathVariable String rut) {
         return patientRepository.findByIdentifierTypeAndIdentifierValue("RUN", rut)
+                .filter(p -> !Boolean.FALSE.equals(p.getActive()))
                 .map(p -> new PatientPublicDTO(
                         p.getId(),
                         p.getIdentifierType(),

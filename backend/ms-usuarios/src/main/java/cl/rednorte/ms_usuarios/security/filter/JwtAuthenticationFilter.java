@@ -1,6 +1,5 @@
 package cl.rednorte.ms_usuarios.security.filter;
 
-import cl.rednorte.ms_usuarios.security.TokenJwtConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,8 +29,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
+
 
         try {
             Map<String, String> body = new ObjectMapper().readValue(request.getInputStream(), Map.class);

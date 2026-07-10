@@ -3,7 +3,6 @@ package cl.rednorte.ms_ficha_clinica;
 import cl.rednorte.ms_ficha_clinica.controller.ClinicalHistoryController;
 import cl.rednorte.ms_ficha_clinica.dto.ClinicalHistoryDTO;
 import cl.rednorte.ms_ficha_clinica.service.ClinicalHistoryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,13 +29,11 @@ class ClinicalHistoryControllerTest {
     @InjectMocks
     private ClinicalHistoryController clinicalHistoryController;
 
-    private ObjectMapper objectMapper;
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(clinicalHistoryController).build();
-        objectMapper = new ObjectMapper();
     }
+
 
     @Test
     void getFullClinicalHistory_ShouldReturnHistory() throws Exception {

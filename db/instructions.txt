@@ -20,7 +20,7 @@ Puede ser CMD, PowerShell, Git Bash o la terminal de VS Code.
 cd db
 
 ---------------------------------------------------------
-3. Levantar el contenedor de MySQL
+3. Levantar el contenedor de PostgreSQL
 ---------------------------------------------------------
 
 docker compose up -d
@@ -34,7 +34,7 @@ Esto iniciará el contenedor en segundo plano.
 docker ps
 
 Debería aparecer el contenedor:
-rednorte-mysql-dev
+rednorte-postgres-dev
 
 ---------------------------------------------------------
 5. Ver logs en tiempo real (opcional)
@@ -66,7 +66,7 @@ INFORMACIÓN ADICIONAL
 ---------------------------------------------------------
 
 - Puerto expuesto:
-  3307 -> 3306 (MySQL interno)
+  5432 -> 5432 (o el puerto configurado en DB_PORT en el .env)
 
 - Base de datos inicial:
   bd_rednorte
@@ -75,6 +75,6 @@ INFORMACIÓN ADICIONAL
   configuradas en el archivo `.env`
 
 - Persistencia de datos:
-  volumen Docker `mysql_data`
+  volumen Docker `postgres_data`
 
 =========================================================

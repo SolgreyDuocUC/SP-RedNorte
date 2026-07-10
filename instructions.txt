@@ -6,7 +6,7 @@ Este archivo permite levantar TODA la infraestructura
 del proyecto desde la raíz, con un solo comando.
 
 Servicios incluidos:
-  - MySQL 8.0
+  - PostgreSQL 16
   - ms-ficha-clinica
   - ms-paciente
   - ms-reservas
@@ -70,7 +70,7 @@ docker compose logs -f ms-reservas
 
 docker compose logs -f ms-paciente
 
-docker compose logs -f mysql
+docker compose logs -f postgres
 
 ---------------------------------------------------------
 REBUILD DE UN SERVICIO
@@ -99,8 +99,8 @@ http://localhost:8003/swagger-ui/index.html
 Swagger ms-usuarios:
 http://localhost:8004/swagger-ui/index.html
 
-MySQL:
-localhost:3307
+PostgreSQL:
+localhost:5432
 
 ---------------------------------------------------------
 IMPORTANTE

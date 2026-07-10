@@ -3,6 +3,7 @@ package cl.rednorte.ms_ficha_clinica.service.impl;
 import cl.rednorte.ms_ficha_clinica.dto.ObservationDTO;
 import cl.rednorte.ms_ficha_clinica.exception.ResourceNotFoundException;
 import cl.rednorte.ms_ficha_clinica.model.ObservationEntity;
+import cl.rednorte.ms_ficha_clinica.repository.EncounterRepository;
 import cl.rednorte.ms_ficha_clinica.repository.ObservationRepository;
 import cl.rednorte.ms_ficha_clinica.service.ObservationService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,13 @@ import java.util.stream.Collectors;
 public class ObservationServiceImpl implements ObservationService {
 
     private final ObservationRepository observationRepository;
+    private final EncounterRepository encounterRepository;
 
     @Override
     public ObservationDTO createObservation(ObservationDTO dto) {
+        if (dto.getEncounterId() == null || !encounterRepository.existsById(dto.getEncounterId())) {
+            throw new ResourceNotFoundException("Encounter not found with id: " + dto.getEncounterId());
+        }
         ObservationEntity entity = mapToEntity(dto);
         if (entity.getId() == null || entity.getId().isEmpty()) {
             entity.setId(UUID.randomUUID().toString());
@@ -74,9 +79,10 @@ public class ObservationServiceImpl implements ObservationService {
         ObservationEntity existingEntity = observationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Observation not found with id: " + id));
 
-        existingEntity.setPatientId(dto.getPatientId() != null ? dto.getPatientId() : existingEntity.getPatientId());
-        existingEntity
-                .setEncounterId(dto.getEncounterId() != null ? dto.getEncounterId() : existingEntity.getEncounterId());
+        // patientId/encounterId no son editables: una observación pertenece
+        // al paciente/encuentro con el que fue creada. Permitir cambiarlos
+        // aquí permitía re-asignar en silencio un resultado clínico a otro
+        // paciente con un simple PUT.
         existingEntity.setCode(dto.getCode() != null ? dto.getCode() : existingEntity.getCode());
         existingEntity.setValue(dto.getValue() != null ? dto.getValue() : existingEntity.getValue());
         existingEntity.setUnit(dto.getUnit() != null ? dto.getUnit() : existingEntity.getUnit());

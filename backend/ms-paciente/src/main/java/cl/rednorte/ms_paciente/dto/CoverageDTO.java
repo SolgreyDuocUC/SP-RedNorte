@@ -11,6 +11,8 @@ public class CoverageDTO {
 
     private String id;
 
+    private String patientId;
+
     private String type;      // FONASA, ISAPRE
     private String provider;  // Colmena, Consalud, etc.
 }

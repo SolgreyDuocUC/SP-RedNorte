@@ -72,10 +72,20 @@ public class GatewayConfig {
                                                 .before(uri(urgenciasUrl))
                                                 .build())
                                 .and(route("ruta-centros")
-                                                .route(path("/api/v1/organizations")
-                                                                .or(path("/api/v1/organizations/**"))
-                                                                .or(path("/api/v1/locations"))
-                                                                .or(path("/api/v1/locations/**")), http())
+                                                // ms-centros expone /locations, /regions, /communes y
+                                                // /specialties (ver CentroController, RegionController,
+                                                // ComunaController, EspecialidadController). No existe un
+                                                // controller para /organizations: antes esa ruta apuntaba a
+                                                // un endpoint inexistente (siempre 404) mientras /regions,
+                                                // /communes y /specialties ni siquiera estaban ruteados.
+                                                .route(path("/api/v1/locations")
+                                                                .or(path("/api/v1/locations/**"))
+                                                                .or(path("/api/v1/regions"))
+                                                                .or(path("/api/v1/regions/**"))
+                                                                .or(path("/api/v1/communes"))
+                                                                .or(path("/api/v1/communes/**"))
+                                                                .or(path("/api/v1/specialties"))
+                                                                .or(path("/api/v1/specialties/**")), http())
                                                 .before(uri(centrosUrl))
                                                 .build())
                                 .and(route("ruta-notificaciones")

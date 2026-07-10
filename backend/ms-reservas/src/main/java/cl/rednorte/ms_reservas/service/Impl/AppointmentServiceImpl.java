@@ -1,8 +1,6 @@
 package cl.rednorte.ms_reservas.service.Impl;
 
 import cl.rednorte.ms_reservas.dto.AppointmentDTO;
-import cl.rednorte.ms_reservas.dto.PatientIntegrationDTO;
-import cl.rednorte.ms_reservas.dto.NotificationRequest;
 import cl.rednorte.ms_reservas.exceptions.BusinessException;
 import cl.rednorte.ms_reservas.model.AppointmentEntity;
 import cl.rednorte.ms_reservas.model.SlotEntity;
@@ -12,10 +10,8 @@ import cl.rednorte.ms_reservas.repository.SlotRepository;
 import cl.rednorte.ms_reservas.service.AppointmentService;
 import cl.rednorte.ms_reservas.service.ReassignmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.util.Date;
 import java.util.List;
@@ -37,15 +33,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final SlotRepository slotRepository;
     private final AppointmentMapper mapper;
     private final ReassignmentService reassignmentService;
-
-    @Value("${services.paciente.url}")
-    private String pacienteUrl;
-
-    @Value("${services.notificaciones.url}")
-    private String notificacionesUrl;
-
-    @Value("${app.security.notification-secret:}")
-    private String notificationSecret;
+    private final AppointmentNotifier notifier;
 
     @Override
     @Transactional
@@ -66,8 +54,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         if (dto.getSlotId() != null && !dto.getSlotId().isBlank()) {
-            // Reserva directa sobre un bloque de agenda disponible
-            SlotEntity slot = slotRepository.findById(dto.getSlotId())
+            // Reserva directa sobre un bloque de agenda disponible.
+            // Se bloquea la fila (SELECT ... FOR UPDATE) para que dos
+            // reservas concurrentes sobre el mismo slot no puedan pasar
+            // ambas la validación de estado "free" (double-booking).
+            SlotEntity slot = slotRepository.findByIdForUpdate(dto.getSlotId())
                     .orElseThrow(() -> new BusinessException("El bloque de agenda indicado no existe."));
 
             if (!SLOT_STATUS_FREE.equalsIgnoreCase(slot.getStatus())) {
@@ -94,7 +85,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Si se reservó exitosamente, enviar notificación por correo
         if (STATUS_BOOKED.equalsIgnoreCase(saved.getStatus())) {
-            sendConfirmationEmail(saved);
+            notifier.notifyBooked(saved);
         }
 
         return mapper.toDto(saved);
@@ -145,32 +136,46 @@ public class AppointmentServiceImpl implements AppointmentService {
             return mapper.toDto(cancel(existing));
         }
 
+        String oldStatus = existing.getStatus();
+
         if (dto.getStart() != null)
             existing.setStart(dto.getStart());
         if (dto.getEnd() != null)
             existing.setEnd(dto.getEnd());
-        if (dto.getStatus() != null)
-            existing.setStatus(dto.getStatus());
         if (dto.getDescription() != null)
             existing.setDescription(dto.getDescription());
         if (dto.getPractitionerId() != null)
             existing.setPractitionerId(dto.getPractitionerId());
-        if (dto.getPatientId() != null)
-            existing.setPatientId(dto.getPatientId());
+        // patientId NO es editable vía update(): ningún flujo legítimo
+        // (reagendar, cancelar, cambiar prioridad/descripción) necesita
+        // cambiar el dueño de una cita. Permitirlo dejaba "secuestrar" en
+        // silencio la reserva de un paciente reasignándola a otro id, sin
+        // pasar por la validación de disponibilidad de create().
         if (dto.getSpecialty() != null)
             existing.setSpecialty(dto.getSpecialty());
         if (dto.getPriority() != null)
             existing.setPriority(dto.getPriority());
 
-        String oldStatus = existing.getStatus();
-        if (dto.getStatus() != null)
+        if (dto.getStatus() != null) {
+            // Una cita solo puede pasar a "booked" a través de create() (con
+            // un slot validado y bloqueado) o de la reasignación automática
+            // de lista de espera — nunca por una edición manual de estado.
+            // Sin este resguardo, una cita cancelada (que ya perdió su
+            // referencia al slot) podía "resucitarse" a booked mientras el
+            // slot original ya fue reasignado a otro paciente, dejando dos
+            // citas booked apuntando al mismo slot.
+            if (STATUS_BOOKED.equalsIgnoreCase(dto.getStatus()) && !STATUS_BOOKED.equalsIgnoreCase(oldStatus)) {
+                throw new BusinessException(
+                        "Una cita solo puede quedar 'booked' mediante la creación de una reserva o la reasignación automática de la lista de espera.");
+            }
             existing.setStatus(dto.getStatus());
+        }
 
         AppointmentEntity saved = repository.save(existing);
 
         // Si cambió el estado a "booked", enviar correo
         if (STATUS_BOOKED.equalsIgnoreCase(saved.getStatus()) && !STATUS_BOOKED.equalsIgnoreCase(oldStatus)) {
-            sendConfirmationEmail(saved);
+            notifier.notifyBooked(saved);
         }
 
         return mapper.toDto(saved);
@@ -187,64 +192,22 @@ public class AppointmentServiceImpl implements AppointmentService {
      * y dispara la reasignación automática hacia la lista de espera.
      */
     private AppointmentEntity cancel(AppointmentEntity existing) {
+        // Se guarda la referencia y se limpia del appointment cancelado ANTES
+        // de reasignar el slot: si no se limpia, una edición posterior que
+        // vuelva a poner esta cita en "booked" quedaría apuntando al mismo
+        // slot que la reasignación automática ya le entregó a otro paciente
+        // (dos citas booked sobre un mismo slot).
+        SlotEntity slot = existing.getSlot();
         existing.setStatus(STATUS_CANCELLED);
+        existing.setSlot(null);
+        existing.setStart(null);
+        existing.setEnd(null);
         AppointmentEntity saved = repository.save(existing);
 
-        SlotEntity slot = existing.getSlot();
         if (slot != null) {
             reassignmentService.reassign(slot);
         }
 
         return saved;
-    }
-
-    private void sendConfirmationEmail(AppointmentEntity entity) {
-        try {
-            System.out.println("Buscando información de paciente para ID: " + entity.getPatientId());
-            RestClient restClient = RestClient.create();
-            PatientIntegrationDTO patient = restClient.get()
-                    .uri(pacienteUrl + "/api/v1/patients/" + entity.getPatientId())
-                    .retrieve()
-                    .body(PatientIntegrationDTO.class);
-
-            if (patient == null || patient.getEmail() == null || patient.getEmail().isBlank()) {
-                System.out.println("No se pudo obtener el correo electrónico del paciente con ID: " + entity.getPatientId());
-                return;
-            }
-
-            String subject = "Confirmación de Cita Médica - RedNorte";
-            String startStr = entity.getStart() != null ? entity.getStart().toString() : "No especificado";
-            String htmlBody = String.format(
-                    "<h3>Hola %s %s,</h3>" +
-                    "<p>Tu cita médica ha sido agendada con éxito.</p>" +
-                    "<ul>" +
-                    "<li><strong>Especialidad:</strong> %s</li>" +
-                    "<li><strong>Fecha/Hora de Inicio:</strong> %s</li>" +
-                    "<li><strong>Código de Reserva:</strong> %s</li>" +
-                    "</ul>" +
-                    "<p>Guarda tu Código de Reserva: lo necesitarás si deseas cancelar tu hora.</p>" +
-                    "<p>Gracias por atenderte en la Red de Salud RedNorte.</p>",
-                    patient.getFirstName(), patient.getLastName(),
-                    entity.getSpecialty(), startStr, entity.getId()
-            );
-
-            NotificationRequest notification = NotificationRequest.builder()
-                    .recipient(patient.getEmail())
-                    .subject(subject)
-                    .body(htmlBody)
-                    .build();
-
-            restClient.post()
-                    .uri(notificacionesUrl + "/api/v1/notifications/send")
-                    .header("X-Notification-Secret", notificationSecret)
-                    .body(notification)
-                    .retrieve()
-                    .toBodilessEntity();
-
-            System.out.println("Notificación de cita enviada correctamente a: " + patient.getEmail());
-        } catch (Exception e) {
-            System.err.println("Error al enviar la notificación por correo: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }

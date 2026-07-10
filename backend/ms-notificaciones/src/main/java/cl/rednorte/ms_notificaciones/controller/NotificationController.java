@@ -26,8 +26,15 @@ public class NotificationController {
             @RequestHeader(value = "X-Notification-Secret", required = false) String clientSecret,
             @RequestBody NotificationRequest request) {
 
-        // Validar token de seguridad inter-servicio
-        if (expectedSecret != null && !expectedSecret.isBlank() && !expectedSecret.equals(clientSecret)) {
+        // Validar token de seguridad inter-servicio. Si el secreto no está
+        // configurado (env var vacía/ausente), antes se OMITÍA por completo
+        // la validación y el endpoint quedaba abierto a cualquiera — debe
+        // fallar cerrado, no abierto.
+        if (expectedSecret == null || expectedSecret.isBlank()) {
+            log.error("app.security.notification-secret no está configurado; se rechazan todas las solicitudes.");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Servicio de notificaciones mal configurado.");
+        }
+        if (!expectedSecret.equals(clientSecret)) {
             log.warn("Intento de acceso no autorizado al servicio de notificaciones.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autorizado.");
         }

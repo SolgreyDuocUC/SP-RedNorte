@@ -1,8 +1,6 @@
 package cl.rednorte.ms_usuarios.security;
 
-import cl.rednorte.ms_usuarios.security.filter.JwtAuthenticationFilter;
-import cl.rednorte.ms_usuarios.security.filter.JwtValidationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,10 +17,12 @@ import org.springframework.web.cors.*;
 import java.util.Arrays;
 
 @Configuration
+@RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class SpringSecurityConfig {
 
-    @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
+    private final AuthenticationConfiguration authenticationConfiguration;
+
 
     @Bean
     PasswordEncoder passwordEncoder() {

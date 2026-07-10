@@ -1,10 +1,12 @@
 package cl.rednorte.ms_ficha_clinica.service.impl;
 
 import cl.rednorte.ms_ficha_clinica.dto.ClinicalNoteDTO;
+import cl.rednorte.ms_ficha_clinica.exception.ResourceNotFoundException;
 import cl.rednorte.ms_ficha_clinica.model.ClinicalNoteEntity;
 import cl.rednorte.ms_ficha_clinica.model.ClinicalNoteModel;
 import cl.rednorte.ms_ficha_clinica.model.mapper.ClinicalNoteMapper;
 import cl.rednorte.ms_ficha_clinica.repository.ClinicalNoteRepository;
+import cl.rednorte.ms_ficha_clinica.repository.EncounterRepository;
 import cl.rednorte.ms_ficha_clinica.service.ClinicalNoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,13 @@ import java.util.stream.Collectors;
 public class ClinicalNoteServiceImpl implements ClinicalNoteService {
 
     private final ClinicalNoteRepository clinicalNoteRepository;
+    private final EncounterRepository encounterRepository;
 
     @Override
     public ClinicalNoteDTO createClinicalNote(ClinicalNoteDTO clinicalNoteDTO) {
+        if (clinicalNoteDTO.getEncounterId() == null || !encounterRepository.existsById(clinicalNoteDTO.getEncounterId())) {
+            throw new ResourceNotFoundException("Encounter not found with id: " + clinicalNoteDTO.getEncounterId());
+        }
         ClinicalNoteModel model = ClinicalNoteMapper.toModel(clinicalNoteDTO);
         if (model.getCreatedAt() == null) {
             model.setCreatedAt(new Date());

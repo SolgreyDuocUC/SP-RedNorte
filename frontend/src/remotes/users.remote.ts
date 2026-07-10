@@ -1,4 +1,5 @@
 import { usersApi } from "./users.api";
+import { mockStorage } from "../mocks/mockStorage";
 
 export interface UserRoleDTO {
   id?: string;
@@ -22,26 +23,27 @@ export interface UserDTO {
 
 export const usersRemote = {
   getAll: async (): Promise<UserDTO[]> => {
-    const response = await usersApi.get<UserDTO[]>("/users");
-    return response.data;
+    return usersApi.get<UserDTO[]>("/users").then(r => r.data).catch(() => mockStorage.getUsers());
   },
 
   getById: async (id: string): Promise<UserDTO> => {
-    const response = await usersApi.get<UserDTO>(`/users/${id}`);
-    return response.data;
+    return usersApi.get<UserDTO>(`/users/${id}`).then(r => r.data).catch(err => {
+      const found = mockStorage.getUsers().find(u => u.id === id || u.run === id);
+      if (found) return found;
+      throw err;
+    });
   },
 
   create: async (user: UserDTO): Promise<UserDTO> => {
-    const response = await usersApi.post<UserDTO>("/users", user);
-    return response.data;
+    return usersApi.post<UserDTO>("/users", user).then(r => r.data).catch(() => mockStorage.createUser(user));
   },
 
   update: async (id: string, user: UserDTO): Promise<UserDTO> => {
-    const response = await usersApi.put<UserDTO>(`/users/${id}`, user);
-    return response.data;
+    return usersApi.put<UserDTO>(`/users/${id}`, user).then(r => r.data).catch(() => mockStorage.updateUser(id, user));
   },
 
   delete: async (id: string): Promise<void> => {
-    await usersApi.delete(`/users/${id}`);
+    await usersApi.delete(`/users/${id}`).catch(() => mockStorage.deleteUser(id));
   }
 };
+

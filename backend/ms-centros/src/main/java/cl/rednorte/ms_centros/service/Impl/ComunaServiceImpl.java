@@ -3,6 +3,7 @@ package cl.rednorte.ms_centros.service.Impl;
 import cl.rednorte.ms_centros.dto.ComunaDto;
 import cl.rednorte.ms_centros.model.ComunaEntity;
 import cl.rednorte.ms_centros.model.RegionEntity;
+import cl.rednorte.ms_centros.repository.CentroRepository;
 import cl.rednorte.ms_centros.repository.ComunaRepository;
 import cl.rednorte.ms_centros.repository.RegionRepository;
 import cl.rednorte.ms_centros.service.ComunaService;
@@ -18,6 +19,7 @@ public class ComunaServiceImpl implements ComunaService {
 
     private final ComunaRepository comunaRepository;
     private final RegionRepository regionRepository; // Necesario para validar e inyectar la región
+    private final CentroRepository centroRepository;
 
     // ==========================================
     // MÉTODOS DE MAPEO (Traducción Entidad <-> DTO)
@@ -115,6 +117,11 @@ public class ComunaServiceImpl implements ComunaService {
         // Tu interfaz solicita borrar pasando el DTO completo, por lo que validamos usando su ID interno
         if (comunaDto == null || !comunaRepository.existsById(comunaDto.getId())) {
             throw new RuntimeException("No se puede eliminar. Comuna no encontrada.");
+        }
+        // Sin esta validación, borrar una comuna con centros asociados deja
+        // esos centros apuntando a una comuna inexistente.
+        if (!centroRepository.findByComuna_Id(comunaDto.getId()).isEmpty()) {
+            throw new RuntimeException("No se puede eliminar la comuna: tiene centros asociados.");
         }
         comunaRepository.deleteById(comunaDto.getId());
     }

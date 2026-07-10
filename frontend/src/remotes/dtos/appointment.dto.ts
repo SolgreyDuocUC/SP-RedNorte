@@ -17,8 +17,10 @@ export type CreateAppointmentDTO = Omit<AppointmentDTO, 'id'>;
 export interface SlotDTO {
   id?: string;
   practitionerId: string;
-  specialty: string;
+  specialty?: string;
   start: string;
   end: string;
   status: string; // 'free', 'busy', 'reserved'
+  [key: string]: any;
 }
+

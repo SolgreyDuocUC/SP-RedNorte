@@ -26,10 +26,18 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(fromEmail);
-            helper.setTo(request.getRecipient());
-            helper.setSubject(request.getSubject());
-            helper.setText(request.getBody(), true); // true indica que el contenido es HTML
+            if (fromEmail != null) {
+                helper.setFrom(fromEmail);
+            }
+            if (request.getRecipient() != null) {
+                helper.setTo(request.getRecipient());
+            }
+            if (request.getSubject() != null) {
+                helper.setSubject(request.getSubject());
+            }
+            if (request.getBody() != null) {
+                helper.setText(request.getBody(), true); // true indica que el contenido es HTML
+            }
 
             mailSender.send(message);
             log.info("Correo enviado exitosamente a {}", request.getRecipient());

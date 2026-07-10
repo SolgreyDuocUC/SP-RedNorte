@@ -2,19 +2,22 @@ package cl.rednorte.ms_centros.service.Impl;
 
 import cl.rednorte.ms_centros.dto.RegionDto;
 import cl.rednorte.ms_centros.model.RegionEntity;
+import cl.rednorte.ms_centros.repository.ComunaRepository;
 import cl.rednorte.ms_centros.repository.RegionRepository;
 import cl.rednorte.ms_centros.service.RegionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RegionServiceImpl implements RegionService { // 💡 Obligatorio usar "implements"
 
-    @Autowired
-    private RegionRepository regionRepository;
+    private final RegionRepository regionRepository;
+    private final ComunaRepository comunaRepository;
+
 
     // ==========================================
     // MÉTODOS DE MAPEO (Traducción Entidad <-> DTO)
@@ -96,6 +99,13 @@ public class RegionServiceImpl implements RegionService { // 💡 Obligatorio us
     public void delete(Long id) {
         if (!regionRepository.existsById(id)) {
             throw new RuntimeException("No se puede eliminar. Región no encontrada.");
+        }
+        // Sin esta validación, borrar una región con comunas asociadas o
+        // deja las comunas apuntando a una región inexistente (si la FK no
+        // se hace cumplir) o revienta con un error de integridad referencial
+        // sin explicación para el usuario.
+        if (!comunaRepository.findByRegion_Id(id).isEmpty()) {
+            throw new RuntimeException("No se puede eliminar la región: tiene comunas asociadas.");
         }
         regionRepository.deleteById(id);
     }

@@ -43,9 +43,14 @@ public class UserServiceImpl implements UserService {
         }
 
         if (userDTO.getRoles() != null) {
+            // Los roles deben existir de antemano (creados vía RoleController).
+            // Auto-crearlos aquí a partir de un nombre no validado permitía
+            // que un typo ("ROLE_ADMNI") mintiera una fila nueva y bogus en
+            // la tabla roles en vez de fallar, dejando al usuario con un rol
+            // que no otorga ningún permiso real.
             Set<RoleEntity> managedRoles = userDTO.getRoles().stream()
                     .map(roleDto -> roleRepository.findByName(roleDto.getName())
-                            .orElseGet(() -> roleRepository.save(RoleEntity.builder().name(roleDto.getName()).build())))
+                            .orElseThrow(() -> new ResourceNotFoundException("Rol no encontrado: " + roleDto.getName())))
                     .collect(Collectors.toSet());
             entity.setRoles(managedRoles);
         }

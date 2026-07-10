@@ -1,9 +1,11 @@
 package cl.rednorte.ms_ficha_clinica.service.impl;
 
 import cl.rednorte.ms_ficha_clinica.dto.ProcedureDTO;
+import cl.rednorte.ms_ficha_clinica.exception.ResourceNotFoundException;
 import cl.rednorte.ms_ficha_clinica.model.ProcedureEntity;
 import cl.rednorte.ms_ficha_clinica.model.ProcedureModel;
 import cl.rednorte.ms_ficha_clinica.model.mapper.ProcedureMapper;
+import cl.rednorte.ms_ficha_clinica.repository.EncounterRepository;
 import cl.rednorte.ms_ficha_clinica.repository.ProcedureRepository;
 import cl.rednorte.ms_ficha_clinica.service.ProcedureService;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +20,13 @@ import java.util.stream.Collectors;
 public class ProcedureServiceImpl implements ProcedureService {
 
     private final ProcedureRepository procedureRepository;
+    private final EncounterRepository encounterRepository;
 
     @Override
     public ProcedureDTO createProcedure(ProcedureDTO procedureDTO) {
+        if (procedureDTO.getEncounterId() == null || !encounterRepository.existsById(procedureDTO.getEncounterId())) {
+            throw new ResourceNotFoundException("Encounter not found with id: " + procedureDTO.getEncounterId());
+        }
         ProcedureModel model = ProcedureMapper.toModel(procedureDTO);
         if (model.getPerformedDate() == null) {
             model.setPerformedDate(new Date());

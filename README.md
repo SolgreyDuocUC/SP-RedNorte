@@ -50,7 +50,7 @@ SP-RedNorte/
 
 - Java 21
 - Spring Boot 4.x (Web MVC, Data JPA, Validation)
-- MySQL 8 (puerto 3307)
+- PostgreSQL 16 (puerto 5432)
 - HAPI FHIR R4 (estándar de interoperabilidad clínica)
 - Lombok
 
@@ -63,12 +63,12 @@ SP-RedNorte/
 
 ## Base de Datos
 
-Todos los microservicios comparten la misma base de datos MySQL:
+Todos los microservicios comparten la misma base de datos PostgreSQL:
 
 ```text
-Host:     localhost:3307
+Host:     localhost:5432
 Base:     bd_rednorte
-Usuario:  root
+Usuario:  postgres
 ```
 
 ---

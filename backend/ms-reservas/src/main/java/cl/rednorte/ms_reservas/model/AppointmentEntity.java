@@ -52,8 +52,8 @@ public class AppointmentEntity {
     private Integer priority; // 1 = Normal, 2 = Urgente, 3 = Crítico
 
     @Column(name = "created_at", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
 
     @PrePersist
     protected void onCreate() {

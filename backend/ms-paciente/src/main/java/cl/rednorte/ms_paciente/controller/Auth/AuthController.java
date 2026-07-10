@@ -48,6 +48,14 @@ public class AuthController {
 
         PatientEntity patient = patientOpt.get();
 
+        // Un paciente inactivo (soft-delete) no debe poder autenticarse: la
+        // desactivación era puramente cosmética porque este chequeo faltaba,
+        // dejando credenciales de pacientes "eliminados" funcionando para
+        // siempre.
+        if (Boolean.FALSE.equals(patient.getActive())) {
+            return ResponseEntity.status(401).build();
+        }
+
         if (!patientService.matchesPassword(request.getPassword(), patient.getPassword())) {
             return ResponseEntity.status(401).build();
         }

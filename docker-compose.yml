@@ -3,12 +3,13 @@ version: "3.8"
 services:
 
   # -----------------------------------------------------------
-  # BASE DE DATOS (PostgreSQL)
+  # BASE DE DATOS (PostgreSQL optimizado para Docker/Dev)
   # -----------------------------------------------------------
   postgres:
     image: postgres:16-alpine
     container_name: rednorte-postgres-dev
     restart: unless-stopped
+    command: postgres -c max_connections=200 -c shared_buffers=128MB -c effective_cache_size=384MB -c work_mem=4MB -c maintenance_work_mem=32MB -c synchronous_commit=off -c log_statement=none
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
@@ -25,8 +26,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-
+      start_period: 10s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-ficha-clinica
@@ -35,36 +35,31 @@ services:
     build:
       context: ./backend/ms-ficha-clinica
       dockerfile: Dockerfile
-
     image: rednorte/ms-ficha-clinica:dev
     container_name: rednorte-ms-ficha-clinica-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
-
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8001:8001"
-
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8001/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 5
-      start_period: 90s
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-paciente
@@ -73,36 +68,31 @@ services:
     build:
       context: ./backend/ms-paciente
       dockerfile: Dockerfile
-
     image: rednorte/ms-paciente:dev
     container_name: rednorte-ms-paciente-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
-
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8002:8002"
-
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8002/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 5
-      start_period: 90s
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-reservas
@@ -111,40 +101,39 @@ services:
     build:
       context: ./backend/ms-reservas
       dockerfile: Dockerfile
-
     image: rednorte/ms-reservas:dev
     container_name: rednorte-ms-reservas-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
       ms-notificaciones:
-        condition: service_started
-
-
+        condition: service_healthy
+      ms-paciente:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      MS_PACIENTE_URI: http://ms-paciente:8002
       MS_NOTIFICACIONES_URI: http://ms-notificaciones:8010
       NOTIFICATION_SERVICE_SECRET: ${NOTIFICATION_SERVICE_SECRET}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-63e00738b0fb4a40926cbbfbeee2c33ea30db4d7b02162e05d90b2c7699276df}
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8003:8003"
-
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8003/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 5
-      start_period: 90s
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-notificaciones
@@ -153,26 +142,30 @@ services:
     build:
       context: ./backend/ms-notificaciones
       dockerfile: Dockerfile
-
     image: rednorte/ms-notificaciones:dev
     container_name: rednorte-ms-notificaciones-dev
     restart: unless-stopped
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8010
       SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:-smtp.gmail.com}
       SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD}
       NOTIFICATION_SERVICE_SECRET: ${NOTIFICATION_SERVICE_SECRET}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-*}
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8010:8010"
-
     networks:
       - rednorte-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8010/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-usuarios
@@ -181,35 +174,35 @@ services:
     build:
       context: ./backend/ms-usuarios
       dockerfile: Dockerfile
-
     image: rednorte/ms-usuarios:dev
     container_name: rednorte-ms-usuarios-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
-
+      ms-centros:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8004
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      MS_CENTROS_URI: http://ms-centros:8006
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8004:8004"
-
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8004/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 5
-      start_period: 90s
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-urgencias
@@ -218,35 +211,31 @@ services:
     build:
       context: ./backend/ms-urgencias
       dockerfile: Dockerfile
-
     image: rednorte/ms-urgencias:dev
     container_name: rednorte-ms-urgencias-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8005:8005"
-
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8005/actuator/health || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 5
-      start_period: 90s
+      start_period: 60s
 
   # -----------------------------------------------------------
   # MICROSERVICIO: ms-centros (Centros y Organizaciones FHIR)
@@ -255,95 +244,108 @@ services:
     build:
       context: ./backend/ms-centros
       dockerfile: Dockerfile
-
     image: rednorte/ms-centros:dev
     container_name: rednorte-ms-centros-dev
     restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
-
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8006
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/bd_rednorte}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgrespassword}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:-org.postgresql.Driver}
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8006:8006"
-
     networks:
       - rednorte-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8006/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # -----------------------------------------------------------
-  # MICROSERVICIO: ms-gateway (API Gateway)
+  # MICROSERVICIO: ms-gateway (API Gateway Centralizado)
   # -----------------------------------------------------------
   ms-gateway:
     build:
       context: ./backend/ms-gateway
       dockerfile: Dockerfile
-
     image: rednorte/ms-gateway:dev
     container_name: rednorte-ms-gateway-dev
     restart: unless-stopped
-
     depends_on:
-      - ms-ficha-clinica
-      - ms-paciente
-      - ms-reservas
-      - ms-usuarios
-      - ms-urgencias
-      - ms-centros
-
+      ms-ficha-clinica:
+        condition: service_healthy
+      ms-paciente:
+        condition: service_healthy
+      ms-reservas:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_healthy
+      ms-urgencias:
+        condition: service_healthy
+      ms-centros:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8011
       MS_FICHA_CLINICA_URI: http://ms-ficha-clinica:8001
       MS_PACIENTE_URI: http://ms-paciente:8002
       MS_RESERVAS_URI: http://ms-reservas:8003
       MS_USUARIOS_URI: http://ms-usuarios:8004
       MS_URGENCIAS_URI: http://ms-urgencias:8005
       MS_CENTROS_URI: http://ms-centros:8006
+      MS_NOTIFICACIONES_URI: http://ms-notificaciones:8010
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss256k -XX:TieredStopAtLevel=1 -Djava.security.egd=file:/dev/./urandom"
       TZ: America/Santiago
-
     ports:
       - "8011:8011"
-
     networks:
       - rednorte-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8011/actuator/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # -----------------------------------------------------------
-  # FRONTEND
+  # FRONTEND (Nginx + React SPA Optimizado)
   # -----------------------------------------------------------
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-
     image: rednorte/frontend:dev
     container_name: rednorte-frontend-dev
     restart: unless-stopped
-
     depends_on:
-      - ms-gateway
-      - ms-reservas
-      - ms-paciente
-
+      ms-gateway:
+        condition: service_healthy
+      ms-reservas:
+        condition: service_healthy
+      ms-paciente:
+        condition: service_healthy
+      ms-usuarios:
+        condition: service_healthy
     environment:
       TZ: America/Santiago
-
     ports:
-      - "${FRONTEND_PORT}:80"
-
+      - "${FRONTEND_PORT:-80}:80"
     networks:
       - rednorte-network
-
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 || exit 1"]
-      interval: 30s
-      timeout: 10s
+      interval: 20s
+      timeout: 5s
       retries: 3
       start_period: 15s
 
@@ -360,5 +362,6 @@ networks:
 # =============================================================
 volumes:
   postgres_data:
+
 
 

@@ -3,11 +3,16 @@ package cl.rednorte.ms_urgencias.service;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.r4.model.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @Service
 public class UrgenciaService {
+
+    // Escala de triage Manchester/ESI usada en la red: C1 (crítico) a C5 (no urgente).
+    private static final Set<String> CATEGORIAS_TRIAGE_VALIDAS = Set.of("C1", "C2", "C3", "C4", "C5");
 
     private final IGenericClient fhirClient;
 
@@ -31,12 +36,23 @@ public class UrgenciaService {
     }
 
 public void procesarTriage(String id, Map<String, Object> datosTriage) {
+        // Validar la categorización ANTES de leer/mutar el encuentro: sin
+        // esto, un valor nulo o mal escrito dejaba el encuentro marcado como
+        // TRIAGED con una prioridad nula/"Categoría null" — un paciente
+        // crítico podía quedar sin prioridad real mientras el sistema
+        // reportaba el triage como completado.
+        Object categorizacionRaw = datosTriage.get("categorizacion");
+        String categorizacion = categorizacionRaw != null ? categorizacionRaw.toString().trim().toUpperCase() : null;
+        if (categorizacion == null || !CATEGORIAS_TRIAGE_VALIDAS.contains(categorizacion)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Categorización de triage inválida: debe ser una de " + CATEGORIAS_TRIAGE_VALIDAS);
+        }
+
         // 1. Leer el encuentro actual
         Encounter encuentro = fhirClient.read().resource(Encounter.class).withId(id).execute();
         encuentro.setStatus(Encounter.EncounterStatus.TRIAGED);
 
         // 2. Asignar Categorización (C1 - C5)
-        String categorizacion = (String) datosTriage.get("categorizacion");
         CodeableConcept prioridad = new CodeableConcept();
         prioridad.addCoding()
             .setSystem("http://terminology.hl7.org/CodeSystem/v3-ObservationValue")
@@ -78,9 +94,9 @@ public void procesarTriage(String id, Map<String, Object> datosTriage) {
                 .where(Encounter.STATUS.exactly().code("triaged"))
                 .returnBundle(Bundle.class).execute();
 
-        // 2. Lógica Algorítmica: Contar pacientes con mayor gravedad en la lista
-        // aquí se itera el bundle sumando minutos según prioridad relativa.
-        return 45; 
+        // 2. Lógica Algorítmica: Contar pacientes en la cola e inferir tiempo medio
+        int pacientesEnEspera = (bundle != null && bundle.getEntry() != null) ? bundle.getEntry().size() : 0;
+        return 15 + (pacientesEnEspera * 10);
     }
 
 public void cancelarAtencion(String idEncuentro, String rutConfirmacion) {

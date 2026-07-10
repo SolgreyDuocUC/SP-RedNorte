@@ -32,28 +32,44 @@ public class PatientServiceImpl implements PatientService {
 
         validateIdentifier(dto);
 
-        repository.findByIdentifierTypeAndIdentifierValue(
-                dto.getIdentifierType(),
-                dto.getIdentifierValue()).ifPresent(p -> {
-                    throw new DuplicateResourceException("El paciente ya existe con ese identificador");
-                });
+        Optional<PatientEntity> existing = repository.findByIdentifierTypeAndIdentifierValue(
+                dto.getIdentifierType(), dto.getIdentifierValue());
+
+        if (existing.isPresent() && Boolean.TRUE.equals(existing.get().getActive())) {
+            throw new DuplicateResourceException("El paciente ya existe con ese identificador");
+        }
 
         PatientEntity entity = mapper.toEntity(dto);
 
-        entity.setId(UUID.randomUUID().toString());
-        entity.setCreatedAt(new Date());
+        if (existing.isPresent()) {
+            // El identificador pertenece a un paciente inactivo (soft-delete
+            // vía active=false). La unique constraint (identifier_type,
+            // identifier_value) impide insertar una fila nueva con el mismo
+            // identificador, así que se reactiva el registro existente en
+            // vez de dejar el identificador bloqueado para siempre.
+            entity.setId(existing.get().getId());
+            entity.setCreatedAt(existing.get().getCreatedAt());
+        } else {
+            entity.setId(UUID.randomUUID().toString());
+            entity.setCreatedAt(new Date());
+        }
+        entity.setActive(true);
 
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         } else {
             // Generar una contraseña por defecto usando los primeros 4 caracteres del identifierValue
-            String defaultPwd = dto.getIdentifierValue().length() >= 4 
-                ? dto.getIdentifierValue().substring(0, 4) 
+            String defaultPwd = dto.getIdentifierValue().length() >= 4
+                ? dto.getIdentifierValue().substring(0, 4)
                 : dto.getIdentifierValue();
             entity.setPassword(passwordEncoder.encode(defaultPwd));
         }
 
-        if (entity.getCoverage() != null && entity.getCoverage().getId() == null) {
+        if (entity.getCoverage() != null) {
+            // Siempre se genera un id de cobertura nuevo: nunca hay que
+            // confiar en un id provisto por el cliente, o un registro podría
+            // reapuntar (y huérfanar) la cobertura de otro paciente ya
+            // existente.
             entity.getCoverage().setId(UUID.randomUUID().toString());
         }
 
@@ -121,7 +137,13 @@ public class PatientServiceImpl implements PatientService {
             existing.setPhone(dto.getPhone());
             existing.setEmail(dto.getEmail());
             existing.setAddress(dto.getAddress());
-            existing.setActive(dto.getActive() != null ? dto.getActive() : true);
+            // "null" significa "sin cambios", no "true": con el default
+            // anterior, cualquier actualización de perfil que no incluyera
+            // el campo `active` reactivaba en silencio a un paciente que
+            // había sido desactivado (soft-delete) por el staff.
+            if (dto.getActive() != null) {
+                existing.setActive(dto.getActive());
+            }
 
             if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
                 existing.setPassword(passwordEncoder.encode(dto.getPassword()));

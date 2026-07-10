@@ -1,9 +1,7 @@
 package cl.rednorte.ms_paciente.controller;
 
-import cl.rednorte.ms_paciente.dto.PatientPublicDTO;
 import cl.rednorte.ms_paciente.model.PatientEntity;
 import cl.rednorte.ms_paciente.repository.PatientRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,13 +30,11 @@ class PatientInternalControllerTest {
     @InjectMocks
     private PatientInternalController patientInternalController;
 
-    private ObjectMapper objectMapper;
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(patientInternalController).build();
-        objectMapper = new ObjectMapper();
     }
+
 
     @Test
     void findByRut_WhenExists_ShouldReturnPublicDto() throws Exception {
