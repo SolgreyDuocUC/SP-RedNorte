@@ -18,9 +18,10 @@ Settings -> Secrets and variables -> Actions -> New repository secret
 * DOCKERHUB_TOKEN    : Un Access Token generado desde tu cuenta de DockerHub 
                        (Account Settings -> Security -> New Access Token).
                        Se recomienda usar tokens en lugar de contraseñas.
-* NEON_DATABASE_URL  : jdbc:postgresql://ep-sweet-paper-ap7u0t4b-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+* NEON_DATABASE_URL  : jdbc:postgresql://ep-nameless-smoke-at1wj3wy-pooler.c-9.us-east-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_3OQME8qVBagR&sslmode=require&channelBinding=require
 * NEON_USER          : neondb_owner
-* NEON_PASSWORD      : npg_ZFQao74MzXDC
+* NEON_PASSWORD      : npg_3OQME8qVBagR
+
 
 ------------------------------------------------------------------------
 2. PIPELINE DE GITHUB ACTIONS (.github/workflows/ci-cd.yml)
