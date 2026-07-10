@@ -19,6 +19,7 @@ import { patientRemote } from '../../../../remotes/patient.remote';
 import { usersRemote, UserDTO } from '../../../../remotes/users.remote';
 import { Reservahoraview } from '../8. Reservas/Reservahoraview';
 import type { AppointmentDTO } from '../../../../remotes/dtos/appointment.dto';
+import { formatRun } from '../../../../core/constants/BookingConst';
 
 interface PatientPortalViewProps {
   onLogout: () => void;
@@ -26,6 +27,7 @@ interface PatientPortalViewProps {
 
 export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
   const [activeTab, setActiveTab] = useState<'agenda' | 'examenes' | 'reservar' | 'ajustes'>('agenda');
+  const [patientData, setPatientData] = useState<any | null>(null);
   const [patientName, setPatientName] = useState('');
   const [patientRun, setPatientRun] = useState('');
   const [patientEmail, setPatientEmail] = useState('');
@@ -58,6 +60,7 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
   const loadUserInfo = async () => {
     try {
       const patient = await patientRemote.getById(userId);
+      setPatientData(patient);
       const nameVal = `${patient.firstName} ${patient.lastName}`.trim() || 'Paciente';
       const runVal = patient.identifierValue || '';
       
@@ -115,9 +118,14 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
 
     setIsUpdatingPassword(true);
     try {
-      await patientRemote.update(userId, { password: newPassword });
+      const currentPatient = await patientRemote.getById(userId);
+      await patientRemote.update(userId, {
+        ...currentPatient,
+        password: newPassword
+      });
       toast.success('Contraseña actualizada con éxito');
       setNewPassword('');
+      setPatientData({ ...currentPatient, password: newPassword });
     } catch (error) {
       toast.error('Error al actualizar contraseña');
     } finally {
@@ -328,7 +336,18 @@ export function PatientPortalView({ onLogout }: PatientPortalViewProps) {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden p-6">
               <h2 className="text-xl font-bold text-slate-800 mb-4">Agendar Hora Médica</h2>
               <div className="h-[70vh]">
-                <Reservahoraview onBack={() => setActiveTab('agenda')} />
+                <Reservahoraview 
+                  onBack={() => setActiveTab('agenda')} 
+                  initialBookingData={patientData ? {
+                    idType: patientData.identifierType === 'PASSPORT' ? 'PASAPORTE' : 'RUN',
+                    identifier: patientData.identifierValue ? formatRun(patientData.identifierValue) : '',
+                    firstName: patientData.firstName || '',
+                    lastName: patientData.lastName || '',
+                    phone: patientData.phone || '',
+                    email: patientData.email || '',
+                    prevision: patientData.coverage ? (patientData.coverage.provider ? `${patientData.coverage.type === 'FONASA' ? 'Fonasa' : patientData.coverage.type === 'ISAPRE' ? 'Isapre' : patientData.coverage.type} - ${patientData.coverage.provider}` : (patientData.coverage.type === 'FONASA' ? 'Fonasa' : patientData.coverage.type === 'ISAPRE' ? 'Isapre' : patientData.coverage.type)) : 'Particular',
+                  } : undefined}
+                />
               </div>
             </div>
           )}

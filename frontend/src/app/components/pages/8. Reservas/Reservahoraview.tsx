@@ -22,11 +22,11 @@ function toCoverageDTO(prevision: string): CoverageDTO | undefined {
   return { type, provider: parts[1]?.trim() };
 }
 
-export function Reservahoraview({ onBack }: { onBack: () => void }) {
-  const [currentStep, setCurrentStep] = useState(1);
+export function Reservahoraview({ onBack, initialBookingData }: { onBack: () => void; initialBookingData?: Partial<BookingData> }) {
+  const [currentStep, setCurrentStep] = useState(initialBookingData ? 2 : 1); // Si ya viene pre-poblado, saltar a paso 2
   const [completed,   setCompleted]   = useState(false);
   const [bookingCode, setBookingCode] = useState('');
-  const [data,        setData]        = useState<Partial<BookingData>>({});
+  const [data,        setData]        = useState<Partial<BookingData>>(initialBookingData ?? {});
   const [isLoading,   setIsLoading]   = useState(false);
   const [uiError,     setUiError]     = useState<string | null>(null);
 
