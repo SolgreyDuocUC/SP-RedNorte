@@ -22,6 +22,14 @@ import java.util.List;
 public class CentroController {
 
     private final CentroService centroService;
+    private final cl.rednorte.ms_centros.config.DatabaseSeederRunner seederRunner;
+
+    @Operation(summary = "Poblar regiones, comunas y centros iniciales")
+    @RequestMapping(value = "/seed", method = {RequestMethod.GET, RequestMethod.POST})
+    public ResponseEntity<String> runSeedScript(@RequestParam(defaultValue = "false") boolean force) {
+        String result = seederRunner.executeSeedScript(force);
+        return ResponseEntity.ok(result);
+    }
 
     @Operation(summary = "Crear o actualizar un centro médico")
     @ApiResponses({
