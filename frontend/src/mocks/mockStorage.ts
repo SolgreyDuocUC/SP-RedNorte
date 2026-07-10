@@ -269,6 +269,10 @@ export const mockStorage = {
     return this.getAppointments().filter(a => a.practitionerId === practitionerId);
   },
 
+  getWaitlist(): AppointmentDTO[] {
+    return this.getAppointments().filter(a => a.status === 'waitlist');
+  },
+
   createAppointment(dto: CreateAppointmentDTO): AppointmentDTO {
     const list = this.getAppointments();
     const newApp: AppointmentDTO = {

@@ -1,26 +1,55 @@
-import { 
-  Building2, 
-  Users, 
-  Stethoscope, 
-  LifeBuoy, 
+import {
+  Building2,
+  Users,
+  Stethoscope,
+  ListOrdered,
+  LifeBuoy,
   Activity,
   CalendarCheck,
   Ban,
   ArrowRight
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '../../ui/card';
+import { usersRemote } from '../../../../remotes/users.remote';
+import { facilitiesRemote } from '../../../../remotes/facilities.remote';
+import { specialtiesRemote } from '../../../../remotes/specialties.remote';
+import { appointmentsRemote } from '../../../../remotes/appointments.remote';
 
 interface AdminDashboardViewProps {
   onNavigate: (view: string) => void;
 }
 
 export function AdminDashboardView({ onNavigate }: AdminDashboardViewProps) {
-  // Mock metrics
+  const [counts, setCounts] = useState({ collaborators: 0, facilities: 0, specialties: 0, waitlist: 0 });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [users, facilities, specialties, waitlist] = await Promise.all([
+          usersRemote.getAll(),
+          facilitiesRemote.getAll(),
+          specialtiesRemote.getAll(),
+          appointmentsRemote.getWaitlist(),
+        ]);
+        setCounts({
+          collaborators: users.length,
+          facilities: facilities.length,
+          specialties: specialties.length,
+          waitlist: waitlist.length,
+        });
+      } catch (error) {
+        console.error('Error fetching admin dashboard metrics:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
   const metrics = [
-    { label: 'TOTAL COLABORADORES', value: '142', icon: Users, color: 'bg-blue-50 text-blue-600', border: 'border-l-4 border-blue-500' },
-    { label: 'CENTROS ACTIVOS', value: '12', icon: Building2, color: 'bg-green-50 text-green-600', border: 'border-l-4 border-green-500' },
-    { label: 'ESPECIALIDADES', value: '38', icon: Stethoscope, color: 'bg-purple-50 text-purple-600', border: 'border-l-4 border-purple-500' },
-    { label: 'TICKETS PENDIENTES', value: '5', icon: LifeBuoy, color: 'bg-amber-50 text-amber-600', border: 'border-l-4 border-amber-500' },
+    { label: 'TOTAL COLABORADORES', value: String(counts.collaborators), icon: Users, color: 'bg-blue-50 text-blue-600', border: 'border-l-4 border-blue-500' },
+    { label: 'CENTROS ACTIVOS', value: String(counts.facilities), icon: Building2, color: 'bg-green-50 text-green-600', border: 'border-l-4 border-green-500' },
+    { label: 'ESPECIALIDADES', value: String(counts.specialties), icon: Stethoscope, color: 'bg-purple-50 text-purple-600', border: 'border-l-4 border-purple-500' },
+    { label: 'PACIENTES EN LISTA DE ESPERA', value: String(counts.waitlist), icon: ListOrdered, color: 'bg-amber-50 text-amber-600', border: 'border-l-4 border-amber-500' },
   ];
 
   const modules = [

@@ -38,11 +38,16 @@ export function AppointmentsView({ userRole = 'paciente' }: { userRole?: string 
   const loadAppointments = async () => {
     setLoading(true);
     try {
-      // Si es admin, trae todas; si es paciente, idealmente traería las suyas (aquí mockeamos ID por simplicidad hasta que haya login real completo)
-      const data = isAdmin ? await appointmentsRemote.getAll() : await appointmentsRemote.getByPatient('pat-2024-001');
-      setAppointments(data);
+      if (isAdmin) {
+        const data = await appointmentsRemote.getAll();
+        setAppointments(data);
+      } else {
+        const patientId = localStorage.getItem('user_run') || localStorage.getItem('rn_patient_id') || '16.666.666-2';
+        const data = await appointmentsRemote.getByPatient(patientId);
+        setAppointments(data);
+      }
     } catch (error) {
-      toast.error('Error de conexión', { description: 'No se pudieron cargar las citas médicas desde el servidor.' });
+      toast.error('Error de conexión con la base de datos', { description: 'No se pudieron cargar las citas médicas desde el backend.' });
     } finally {
       setLoading(false);
     }

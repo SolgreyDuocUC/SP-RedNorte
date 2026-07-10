@@ -1,4 +1,4 @@
-export type AppointmentStatus = 'booked' | 'cancelled' | 'fulfilled' | 'noshow';
+export type AppointmentStatus = 'booked' | 'cancelled' | 'fulfilled' | 'noshow' | 'waitlist';
 
 // Matches backend cl.rednorte.ms_reservas.dto.AppointmentDTO exactly
 export interface AppointmentDTO {
@@ -10,6 +10,7 @@ export interface AppointmentDTO {
   end: string;
   status: AppointmentStatus;
   description?: string;
+  priority?: number; // 1 = Normal, 2 = Urgente, 3 = Crítico (backend ms-reservas)
 }
 
 export type CreateAppointmentDTO = Omit<AppointmentDTO, 'id'>;

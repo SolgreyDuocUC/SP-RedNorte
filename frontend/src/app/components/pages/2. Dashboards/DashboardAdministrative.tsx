@@ -24,17 +24,20 @@ interface DashboardAdministrativeProps {
 export function DashboardAdministrative({ onRegisterPatient, onNewBooking }: DashboardAdministrativeProps) {
   const [patients, setPatients] = useState<PatientDTO[]>([]);
   const [appointments, setAppointments] = useState<AppointmentDTO[]>([]);
+  const [waitlistCount, setWaitlistCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientsData, appointmentsData] = await Promise.all([
+        const [patientsData, appointmentsData, waitlistData] = await Promise.all([
           patientRemote.getAll(),
-          appointmentsRemote.getAll()
+          appointmentsRemote.getAll(),
+          appointmentsRemote.getWaitlist()
         ]);
         setPatients(patientsData);
         setAppointments(appointmentsData);
+        setWaitlistCount(waitlistData.length);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -174,7 +177,7 @@ export function DashboardAdministrative({ onRegisterPatient, onNewBooking }: Das
                 </div>
                 <div>
                   <h3 className="font-bold">Lista de Espera</h3>
-                  <p className="text-[10px] text-blue-200">0 Pacientes pendientes</p>
+                  <p className="text-[10px] text-blue-200">{waitlistCount} Pacientes pendientes</p>
                 </div>
               </div>
               <button 
