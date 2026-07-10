@@ -8,6 +8,9 @@ interface SupportTicket {
   id: string;
   userId: string;
   user: string;
+  nombre: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
   run: string;
   email: string;
   type: string;
@@ -64,6 +67,9 @@ export function AdminSupportView() {
           id: `SOP-${1000 + index}`,
           userId: u.id || '',
           user: `${u.nombre} ${u.apellidoPaterno || ''}`.trim() || 'Usuario BD',
+          nombre: u.nombre || '',
+          apellidoPaterno: u.apellidoPaterno || '',
+          apellidoMaterno: u.apellidoMaterno || '',
           run: u.run || 'S/N',
           email: u.email || 'sin-correo@rednorte.cl',
           type: issueType,
@@ -92,7 +98,9 @@ export function AdminSupportView() {
     try {
       await usersRemote.update(selectedTicketForPassword.userId, {
         run: selectedTicketForPassword.run,
-        nombre: selectedTicketForPassword.user,
+        nombre: selectedTicketForPassword.nombre || selectedTicketForPassword.user,
+        apellidoPaterno: selectedTicketForPassword.apellidoPaterno || '',
+        apellidoMaterno: selectedTicketForPassword.apellidoMaterno || '',
         email: selectedTicketForPassword.email,
         password: newPassword,
         enabled: true,
@@ -120,7 +128,9 @@ export function AdminSupportView() {
     try {
       await usersRemote.update(selectedTicketForRole.userId, {
         run: selectedTicketForRole.run,
-        nombre: selectedTicketForRole.user,
+        nombre: selectedTicketForRole.nombre || selectedTicketForRole.user,
+        apellidoPaterno: selectedTicketForRole.apellidoPaterno || '',
+        apellidoMaterno: selectedTicketForRole.apellidoMaterno || '',
         email: selectedTicketForRole.email,
         enabled: true,
         roles: [{ name: newRole }]
