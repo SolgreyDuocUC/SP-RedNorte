@@ -67,6 +67,50 @@ Eliminar todo incluyendo volúmenes (BORRA LA BD):
   docker compose down -v
 
 ---------------------------------------------------------
+CONSULTAR POSTGRESQL DESDE LA TERMINAL DE DOCKER
+---------------------------------------------------------
+
+El contenedor "rednorte-postgres-dev" corre siempre, incluso
+si solo quieres levantar este microservicio desde el IDE
+(fuera de Docker). Si no está corriendo, los microservicios
+fallan al conectar a localhost:5432 ("Connection refused").
+
+Levantar solo Postgres (sin el resto del stack):
+  docker compose up -d postgres
+
+Volver a levantar Postgres si quedó detenido
+(por ejemplo tras un "docker compose stop"):
+  docker compose start postgres
+
+Ver si Postgres está arriba y saludable:
+  docker compose ps postgres
+  docker exec rednorte-postgres-dev pg_isready -U postgres -d bd_rednorte
+
+Abrir una sesión psql interactiva dentro del contenedor:
+  docker exec -it rednorte-postgres-dev psql -U postgres -d bd_rednorte
+
+Ejecutar una consulta puntual sin entrar en modo interactivo:
+  docker exec rednorte-postgres-dev psql -U postgres -d bd_rednorte -c "SELECT * FROM patients LIMIT 10;"
+
+Listar tablas del esquema public:
+  docker exec rednorte-postgres-dev psql -U postgres -d bd_rednorte -c "\dt"
+
+Ver el DDL/columnas de una tabla:
+  docker exec rednorte-postgres-dev psql -U postgres -d bd_rednorte -c "\d patients"
+
+Volcar (dump) la base completa a un archivo local:
+  docker exec rednorte-postgres-dev pg_dump -U postgres -d bd_rednorte > backup.sql
+
+Restaurar un dump dentro del contenedor:
+  docker exec -i rednorte-postgres-dev psql -U postgres -d bd_rednorte < backup.sql
+
+Nota: mientras se valida el poblado con Flyway (2026-07-11),
+las 4 variables SPRING_DATASOURCE_* de Neon están comentadas
+en el .env raíz, por lo que TODOS los microservicios (Docker
+o IDE local) apuntan a este Postgres local descartable, no a
+Neon/producción. Ver .env raíz para reactivar Neon.
+
+---------------------------------------------------------
 ACCESOS
 ---------------------------------------------------------
 

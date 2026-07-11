@@ -42,10 +42,15 @@ class PatientControllerTest {
 
     @BeforeEach
     void setUp() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new org.springframework.data.web.config.SpringDataJacksonConfiguration.PageModule(
+                new org.springframework.data.web.config.SpringDataWebSettings(
+                        org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)));
+
         mockMvc = MockMvcBuilders.standaloneSetup(patientController)
                 .setCustomArgumentResolvers(new org.springframework.data.web.PageableHandlerMethodArgumentResolver())
+                .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter(objectMapper))
                 .build();
-        objectMapper = new ObjectMapper();
     }
 
     @Test
