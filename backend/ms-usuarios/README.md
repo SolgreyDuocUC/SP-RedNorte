@@ -48,7 +48,7 @@ ms-usuarios/
 
 - Java 21
 - Maven 3.9+
-- MySQL 8 en `localhost:3307`
+- PostgreSQL 16 en `localhost:5432` (o acceso a Neon)
 - Base de datos `bd_rednorte`
 
 ---
@@ -76,5 +76,5 @@ http://localhost:8004/swagger-ui/index.html
 - `spring-boot-starter-webmvc`
 - `spring-boot-starter-data-jpa`
 - `spring-boot-starter-validation`
-- `mysql-connector-j`
+- `postgresql`
 - `lombok`

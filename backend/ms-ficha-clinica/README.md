@@ -53,7 +53,7 @@ ms-ficha-clinica/
 
 - Java 21
 - Maven 3.9+
-- MySQL 8 en `localhost:3307`
+- PostgreSQL 16 en `localhost:5432` (o acceso a Neon)
 - Base de datos `bd_rednorte`
 
 ---
@@ -83,5 +83,5 @@ http://localhost:8001/swagger-ui/index.html
 - `spring-boot-starter-validation`
 - `hapi-fhir-structures-r4` — modelado de recursos clínicos FHIR
 - `hapi-fhir-client` — cliente para servidores FHIR externos
-- `mysql-connector-j`
+- `postgresql`
 - `lombok`

@@ -7,10 +7,9 @@ services:
     restart: unless-stopped
 
     environment:
-      # Mapeamos tus variables de entorno al contenedor de Postgres
-      POSTGRES_USER: ${MYSQL_USER}
-      POSTGRES_PASSWORD: ${MYSQL_PASSWORD}
-      POSTGRES_DB: ${MYSQL_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
       TZ: America/Santiago
 
     ports:
@@ -25,7 +24,7 @@ services:
       - rednorte-network
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${MYSQL_USER} -d ${MYSQL_DATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5

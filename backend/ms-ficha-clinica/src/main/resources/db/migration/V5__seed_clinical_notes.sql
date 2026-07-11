@@ -1,0 +1,7 @@
+-- Notas clínicas de evolución de los encuentros de V1.
+INSERT INTO clinical_notes (id, patient_id, encounter_id, content, author, created_at) VALUES
+('note-0001', '1', 'enc-0001', 'Paciente masculino de 41 años, control por hipertensión arterial esencial diagnosticada hace un año. PA 145/92 mmHg en box. ECG sin alteraciones agudas del ritmo. Se ajusta tratamiento antihipertensivo y se solicita control en 4 semanas con perfil lipídico.', 'Dr. Matías Fernández Cortés', '2026-06-10 09:30:00'),
+('note-0002', '3', 'enc-0002', 'Paciente refiere episodios de palpitaciones de inicio súbito de 2 semanas de evolución. ECG muestra taquicardia supraventricular paroxística. Se deriva a estudio electrofisiológico y se indica manejo con betabloqueador mientras tanto.', 'Dr. Matías Fernández Cortés', '2026-05-22 10:45:00'),
+('note-0003', '2', 'enc-0003', 'Lactante de 6 meses, control de niño sano. Peso y talla dentro de rango esperado para la edad. Desarrollo psicomotor acorde. Se indican vacunas correspondientes al esquema PNI y control en 2 meses.', 'Dra. Daniela Soto Herrera', '2026-04-14 11:20:00'),
+('note-0004', '6', 'enc-0004', 'Escolar de 8 años con cuadro febril de 2 días de evolución, tos y odinofagia. Al examen: faringe eritematosa sin exudado, sin signos de dificultad respiratoria. Diagnóstico de infección respiratoria alta viral. Manejo sintomático e indicaciones de alarma.', 'Dra. Daniela Soto Herrera', '2026-03-02 09:20:00')
+ON CONFLICT (id) DO NOTHING;

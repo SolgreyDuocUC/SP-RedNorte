@@ -77,4 +77,23 @@ INFORMACIÓN ADICIONAL
 - Persistencia de datos:
   volumen Docker `postgres_data`
 
+---------------------------------------------------------
+POBLADO DE DATOS DE DEMO
+---------------------------------------------------------
+
+Esta carpeta ya NO contiene scripts de poblado (antes existía
+poblado_centros.sql). Cada microservicio versiona y ejecuta sus
+propios datos de demo con Flyway al arrancar:
+
+  backend/ms-centros/src/main/resources/db/migration/
+  backend/ms-usuarios/src/main/resources/db/migration/
+  backend/ms-paciente/src/main/resources/db/migration/
+  backend/ms-reservas/src/main/resources/db/migration/
+  backend/ms-ficha-clinica/src/main/resources/db/migration/
+
+No requiere ningún paso manual: al levantar el stack con
+`docker compose up -d --build` desde la raíz, cada servicio crea
+su esquema (Hibernate ddl-auto) y luego siembra sus datos de demo
+automáticamente. Para desactivarlo, setear DB_AUTO_SEED=false.
+
 =========================================================

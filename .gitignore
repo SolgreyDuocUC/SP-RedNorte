@@ -1,5 +1,10 @@
+# Variables de entorno (contienen credenciales reales) - NUNCA subir a git.
+# Cubre .env en cualquier carpeta (raiz, db/, backend/*/, frontend/) y sus
+# variantes locales. Los .env.example SI se versionan (son plantillas con
+# placeholders, sin secretos) y no calzan con estos patrones.
 .env
-.env*.local
+.env.local
+.env.*.local
 *.env
 node_modules
 

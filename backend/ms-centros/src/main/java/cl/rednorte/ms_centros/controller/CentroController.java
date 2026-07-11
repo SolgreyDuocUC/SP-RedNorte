@@ -22,12 +22,12 @@ import java.util.List;
 public class CentroController {
 
     private final CentroService centroService;
-    private final cl.rednorte.ms_centros.config.DatabaseSeederRunner seederRunner;
+    private final cl.rednorte.ms_centros.config.FlywaySeedRunner seederRunner;
 
-    @Operation(summary = "Poblar regiones, comunas y centros iniciales")
+    @Operation(summary = "Ejecutar manualmente las migraciones de poblado (Flyway) pendientes")
     @RequestMapping(value = "/seed", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<String> runSeedScript(@RequestParam(defaultValue = "false") boolean force) {
-        String result = seederRunner.executeSeedScript(force);
+    public ResponseEntity<String> runSeedScript() {
+        String result = seederRunner.runMigrations();
         return ResponseEntity.ok(result);
     }
 

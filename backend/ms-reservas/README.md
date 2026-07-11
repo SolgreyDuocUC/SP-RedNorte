@@ -48,7 +48,7 @@ ms-reservas/
 
 - Java 21
 - Maven 3.9+
-- MySQL 8 en `localhost:3307`
+- PostgreSQL 16 en `localhost:5432` (o acceso a Neon)
 - Base de datos `bd_rednorte`
 
 ---
@@ -78,5 +78,5 @@ http://localhost:8003/swagger-ui/index.html
 - `spring-boot-starter-validation`
 - `hapi-fhir-structures-r4` — modelado del recurso Appointment
 - `hapi-fhir-client` — cliente para servidores FHIR externos
-- `mysql-connector-j`
+- `postgresql`
 - `lombok`

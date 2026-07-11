@@ -24,7 +24,7 @@ usando el orquestador raíz, que levanta TODO de una vez:
   docker compose up -d --build
 
 Esto levanta en orden automático:
-  1. MySQL
+  1. PostgreSQL
   2. ms-ficha-clinica (este servicio)
   3. ms-paciente
   4. ms-reservas
@@ -36,9 +36,9 @@ VARIABLES DE ENTORNO (inyectadas por docker-compose)
 ---------------------------------------------------------
 
   SPRING_PROFILES_ACTIVE    → dev
-  SPRING_DATASOURCE_URL     → jdbc:mysql://mysql:3306/bd_rednorte
-  SPRING_DATASOURCE_USERNAME→ root
-  SPRING_DATASOURCE_PASSWORD→ rootpassword (desde .env raíz)
+  SPRING_DATASOURCE_URL     → jdbc:postgresql://postgres:5432/bd_rednorte
+  SPRING_DATASOURCE_USERNAME→ postgres
+  SPRING_DATASOURCE_PASSWORD→ postgrespassword (desde .env raíz, o credenciales Neon)
   TZ                        → America/Santiago
 
 Los valores por defecto para entorno local (sin Docker)
@@ -60,7 +60,7 @@ Ver estado de todos los contenedores:
 Detener todos los servicios:
   docker compose stop
 
-Detener y eliminar contenedores (conserva datos MySQL):
+Detener y eliminar contenedores (conserva datos PostgreSQL):
   docker compose down
 
 Eliminar todo incluyendo volúmenes (BORRA LA BD):
@@ -72,7 +72,7 @@ ACCESOS
 
   API REST   : http://localhost:8001
   Swagger UI : http://localhost:8001/swagger-ui/index.html
-  MySQL      : localhost:3307  (usuario: root)
+  PostgreSQL : localhost:5432  (usuario: postgres)
 
 ---------------------------------------------------------
 ESTRUCTURA DEL DOCKERFILE
