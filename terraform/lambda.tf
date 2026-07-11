@@ -1,26 +1,3 @@
-data "aws_iam_policy_document" "lambda_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "lambda_exec_role" {
-  name               = "rednorte_lambda_exec_role"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
-  role       = aws_iam_role.lambda_exec_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
 # Payload dummy inicial para la función Lambda Serverless
 data "archive_file" "lambda_zip" {
   type        = "zip"
@@ -42,7 +19,9 @@ EOF
 
 resource "aws_lambda_function" "notification_processor" {
   function_name = "rednorte-serverless-function"
-  role          = aws_iam_role.lambda_exec_role.arn
+  # En AWS Academy (Learner Lab), debes usar el LabRole que ya está creado y proveído.
+  # No tienes permisos para crear nuevos roles (aws_iam_role)
+  role          = data.aws_iam_role.lab_role.arn
   handler       = "index.handler"
   runtime       = "nodejs20.x"
 
